@@ -29440,38 +29440,38 @@ function AuthModal() {
 //#endregion
 //#region src/components/Layout.tsx
 function Layout() {
+	const { pathname } = useLocation();
+	(0, import_react.useEffect)(() => {
+		window.scrollTo(0, 0);
+	}, [pathname]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/Layout.tsx:9:5",
+		"data-uid": "src/components/Layout.tsx:16:5",
 		"data-prohibitions": "[]",
 		className: "flex flex-col min-h-screen bg-background",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollRestoration, {
-				"data-uid": "src/components/Layout.tsx:10:7",
-				"data-prohibitions": "[editContent]"
-			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header, {
-				"data-uid": "src/components/Layout.tsx:11:7",
+				"data-uid": "src/components/Layout.tsx:17:7",
 				"data-prohibitions": "[editContent]"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-				"data-uid": "src/components/Layout.tsx:12:7",
+				"data-uid": "src/components/Layout.tsx:18:7",
 				"data-prohibitions": "[]",
 				className: "flex-grow",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {
-					"data-uid": "src/components/Layout.tsx:13:9",
+					"data-uid": "src/components/Layout.tsx:19:9",
 					"data-prohibitions": "[editContent]"
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Footer, {
-				"data-uid": "src/components/Layout.tsx:15:7",
+				"data-uid": "src/components/Layout.tsx:21:7",
 				"data-prohibitions": "[editContent]"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CartDrawer, {
-				"data-uid": "src/components/Layout.tsx:16:7",
+				"data-uid": "src/components/Layout.tsx:22:7",
 				"data-prohibitions": "[editContent]"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AuthModal, {
-				"data-uid": "src/components/Layout.tsx:17:7",
+				"data-uid": "src/components/Layout.tsx:23:7",
 				"data-prohibitions": "[editContent]"
 			})
 		]
@@ -33874,4 +33874,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-DxBf9wtj.js.map
+//# sourceMappingURL=index-B0Gjgp9M.js.map
