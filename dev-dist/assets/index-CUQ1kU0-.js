@@ -24536,7 +24536,9 @@ function CartProvider({ children }) {
 		const saved = localStorage.getItem("nd_cart");
 		if (saved) try {
 			setItems(JSON.parse(saved));
-		} catch (e) {}
+		} catch (e) {
+			console.error("Failed to parse cart items from localStorage", e);
+		}
 	}, []);
 	(0, import_react.useEffect)(() => {
 		localStorage.setItem("nd_cart", JSON.stringify(items));
@@ -24571,7 +24573,7 @@ function CartProvider({ children }) {
 	const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 	const totalPrice = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CartContext.Provider, {
-		"data-uid": "src/stores/useCartStore.tsx:74:5",
+		"data-uid": "src/stores/useCartStore.tsx:76:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			items,
@@ -33529,4 +33531,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-CJtzQD1Y.js.map
+//# sourceMappingURL=index-CUQ1kU0-.js.map
