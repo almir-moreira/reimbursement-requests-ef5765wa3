@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import RequestsList from './pages/RequestsList'
 import RequestForm from './pages/RequestForm'
 import MasterData from './pages/MasterData'
+import Reporting from './pages/Reporting'
 import { AppProviders } from './stores/main'
 
 const App = () => (
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/requests" element={<RequestsList />} />
             <Route path="/requests/:id" element={<RequestForm />} />
             <Route path="/master-data" element={<MasterData />} />
+            <Route path="/reporting" element={<Reporting />} />
           </Route>
         </Routes>
       </TooltipProvider>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ReimbursementRequest, Expense } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -21,15 +22,34 @@ interface Props {
 
 export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
   const { user, lang } = useAuthStore()
-  const { exchangeRates } = useMasterDataStore()
+  const { exchangeRates, events } = useMasterDataStore()
   const expenses = formData.expenses || []
   const isInternal = user?.role !== 'requester'
+
+  // Inherit default Account and Workorder from selected event
+  const defaultEvent = events.find((e) => e.id === formData.eventId)
+  const defaultAccount = defaultEvent?.account || formData.account || ''
+  const defaultWorkorder = defaultEvent?.workorder || formData.workorder || ''
+
+  const getRates = (currency: string) => {
+    const usdRate = exchangeRates.find((r) => r.currency === currency)?.rateToUsd || 1
+    const eurRateToUsd = exchangeRates.find((r) => r.currency === 'EUR')?.rateToUsd || 1.08
+    const effectiveRate = usdRate / eurRateToUsd
+    return { usdRate, effectiveRate }
+  }
 
   const addExpense = () => {
     onChange({
       expenses: [
         ...expenses,
-        { id: `exp-${Date.now()}`, description: '', amount: 0, currency: 'USD' },
+        {
+          id: `exp-${Date.now()}`,
+          description: '',
+          amount: 0,
+          currency: 'GBP',
+          account: defaultAccount,
+          workorder: defaultWorkorder,
+        },
       ],
     })
   }
@@ -40,16 +60,12 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
 
     if (field === 'amount' || field === 'currency') {
       const amt = Number(field === 'amount' ? value : newExps[index].amount) || 0
-      const curr = field === 'currency' ? value : newExps[index].currency || 'USD'
+      const curr = field === 'currency' ? value : newExps[index].currency || 'GBP'
 
-      const usdRate = exchangeRates.find((r) => r.currency === curr)?.rateToUsd || 1
-      const eurRateToUsd = exchangeRates.find((r) => r.currency === 'EUR')?.rateToUsd || 1.08
-
-      const amountUsd = amt * usdRate
-      const amountEur = amountUsd / eurRateToUsd
-
-      newExps[index].amountUsd = amountUsd
-      newExps[index].amountEuros = amountEur
+      const { usdRate, effectiveRate } = getRates(curr)
+      newExps[index].amountUsd = amt * usdRate
+      newExps[index].exchangeRate = effectiveRate
+      newExps[index].amountEuros = amt * effectiveRate
     }
     onChange({ expenses: newExps })
   }
@@ -58,30 +74,58 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
     onChange({ expenses: expenses.filter((_, i) => i !== index) })
   }
 
+  // Effect to recompute if event changes and fields are empty
+  useEffect(() => {
+    let changed = false
+    const newExps = expenses.map((exp) => {
+      let e = { ...exp }
+      if (!e.account && defaultAccount) {
+        e.account = defaultAccount
+        changed = true
+      }
+      if (!e.workorder && defaultWorkorder) {
+        e.workorder = defaultWorkorder
+        changed = true
+      }
+      // Recalculate exchange rates if they are missing
+      if (e.amountEuros === undefined) {
+        const { usdRate, effectiveRate } = getRates(e.currency)
+        e.amountUsd = e.amount * usdRate
+        e.exchangeRate = effectiveRate
+        e.amountEuros = e.amount * effectiveRate
+        changed = true
+      }
+      return e
+    })
+    if (changed && !readOnly) onChange({ expenses: newExps })
+  }, [formData.eventId, defaultAccount, defaultWorkorder, exchangeRates])
+
   const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
 
   return (
     <div className="space-y-6 pt-6 border-t border-border" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <h3 className="font-serif font-bold text-xl text-primary">Expense Details</h3>
-      <div className="overflow-x-auto border border-border rounded-lg">
+      <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Expense Details</h3>
+      <div className="overflow-x-auto border border-border rounded-lg shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
+          <thead className="bg-muted/50 border-b border-border">
             <tr className="text-start text-muted-foreground">
-              <th className="p-3 font-semibold min-w-[250px] text-start">Description</th>
-              <th className="p-3 font-semibold w-32 text-start">Amount</th>
-              <th className="p-3 font-semibold w-32 text-start">Currency</th>
+              <th className="p-3 font-semibold min-w-[200px] text-start">Description</th>
+              <th className="p-3 font-semibold w-24 text-start">Amount</th>
+              <th className="p-3 font-semibold w-24 text-start">Currency</th>
               {isInternal && (
                 <>
-                  <th className="p-3 font-semibold w-32 text-start">Amt (USD)</th>
-                  <th className="p-3 font-semibold w-32 text-start">Amt (EUR)</th>
+                  <th className="p-3 font-semibold w-24 text-start">Account</th>
+                  <th className="p-3 font-semibold w-32 text-start">Budget Line</th>
+                  <th className="p-3 font-semibold w-24 text-center">Exch. Rate</th>
                 </>
               )}
-              {!readOnly && <th className="p-3 font-semibold w-12 text-start"></th>}
+              <th className="p-3 font-semibold w-32 text-right">Amt (EUR)</th>
+              {!readOnly && <th className="p-3 font-semibold w-12 text-center"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {expenses.map((exp, i) => (
-              <tr key={exp.id} className="hover:bg-muted/20">
+              <tr key={exp.id} className="hover:bg-muted/10 transition-colors">
                 <td className="p-2">
                   <Input
                     disabled={readOnly}
@@ -103,10 +147,10 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     value={exp.currency}
                     onValueChange={(v) => updateExp(i, 'currency', v)}
                   >
-                    <SelectTrigger dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                    <SelectContent>
                       {exchangeRates.map((r) => (
                         <SelectItem key={r.currency} value={r.currency}>
                           {r.currency}
@@ -119,27 +163,39 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                   <>
                     <td className="p-2">
                       <Input
-                        disabled
-                        value={exp.amountUsd?.toFixed(2) || ''}
-                        className="bg-muted/30 text-end font-mono text-xs"
+                        disabled={readOnly}
+                        value={exp.account || ''}
+                        onChange={(e) => updateExp(i, 'account', e.target.value)}
+                        className="bg-white"
                       />
                     </td>
                     <td className="p-2">
                       <Input
-                        disabled
-                        value={exp.amountEuros?.toFixed(2) || ''}
-                        className="bg-muted/30 font-bold text-end text-primary"
+                        disabled={readOnly}
+                        value={exp.workorder || ''}
+                        onChange={(e) => updateExp(i, 'workorder', e.target.value)}
+                        className="bg-white"
                       />
+                    </td>
+                    <td className="p-2 text-center">
+                      <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                        {exp.exchangeRate?.toFixed(2) || '1.00'}
+                      </span>
                     </td>
                   </>
                 )}
+                <td className="p-2 text-right">
+                  <span className="font-semibold text-[#4a8ebf] pr-2">
+                    {exp.amountEuros?.toFixed(2) || '0.00'}
+                  </span>
+                </td>
                 {!readOnly && (
                   <td className="p-2 text-center">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => removeExp(i)}
-                      className="text-destructive hover:bg-destructive/10"
+                      className="text-destructive hover:bg-destructive/10 h-8 w-8"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -149,39 +205,42 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
             ))}
             {expenses.length === 0 && (
               <tr>
-                <td colSpan={isInternal ? 6 : 4} className="text-center p-6 text-muted-foreground">
-                  No expenses added.
+                <td
+                  colSpan={isInternal ? 8 : 5}
+                  className="text-center p-8 text-muted-foreground bg-muted/20"
+                >
+                  No expenses added yet.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {!readOnly && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addExpense}
-          className="text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10"
-        >
-          <Plus className="w-4 h-4 mr-2" /> Add Row
-        </Button>
-      )}
-      {isInternal && (
-        <div className="flex justify-end mt-4 pt-4 border-t border-border/50">
-          <div className="w-64 space-y-2">
-            <Label className="text-end block text-muted-foreground uppercase text-xs">
-              Total Amount in Euros
-            </Label>
-            <Input
-              disabled
-              value={totalEuros.toFixed(2)}
-              className="text-end font-bold text-xl bg-primary/5 text-primary border-primary/20 h-12"
-            />
+
+      <div className="flex justify-between items-center mt-4">
+        {!readOnly ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addExpense}
+            className="text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Add Expense
+          </Button>
+        ) : (
+          <div />
+        )}
+
+        <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border">
+          <Label className="text-muted-foreground uppercase text-xs font-bold tracking-wider">
+            Total Amount in Euros
+          </Label>
+          <div className="text-2xl font-bold text-[#4a8ebf] min-w-[120px] text-right">
+            € {totalEuros.toFixed(2)}
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

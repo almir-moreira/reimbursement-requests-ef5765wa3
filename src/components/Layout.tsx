@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, User, FileText, Database, LogOut, Globe } from 'lucide-react'
+import { LayoutDashboard, User, FileText, Database, LogOut, Globe, BarChart } from 'lucide-react'
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,9 @@ export default function Layout() {
   if (user.role === 'requester') {
     navItems.push({ name: t('profile'), path: '/profile', icon: User })
   }
+  if (user.role === 'admin' || user.role === 'finance') {
+    navItems.push({ name: t('reporting'), path: '/reporting', icon: BarChart })
+  }
   if (user.role === 'admin') {
     navItems.push({ name: t('masterData'), path: '/master-data', icon: Database })
   }
@@ -49,8 +52,13 @@ export default function Layout() {
         className="flex min-h-screen w-full bg-background font-sans"
       >
         <Sidebar>
-          <div className="p-6 font-serif font-bold text-2xl border-b border-border text-[#4a8ebf]">
-            {lang === 'en' ? 'Reimbursements' : 'نظام الاسترداد'}
+          <div className="p-6 border-b border-border">
+            <h1 className="font-bold text-2xl text-[#4a8ebf] uppercase tracking-wider mb-1">
+              KAICIID
+            </h1>
+            <div className="font-serif font-semibold text-lg text-foreground/80">
+              {lang === 'en' ? 'Reimbursement Portal' : 'بوابة الاسترداد'}
+            </div>
           </div>
           <SidebarContent className="p-4 gap-2 mt-4">
             <SidebarMenu>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useMasterDataStore from '@/stores/useMasterDataStore'
 import { CrudTable } from '@/components/master-data/CrudTable'
+import { RequesterManager } from '@/components/master-data/RequesterManager'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 export default function MasterData() {
@@ -69,22 +70,11 @@ export default function MasterData() {
       ],
       tpl: { code: '', name: '' },
     },
-    {
-      key: 'requesters',
-      label: 'Requesters',
-      data: store.requesters,
-      cols: [
-        { key: 'name', label: 'Name' },
-        { key: 'email', label: 'Email' },
-        { key: 'organization', label: 'Organization' },
-      ],
-      tpl: { name: '', email: '', organization: '' },
-    },
   ]
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20">
-      <h1 className="text-3xl font-serif font-bold text-primary">{t('masterData')}</h1>
+      <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('masterData')}</h1>
 
       <Tabs defaultValue="exchangeRates" className="w-full mt-8">
         <ScrollArea className="w-full whitespace-nowrap pb-4">
@@ -98,6 +88,12 @@ export default function MasterData() {
                 {tab.label}
               </TabsTrigger>
             ))}
+            <TabsTrigger
+              value="requesters"
+              className="px-6 h-full data-[state=active]:bg-background"
+            >
+              Requesters
+            </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -122,6 +118,23 @@ export default function MasterData() {
             </Card>
           </TabsContent>
         ))}
+
+        <TabsContent value="requesters" className="mt-2">
+          <Card className="border-border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-serif text-[#4a8ebf]">Requesters</CardTitle>
+              <CardDescription>
+                Manage full requester profiles and bank information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RequesterManager
+                data={store.requesters}
+                onChange={(data) => store.updateData('requesters', data)}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   )

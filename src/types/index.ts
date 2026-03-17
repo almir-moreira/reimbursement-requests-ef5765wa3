@@ -29,6 +29,9 @@ export interface Expense {
   description: string
   amount: number
   currency: string
+  account?: string
+  workorder?: string
+  exchangeRate?: number
   amountUsd?: number
   amountEuros?: number
 }
@@ -69,4 +72,6 @@ export interface ReimbursementRequest {
   history: HistoryLog[]
   qcSignature?: Signature
   coSignature?: Signature
+  financeSignature?: Signature
+  paymentReceipt?: string
 }

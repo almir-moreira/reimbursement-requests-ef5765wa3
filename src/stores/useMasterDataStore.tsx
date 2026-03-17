@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { User } from '@/types'
 
 export interface EventDetail {
   id: string
@@ -37,13 +38,6 @@ export interface Workorder {
   name: string
 }
 
-export interface RequesterProfile {
-  id: string
-  name: string
-  email: string
-  organization: string
-}
-
 interface MasterDataState {
   events: EventDetail[]
   exchangeRates: ExchangeRate[]
@@ -51,7 +45,7 @@ interface MasterDataState {
   costCenters: CostCenter[]
   accounts: Account[]
   workorders: Workorder[]
-  requesters: RequesterProfile[]
+  requesters: Partial<User>[]
 }
 
 interface MasterDataContextData extends MasterDataState {
@@ -60,28 +54,50 @@ interface MasterDataContextData extends MasterDataState {
 
 const initialData: MasterDataState = {
   events: [
-    { id: 'ev-1', name: 'Workshop', costCenter: 'CC-01', account: 'ACC-01', workorder: 'WO-01' },
-    { id: 'ev-2', name: 'Conference', costCenter: 'CC-01', account: 'ACC-02', workorder: 'WO-02' },
+    { id: 'ev-1', name: 'Workshop', costCenter: 'CC-01', account: '62000', workorder: 'P1134-12' },
+    {
+      id: 'ev-2',
+      name: 'Conference',
+      costCenter: 'CC-02',
+      account: '62001',
+      workorder: 'P1135-12',
+    },
   ],
   exchangeRates: [
-    { id: 'r-1', currency: 'KES', rateToUsd: 0.0076 },
+    { id: 'r-1', currency: 'GBP', rateToUsd: 1.25 },
     { id: 'r-2', currency: 'EUR', rateToUsd: 1.08 },
     { id: 'r-3', currency: 'USD', rateToUsd: 1 },
+    { id: 'r-4', currency: 'KES', rateToUsd: 0.0076 },
   ],
   countries: [
     { id: 'c-1', name: 'Kenya' },
     { id: 'c-2', name: 'Portugal' },
     { id: 'c-3', name: 'USA' },
-    { id: 'c-4', name: 'Egypt' },
-    { id: 'c-5', name: 'UAE' },
+    { id: 'c-4', name: 'UK' },
   ],
   costCenters: [{ id: 'cc-1', code: 'CC-01', name: 'Operations' }],
   accounts: [
-    { id: 'a-1', code: 'ACC-01', name: 'Travel' },
-    { id: 'a-2', code: 'ACC-02', name: 'Meals' },
+    { id: 'a-1', code: '62000', name: 'Travel' },
+    { id: 'a-2', code: '62001', name: 'Meals' },
   ],
-  workorders: [{ id: 'w-1', code: 'WO-01', name: 'Field Visit' }],
-  requesters: [{ id: 'req-1', name: 'John Doe', email: 'john@example.com', organization: 'WHO' }],
+  workorders: [{ id: 'w-1', code: 'P1134-12', name: 'Field Visit' }],
+  requesters: [
+    {
+      id: 'req-1',
+      name: 'Dorna Khan',
+      email: 'dorna@example.com',
+      organization: '',
+      address: 'Flat 71 Hope Quay, Rope Walk',
+      city: 'Bristol',
+      zipCode: 'BS1 6ZF',
+      phone: '+447946609450',
+      bankHolder: 'Dorna Khan',
+      bankName: 'HSBC UK',
+      iban: '20547565/GB25HBUK40166420547565',
+      swift: 'HBUKGB4196Y',
+      bankCode: '40-16-64',
+    },
+  ],
 }
 
 const MasterDataContext = createContext<MasterDataContextData | undefined>(undefined)
@@ -89,7 +105,7 @@ const MasterDataContext = createContext<MasterDataContextData | undefined>(undef
 export function MasterDataProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MasterDataState>(() => {
     try {
-      const saved = localStorage.getItem('master_data_v2')
+      const saved = localStorage.getItem('master_data_v3')
       if (saved) return JSON.parse(saved)
     } catch {
       // ignore
@@ -98,7 +114,7 @@ export function MasterDataProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
-    localStorage.setItem('master_data_v2', JSON.stringify(state))
+    localStorage.setItem('master_data_v3', JSON.stringify(state))
   }, [state])
 
   const updateData = (key: keyof MasterDataState, data: any) => {

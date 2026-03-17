@@ -100,4 +100,27 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  /* Custom Print styles */
+  @media print {
+    body {
+      background-color: white !important;
+      color: black !important;
+    }
+    .print\:hidden {
+      display: none !important;
+    }
+    .print\:block {
+      display: block !important;
+    }
+    @page {
+      size: auto;
+      margin: 10mm;
+    }
+  }
+
+  .dotted-bg {
+    background-image: radial-gradient(#aaa 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
 }

@@ -17,7 +17,7 @@ import { Role } from '@/types'
 export default function Login() {
   const { login } = useAuthStore()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('john.doe@gmail.com')
+  const [email, setEmail] = useState('dorna@example.com')
   const [role, setRole] = useState<Role>('requester')
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,9 +31,14 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md shadow-elegant border-border">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-serif text-primary">Reimbursement Portal</CardTitle>
-          <CardDescription>Login to manage your requests</CardDescription>
+        <CardHeader className="text-center pb-2">
+          <h1 className="font-bold text-3xl text-[#4a8ebf] uppercase tracking-wider mb-2">
+            KAICIID
+          </h1>
+          <CardTitle className="text-xl font-serif text-foreground/80">
+            Reimbursement Portal
+          </CardTitle>
+          <CardDescription className="pt-2">Login to manage your requests</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -55,14 +60,17 @@ export default function Login() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="requester">Requester</SelectItem>
-                  <SelectItem value="qc">Quality Control</SelectItem>
-                  <SelectItem value="co">Certifying Officer</SelectItem>
+                  <SelectItem value="qc">Quality Control (QC)</SelectItem>
+                  <SelectItem value="co">Certifying Officer (CO)</SelectItem>
                   <SelectItem value="finance">Finance</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" className="w-full h-12 text-md">
+            <Button
+              type="submit"
+              className="w-full h-12 text-md bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold"
+            >
               Sign In
             </Button>
           </form>

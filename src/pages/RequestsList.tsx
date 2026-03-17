@@ -25,9 +25,9 @@ export default function RequestsList() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-serif font-bold text-primary">{t('requests')}</h1>
+        <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('requests')}</h1>
         {user?.role === 'requester' && (
-          <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90">
+          <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold">
             <Link to="/requests/new">
               <Plus className="w-4 h-4 mr-2" /> {t('newRequest')}
             </Link>
@@ -37,53 +37,58 @@ export default function RequestsList() {
 
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden mt-6">
         <Table>
-          <TableHeader className="bg-muted/50">
+          <TableHeader className="bg-muted/50 border-b border-border">
             <TableRow>
               <TableHead>Request ID</TableHead>
               <TableHead>{t('date')}</TableHead>
-              <TableHead>Event</TableHead>
               <TableHead>Requester</TableHead>
+              <TableHead>Total EUR</TableHead>
               <TableHead>{t('status')}</TableHead>
               <TableHead className="text-right">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {filteredRequests.map((req) => (
-              <TableRow key={req.id} className="hover:bg-muted/30">
-                <TableCell className="font-medium font-mono text-xs">{req.id}</TableCell>
-                <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>
-                <TableCell>{req.eventId}</TableCell>
-                <TableCell>{req.requesterDetails?.name}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={`
-                    ${req.status === 'Paid' ? 'bg-success/10 text-success border-success/20' : ''}
-                    ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold' : ''}
-                    ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : ''}
-                    ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
-                  `}
-                  >
-                    {t(req.status) || req.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10"
-                  >
-                    <Link to={`/requests/${req.id}`}>
-                      <Eye className="w-4 h-4 mr-2" /> View
-                    </Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+          <TableBody className="divide-y divide-border/50">
+            {filteredRequests.map((req) => {
+              const total = req.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
+              return (
+                <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-bold font-mono text-xs text-[#4a8ebf]">
+                    {req.id}
+                  </TableCell>
+                  <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{req.requesterDetails?.name}</TableCell>
+                  <TableCell className="font-semibold">€ {total.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={`
+                      ${req.status === 'Paid' ? 'bg-success/10 text-success border-success/20 shadow-sm' : ''}
+                      ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm' : ''}
+                      ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm' : ''}
+                      ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm' : ''}
+                    `}
+                    >
+                      {t(req.status) || req.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20"
+                    >
+                      <Link to={`/requests/${req.id}`}>
+                        <Eye className="w-4 h-4 mr-2" /> View Details
+                      </Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
             {filteredRequests.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground text-lg">
                   No requests found matching your criteria.
                 </TableCell>
               </TableRow>
