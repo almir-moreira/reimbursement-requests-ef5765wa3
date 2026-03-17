@@ -1,6 +1,7 @@
 import { ReimbursementRequest, Expense } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
-  const { user } = useAuthStore()
+  const { user, lang } = useAuthStore()
   const { exchangeRates } = useMasterDataStore()
   const expenses = formData.expenses || []
   const isInternal = user?.role !== 'requester'
@@ -52,24 +53,24 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
   const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
 
   return (
-    <div className="space-y-6 pt-6 border-t border-border">
+    <div className="space-y-6 pt-6 border-t border-border" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <h3 className="font-serif font-bold text-xl text-primary">Expense Details</h3>
       <div className="overflow-x-auto border border-border rounded-lg">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
-            <tr className="text-left text-muted-foreground">
-              <th className="p-3 font-semibold min-w-[200px]">Description</th>
-              <th className="p-3 font-semibold w-32">Amount</th>
-              <th className="p-3 font-semibold w-32">Currency</th>
+            <tr className="text-start text-muted-foreground">
+              <th className="p-3 font-semibold min-w-[200px] text-start">Description</th>
+              <th className="p-3 font-semibold w-32 text-start">Amount</th>
+              <th className="p-3 font-semibold w-32 text-start">Currency</th>
               {isInternal && (
                 <>
-                  <th className="p-3 font-semibold w-32">Account</th>
-                  <th className="p-3 font-semibold w-32">Workorder</th>
-                  <th className="p-3 font-semibold w-24">Exch. Rate</th>
-                  <th className="p-3 font-semibold w-32">Amt Euros</th>
+                  <th className="p-3 font-semibold w-32 text-start">Account</th>
+                  <th className="p-3 font-semibold w-32 text-start">Workorder</th>
+                  <th className="p-3 font-semibold w-24 text-start">Exch. Rate</th>
+                  <th className="p-3 font-semibold w-32 text-start">Amt Euros</th>
                 </>
               )}
-              {!readOnly && <th className="p-3 font-semibold w-12"></th>}
+              {!readOnly && <th className="p-3 font-semibold w-12 text-start"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -96,10 +97,10 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     value={exp.currency}
                     onValueChange={(v) => updateExp(i, 'currency', v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                       {exchangeRates.map((r) => (
                         <SelectItem key={r.currency} value={r.currency}>
                           {r.currency}
@@ -136,7 +137,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                       <Input
                         disabled
                         value={exp.amountEuros?.toFixed(2) || ''}
-                        className="bg-muted/30 font-bold"
+                        className="bg-muted/30 font-bold text-end"
                       />
                     </td>
                   </>
@@ -179,13 +180,13 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
       {isInternal && (
         <div className="flex justify-end mt-4 pt-4 border-t border-border/50">
           <div className="w-64 space-y-2">
-            <Label className="text-right block text-muted-foreground uppercase text-xs">
+            <Label className="text-end block text-muted-foreground uppercase text-xs">
               Total Amount in Euros
             </Label>
             <Input
               disabled
               value={totalEuros.toFixed(2)}
-              className="text-right font-bold text-xl bg-primary/5 text-primary border-primary/20 h-12"
+              className="text-end font-bold text-xl bg-primary/5 text-primary border-primary/20 h-12"
             />
           </div>
         </div>

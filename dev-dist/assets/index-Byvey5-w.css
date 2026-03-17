@@ -2171,6 +2171,14 @@ body{
   text-align: right;
 }
 
+.text-start{
+  text-align: start;
+}
+
+.text-end{
+  text-align: end;
+}
+
 .align-middle{
   vertical-align: middle;
 }

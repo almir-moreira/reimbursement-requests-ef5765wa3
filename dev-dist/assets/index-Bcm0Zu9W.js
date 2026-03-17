@@ -25643,7 +25643,7 @@ function Layout() {
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-label@2.1.8_@types+react-dom@19.2.3_@types+react@19.2.14__@types+react@_55fa612a976b7bdfbf4dcdd93d861aab/node_modules/@radix-ui/react-label/dist/index.mjs
 var NAME = "Label";
-var Label$3 = import_react.forwardRef((props, forwardedRef) => {
+var Label$2 = import_react.forwardRef((props, forwardedRef) => {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.label, {
 		...props,
 		ref: forwardedRef,
@@ -25654,19 +25654,19 @@ var Label$3 = import_react.forwardRef((props, forwardedRef) => {
 		}
 	});
 });
-Label$3.displayName = NAME;
-var Root$1 = Label$3;
+Label$2.displayName = NAME;
+var Root$1 = Label$2;
 //#endregion
 //#region src/components/ui/label.tsx
 var labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
-var Label$2 = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$1, {
+var Label$1 = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$1, {
 	"data-uid": "src/components/ui/label.tsx:16:3",
 	"data-prohibitions": "[editContent]",
 	ref,
 	className: cn(labelVariants(), className),
 	...props
 }));
-Label$2.displayName = Root$1.displayName;
+Label$1.displayName = Root$1.displayName;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+number@1.1.1/node_modules/@radix-ui/number/dist/index.mjs
 function clamp(value, [min, max]) {
@@ -26638,7 +26638,7 @@ var Icon = SelectIcon;
 var Portal = SelectPortal;
 var Content2 = SelectContent$1;
 var Viewport = SelectViewport;
-var Label$1 = SelectLabel$1;
+var Label = SelectLabel$1;
 var Item$1 = SelectItem$1;
 var ItemText = SelectItemText;
 var ItemIndicator = SelectItemIndicator;
@@ -26722,14 +26722,14 @@ var SelectContent = import_react.forwardRef(({ className, children, position = "
 	})
 }));
 SelectContent.displayName = Content2.displayName;
-var SelectLabel = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+var SelectLabel = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 	"data-uid": "src/components/ui/select.tsx:98:3",
 	"data-prohibitions": "[editContent]",
 	ref,
 	className: cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className),
 	...props
 }));
-SelectLabel.displayName = Label$1.displayName;
+SelectLabel.displayName = Label.displayName;
 var SelectItem = import_react.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Item$1, {
 	"data-uid": "src/components/ui/select.tsx:110:3",
 	"data-prohibitions": "[editContent]",
@@ -26863,7 +26863,7 @@ function Login() {
 							"data-uid": "src/pages/Login.tsx:40:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Login.tsx:41:15",
 								"data-prohibitions": "[]",
 								children: "Email"
@@ -26881,7 +26881,7 @@ function Login() {
 							"data-uid": "src/pages/Login.tsx:50:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Login.tsx:51:15",
 								"data-prohibitions": "[]",
 								children: "Role (Demo purpose)"
@@ -27136,7 +27136,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:40:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:41:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27153,7 +27153,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:44:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:45:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27170,7 +27170,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:48:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:49:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27187,7 +27187,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:53:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:54:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27204,7 +27204,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:57:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:58:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27221,7 +27221,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:61:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:62:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27238,7 +27238,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:66:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:67:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27255,7 +27255,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:70:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:71:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27272,7 +27272,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:74:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:75:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27289,7 +27289,7 @@ function Profile() {
 							"data-uid": "src/pages/Profile.tsx:78:13",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/pages/Profile.tsx:79:15",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27321,7 +27321,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:91:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:92:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27338,7 +27338,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:99:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:100:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27355,7 +27355,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:103:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:104:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27372,7 +27372,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:114:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:115:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27389,7 +27389,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:118:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:119:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27406,7 +27406,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:122:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:123:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27423,7 +27423,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:127:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:128:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27440,7 +27440,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:131:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:132:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27457,7 +27457,7 @@ function Profile() {
 								"data-uid": "src/pages/Profile.tsx:140:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2 md:col-span-4",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/Profile.tsx:141:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -27816,7 +27816,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						"data-uid": "src/components/requests/RequestHeader.tsx:26:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 							"data-uid": "src/components/requests/RequestHeader.tsx:27:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
@@ -27833,7 +27833,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						"data-uid": "src/components/requests/RequestHeader.tsx:30:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 							"data-uid": "src/components/requests/RequestHeader.tsx:31:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
@@ -27850,7 +27850,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						"data-uid": "src/components/requests/RequestHeader.tsx:34:9",
 						"data-prohibitions": "[editContent]",
 						className: "space-y-2 md:col-span-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 							"data-uid": "src/components/requests/RequestHeader.tsx:35:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
@@ -27901,7 +27901,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:58:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:59:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27918,7 +27918,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:62:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:63:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27935,7 +27935,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:66:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:67:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27952,7 +27952,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:71:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:72:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27969,7 +27969,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:75:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:76:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -27986,7 +27986,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:79:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:80:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28003,7 +28003,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:84:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:85:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28020,7 +28020,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:88:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:89:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28037,7 +28037,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:92:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:93:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28071,7 +28071,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:102:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:103:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28088,7 +28088,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:106:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:107:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28105,7 +28105,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:110:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:111:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28122,7 +28122,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:115:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:116:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28139,7 +28139,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:119:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:120:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28156,7 +28156,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:123:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:124:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28173,7 +28173,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:128:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:129:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28190,7 +28190,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/RequestHeader.tsx:132:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/RequestHeader.tsx:133:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
@@ -28212,7 +28212,7 @@ function RequestHeader({ formData, onChange, readOnly }) {
 //#endregion
 //#region src/components/requests/ExpenseDetails.tsx
 function ExpenseDetails({ formData, onChange, readOnly }) {
-	const { user } = useAuthStore();
+	const { user, lang } = useAuthStore();
 	const { exchangeRates } = useMasterDataStore();
 	const expenses = formData.expenses || [];
 	const isInternal = user?.role !== "requester";
@@ -28242,99 +28242,100 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 	};
 	const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/ExpenseDetails.tsx:55:5",
+		"data-uid": "src/components/requests/ExpenseDetails.tsx:56:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 pt-6 border-t border-border",
+		dir: lang === "ar" ? "rtl" : "ltr",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:56:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:57:7",
 				"data-prohibitions": "[]",
 				className: "font-serif font-bold text-xl text-primary",
 				children: "Expense Details"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:57:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:58:7",
 				"data-prohibitions": "[editContent]",
 				className: "overflow-x-auto border border-border rounded-lg",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:58:9",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:59:9",
 					"data-prohibitions": "[editContent]",
 					className: "w-full text-sm",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:59:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:60:11",
 						"data-prohibitions": "[editContent]",
 						className: "bg-muted/50",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:60:13",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:61:13",
 							"data-prohibitions": "[editContent]",
-							className: "text-left text-muted-foreground",
+							className: "text-start text-muted-foreground",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:61:15",
-									"data-prohibitions": "[]",
-									className: "p-3 font-semibold min-w-[200px]",
-									children: "Description"
-								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									"data-uid": "src/components/requests/ExpenseDetails.tsx:62:15",
 									"data-prohibitions": "[]",
-									className: "p-3 font-semibold w-32",
-									children: "Amount"
+									className: "p-3 font-semibold min-w-[200px] text-start",
+									children: "Description"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									"data-uid": "src/components/requests/ExpenseDetails.tsx:63:15",
 									"data-prohibitions": "[]",
-									className: "p-3 font-semibold w-32",
+									className: "p-3 font-semibold w-32 text-start",
+									children: "Amount"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:64:15",
+									"data-prohibitions": "[]",
+									className: "p-3 font-semibold w-32 text-start",
 									children: "Currency"
 								}),
 								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:66:19",
-										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32",
-										children: "Account"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 										"data-uid": "src/components/requests/ExpenseDetails.tsx:67:19",
 										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32",
-										children: "Workorder"
+										className: "p-3 font-semibold w-32 text-start",
+										children: "Account"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 										"data-uid": "src/components/requests/ExpenseDetails.tsx:68:19",
 										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-24",
-										children: "Exch. Rate"
+										className: "p-3 font-semibold w-32 text-start",
+										children: "Workorder"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 										"data-uid": "src/components/requests/ExpenseDetails.tsx:69:19",
 										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32",
+										className: "p-3 font-semibold w-24 text-start",
+										children: "Exch. Rate"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:70:19",
+										"data-prohibitions": "[]",
+										className: "p-3 font-semibold w-32 text-start",
 										children: "Amt Euros"
 									})
 								] }),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:72:29",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:73:29",
 									"data-prohibitions": "[]",
-									className: "p-3 font-semibold w-12"
+									className: "p-3 font-semibold w-12 text-start"
 								})
 							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:75:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:76:11",
 						"data-prohibitions": "[editContent]",
 						className: "divide-y divide-border",
 						children: [expenses.map((exp, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:77:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:78:15",
 							"data-prohibitions": "[editContent]",
 							className: "hover:bg-muted/20",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:78:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:79:17",
 									"data-prohibitions": "[]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:79:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:80:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.description,
@@ -28342,11 +28343,11 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:85:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:86:17",
 									"data-prohibitions": "[]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:86:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:87:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										type: "number",
@@ -28355,27 +28356,29 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:93:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:94:17",
 									"data-prohibitions": "[editContent]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:94:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:95:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.currency,
 										onValueChange: (v) => updateExp(i, "currency", v),
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:99:21",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:100:21",
 											"data-prohibitions": "[]",
+											dir: lang === "ar" ? "rtl" : "ltr",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:100:23",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:101:23",
 												"data-prohibitions": "[editContent]"
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectContent, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:102:21",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:103:21",
 											"data-prohibitions": "[editContent]",
+											dir: lang === "ar" ? "rtl" : "ltr",
 											children: exchangeRates.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:104:25",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:105:25",
 												"data-prohibitions": "[editContent]",
 												value: r.currency,
 												children: r.currency
@@ -28385,11 +28388,11 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 								}),
 								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:113:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:114:21",
 										"data-prohibitions": "[]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:114:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:115:23",
 											"data-prohibitions": "[editContent]",
 											disabled: readOnly && user?.role !== "qc",
 											value: exp.account || "",
@@ -28397,11 +28400,11 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:120:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:121:21",
 										"data-prohibitions": "[]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:121:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:122:23",
 											"data-prohibitions": "[editContent]",
 											disabled: readOnly && user?.role !== "qc",
 											value: exp.workorder || "",
@@ -28409,11 +28412,11 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:127:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:128:21",
 										"data-prohibitions": "[]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:128:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:129:23",
 											"data-prohibitions": "[editContent]",
 											disabled: readOnly && user?.role !== "qc",
 											type: "number",
@@ -28422,31 +28425,31 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:135:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:136:21",
 										"data-prohibitions": "[]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:136:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:137:23",
 											"data-prohibitions": "[editContent]",
 											disabled: true,
 											value: exp.amountEuros?.toFixed(2) || "",
-											className: "bg-muted/30 font-bold"
+											className: "bg-muted/30 font-bold text-end"
 										})
 									})
 								] }),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:145:19",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:146:19",
 									"data-prohibitions": "[]",
 									className: "p-2 text-center",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:146:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:147:21",
 										"data-prohibitions": "[]",
 										variant: "ghost",
 										size: "icon",
 										onClick: () => removeExp(i),
 										className: "text-destructive hover:bg-destructive/10",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:152:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:153:23",
 											"data-prohibitions": "[editContent]",
 											className: "w-4 h-4"
 										})
@@ -28454,10 +28457,10 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 								})
 							]
 						}, exp.id)), expenses.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:159:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:160:15",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								"data-uid": "src/components/requests/ExpenseDetails.tsx:160:17",
+								"data-uid": "src/components/requests/ExpenseDetails.tsx:161:17",
 								"data-prohibitions": "[]",
 								colSpan: isInternal ? 8 : 4,
 								className: "text-center p-6 text-muted-foreground",
@@ -28468,7 +28471,7 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 				})
 			}),
 			!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:169:9",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:170:9",
 				"data-prohibitions": "[]",
 				type: "button",
 				variant: "outline",
@@ -28476,30 +28479,30 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 				onClick: addExpense,
 				className: "text-success border-success hover:bg-success/10",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:176:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:177:11",
 					"data-prohibitions": "[editContent]",
 					className: "w-4 h-4 mr-2"
 				}), " Add Row"]
 			}),
 			isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:180:9",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:181:9",
 				"data-prohibitions": "[]",
 				className: "flex justify-end mt-4 pt-4 border-t border-border/50",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:181:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:182:11",
 					"data-prohibitions": "[]",
 					className: "w-64 space-y-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:182:13",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:183:13",
 						"data-prohibitions": "[]",
-						className: "text-right block text-muted-foreground uppercase text-xs",
+						className: "text-end block text-muted-foreground uppercase text-xs",
 						children: "Total Amount in Euros"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:185:13",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:186:13",
 						"data-prohibitions": "[editContent]",
 						disabled: true,
 						value: totalEuros.toFixed(2),
-						className: "text-right font-bold text-xl bg-primary/5 text-primary border-primary/20 h-12"
+						className: "text-end font-bold text-xl bg-primary/5 text-primary border-primary/20 h-12"
 					})]
 				})
 			})
@@ -28552,7 +28555,7 @@ function Attachments({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/Attachments.tsx:41:13",
 							"data-prohibitions": "[]",
 							className: "flex-1 space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/Attachments.tsx:42:15",
 								"data-prohibitions": "[]",
 								className: "text-xs uppercase text-muted-foreground",
@@ -28570,7 +28573,7 @@ function Attachments({ formData, onChange, readOnly }) {
 							"data-uid": "src/components/requests/Attachments.tsx:50:13",
 							"data-prohibitions": "[editContent]",
 							className: "flex-1 space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/Attachments.tsx:51:15",
 								"data-prohibitions": "[]",
 								className: "text-xs uppercase text-muted-foreground",
@@ -28658,7 +28661,7 @@ function ApprovalSection({ formData, onAction }) {
 				"data-uid": "src/components/requests/ApprovalSection.tsx:38:7",
 				"data-prohibitions": "[]",
 				className: "space-y-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 					"data-uid": "src/components/requests/ApprovalSection.tsx:39:9",
 					"data-prohibitions": "[]",
 					className: "text-sm font-semibold",
@@ -28868,7 +28871,7 @@ function RequestForm() {
 								"data-uid": "src/pages/RequestForm.tsx:132:13",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/RequestForm.tsx:133:15",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -28889,7 +28892,7 @@ function RequestForm() {
 								"data-uid": "src/pages/RequestForm.tsx:142:13",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$2, {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 									"data-uid": "src/pages/RequestForm.tsx:143:15",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
@@ -29709,4 +29712,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-CKSFYHHM.js.map
+//# sourceMappingURL=index-Bcm0Zu9W.js.map
