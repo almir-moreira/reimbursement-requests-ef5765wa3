@@ -91,7 +91,9 @@ export function MasterDataProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('master_data_v2')
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      // ignore
+    }
     return initialData
   })
 

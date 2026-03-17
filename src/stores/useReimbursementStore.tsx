@@ -14,7 +14,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('reimbursement_requests_v2')
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      // ignore
+    }
     return []
   })
 

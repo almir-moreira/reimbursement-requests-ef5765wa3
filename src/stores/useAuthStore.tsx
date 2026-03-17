@@ -17,7 +17,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('auth_user_v2')
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      // ignore
+    }
     return null
   })
 
