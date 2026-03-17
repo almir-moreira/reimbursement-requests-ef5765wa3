@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import useCartStore from '@/stores/useCartStore'
 import useAuthStore from '@/stores/useAuthStore'
+import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,8 @@ export function Header() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
@@ -26,6 +29,10 @@ export function Header() {
       setIsMobileSearchOpen(false)
     }
   }
+
+  const currentCat = searchParams.get('cat')
+  const isCatalog = location.pathname === '/catalogo'
+  const isVerTudo = isCatalog && !searchParams.has('cat') && !searchParams.has('search')
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-lg border-b border-border shadow-sm transition-all duration-300">
@@ -49,25 +56,43 @@ export function Header() {
         <nav className="hidden lg:flex flex-1 justify-center items-center gap-8">
           <Link
             to="/catalogo?cat=Cédulas"
-            className="text-sm font-semibold hover:text-accent transition-colors text-foreground"
+            className={cn(
+              'text-sm font-semibold transition-colors',
+              isCatalog && currentCat === 'Cédulas'
+                ? 'text-accent'
+                : 'text-foreground hover:text-accent',
+            )}
           >
             Cédulas
           </Link>
           <Link
             to="/catalogo?cat=Moedas"
-            className="text-sm font-semibold hover:text-accent transition-colors text-foreground"
+            className={cn(
+              'text-sm font-semibold transition-colors',
+              isCatalog && currentCat === 'Moedas'
+                ? 'text-accent'
+                : 'text-foreground hover:text-accent',
+            )}
           >
             Moedas
           </Link>
           <Link
             to="/catalogo?cat=Coleções"
-            className="text-sm font-semibold hover:text-accent transition-colors text-foreground"
+            className={cn(
+              'text-sm font-semibold transition-colors',
+              isCatalog && currentCat === 'Coleções'
+                ? 'text-accent'
+                : 'text-foreground hover:text-accent',
+            )}
           >
             Coleções
           </Link>
           <Link
             to="/catalogo"
-            className="text-sm font-semibold text-accent hover:text-primary transition-colors"
+            className={cn(
+              'text-sm font-semibold transition-colors',
+              isVerTudo ? 'text-primary font-bold' : 'text-accent hover:text-primary',
+            )}
           >
             Ver Tudo
           </Link>

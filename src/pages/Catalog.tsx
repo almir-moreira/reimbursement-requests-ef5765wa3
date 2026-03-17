@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { Filter, SlidersHorizontal, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -18,20 +18,44 @@ import { mockProducts, ItemCategory } from '@/lib/mock-data'
 const CATEGORIES: ItemCategory[] = ['Cédulas', 'Moedas', 'Medalhas', 'Coleções']
 const ORIGINS = ['Brasil', 'Estados Unidos', 'Europa', 'Ásia']
 const YEARS = ['Anterior a 1900', '1900 - 1950', '1951 - 2000', 'Pós 2000']
-const MATERIALS = ['Papel', 'Prata', 'Ouro', 'Níquel', 'Cobre', 'Polímero']
 
 export default function Catalog() {
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const searchParam = searchParams.get('search') || ''
 
-  // States for filters
-  const [selectedCats, setSelectedCats] = useState<string[]>(searchParams.getAll('cat'))
+  // Categories are now driven entirely by the URL to support direct navigation
+  const selectedCats = searchParams.getAll('cat')
+
+  // Other filters remain in local state but will be reset on 'Ver Tudo' navigation
   const [selectedOrigins, setSelectedOrigins] = useState<string[]>([])
   const [selectedYears, setSelectedYears] = useState<string[]>([])
   const [sortOrder, setSortOrder] = useState('newest')
 
+  useEffect(() => {
+    // Reset local filters when navigating to the base catalog page (Ver Tudo)
+    if (location.pathname === '/catalogo' && location.search === '') {
+      setSelectedOrigins([])
+      setSelectedYears([])
+      setSortOrder('newest')
+    }
+  }, [location.pathname, location.search])
+
   const toggleFilter = (setFn: React.Dispatch<React.SetStateAction<string[]>>, val: string) => {
     setFn((prev) => (prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]))
+  }
+
+  const toggleCategory = (cat: string) => {
+    const newParams = new URLSearchParams(searchParams)
+    const cats = newParams.getAll('cat')
+    newParams.delete('cat')
+    if (cats.includes(cat)) {
+      cats.filter((c) => c !== cat).forEach((c) => newParams.append('cat', c))
+    } else {
+      cats.forEach((c) => newParams.append('cat', c))
+      newParams.append('cat', cat)
+    }
+    setSearchParams(newParams)
   }
 
   const filteredProducts = useMemo(() => {
@@ -92,7 +116,7 @@ export default function Catalog() {
               <Checkbox
                 id={`cat-${cat}`}
                 checked={selectedCats.includes(cat)}
-                onCheckedChange={() => toggleFilter(setSelectedCats, cat)}
+                onCheckedChange={() => toggleCategory(cat)}
               />
               <Label htmlFor={`cat-${cat}`} className="text-sm font-medium cursor-pointer">
                 {cat}
@@ -228,13 +252,9 @@ export default function Catalog() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSelectedCats([])
                   setSelectedOrigins([])
                   setSelectedYears([])
-                  if (searchParam) {
-                    searchParams.delete('search')
-                    setSearchParams(searchParams)
-                  }
+                  setSearchParams(new URLSearchParams())
                 }}
                 className="mt-4"
               >

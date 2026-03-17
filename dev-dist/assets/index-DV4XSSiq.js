@@ -27025,53 +27025,58 @@ function Header() {
 	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
 	const [isMobileSearchOpen, setIsMobileSearchOpen] = (0, import_react.useState)(false);
 	const navigate = useNavigate();
+	const location = useLocation();
+	const [searchParams] = useSearchParams();
 	const handleSearch = (e) => {
 		if (e.key === "Enter" && searchTerm.trim()) {
 			navigate(`/catalogo?search=${encodeURIComponent(searchTerm.trim())}`);
 			setIsMobileSearchOpen(false);
 		}
 	};
+	const currentCat = searchParams.get("cat");
+	const isCatalog = location.pathname === "/catalogo";
+	const isVerTudo = isCatalog && !searchParams.has("cat") && !searchParams.has("search");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-		"data-uid": "src/components/Header.tsx:31:5",
+		"data-uid": "src/components/Header.tsx:38:5",
 		"data-prohibitions": "[editContent]",
 		className: "sticky top-0 z-40 w-full bg-background/80 backdrop-blur-lg border-b border-border shadow-sm transition-all duration-300",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/Header.tsx:32:7",
+			"data-uid": "src/components/Header.tsx:39:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4 h-20 flex items-center justify-between gap-4",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/Header.tsx:34:9",
+					"data-uid": "src/components/Header.tsx:41:9",
 					"data-prohibitions": "[]",
 					className: "flex items-center gap-4 lg:w-1/4",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						"data-uid": "src/components/Header.tsx:35:11",
+						"data-uid": "src/components/Header.tsx:42:11",
 						"data-prohibitions": "[]",
 						variant: "ghost",
 						size: "icon",
 						className: "lg:hidden",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Menu$1, {
-							"data-uid": "src/components/Header.tsx:36:13",
+							"data-uid": "src/components/Header.tsx:43:13",
 							"data-prohibitions": "[editContent]",
 							className: "w-5 h-5"
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-						"data-uid": "src/components/Header.tsx:38:11",
+						"data-uid": "src/components/Header.tsx:45:11",
 						"data-prohibitions": "[]",
 						to: "/",
 						className: "flex items-center gap-2 group",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							"data-uid": "src/components/Header.tsx:39:13",
+							"data-uid": "src/components/Header.tsx:46:13",
 							"data-prohibitions": "[]",
 							className: "w-10 h-10 bg-primary rounded-full flex items-center justify-center group-hover:bg-accent transition-colors",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								"data-uid": "src/components/Header.tsx:40:15",
+								"data-uid": "src/components/Header.tsx:47:15",
 								"data-prohibitions": "[]",
 								className: "font-serif font-bold text-white text-xl",
 								children: "ND"
 							})
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							"data-uid": "src/components/Header.tsx:42:13",
+							"data-uid": "src/components/Header.tsx:49:13",
 							"data-prohibitions": "[]",
 							className: "font-serif font-bold text-xl tracking-tight hidden sm:block text-primary",
 							children: "Numismática Digital"
@@ -27079,55 +27084,55 @@ function Header() {
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", {
-					"data-uid": "src/components/Header.tsx:49:9",
-					"data-prohibitions": "[]",
+					"data-uid": "src/components/Header.tsx:56:9",
+					"data-prohibitions": "[editContent]",
 					className: "hidden lg:flex flex-1 justify-center items-center gap-8",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-							"data-uid": "src/components/Header.tsx:50:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/Header.tsx:57:11",
+							"data-prohibitions": "[editContent]",
 							to: "/catalogo?cat=Cédulas",
-							className: "text-sm font-semibold hover:text-accent transition-colors text-foreground",
+							className: cn$1("text-sm font-semibold transition-colors", isCatalog && currentCat === "Cédulas" ? "text-accent" : "text-foreground hover:text-accent"),
 							children: "Cédulas"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-							"data-uid": "src/components/Header.tsx:56:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/Header.tsx:68:11",
+							"data-prohibitions": "[editContent]",
 							to: "/catalogo?cat=Moedas",
-							className: "text-sm font-semibold hover:text-accent transition-colors text-foreground",
+							className: cn$1("text-sm font-semibold transition-colors", isCatalog && currentCat === "Moedas" ? "text-accent" : "text-foreground hover:text-accent"),
 							children: "Moedas"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-							"data-uid": "src/components/Header.tsx:62:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/Header.tsx:79:11",
+							"data-prohibitions": "[editContent]",
 							to: "/catalogo?cat=Coleções",
-							className: "text-sm font-semibold hover:text-accent transition-colors text-foreground",
+							className: cn$1("text-sm font-semibold transition-colors", isCatalog && currentCat === "Coleções" ? "text-accent" : "text-foreground hover:text-accent"),
 							children: "Coleções"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-							"data-uid": "src/components/Header.tsx:68:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/Header.tsx:90:11",
+							"data-prohibitions": "[editContent]",
 							to: "/catalogo",
-							className: "text-sm font-semibold text-accent hover:text-primary transition-colors",
+							className: cn$1("text-sm font-semibold transition-colors", isVerTudo ? "text-primary font-bold" : "text-accent hover:text-primary"),
 							children: "Ver Tudo"
 						})
 					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/Header.tsx:77:9",
+					"data-uid": "src/components/Header.tsx:102:9",
 					"data-prohibitions": "[editContent]",
 					className: "flex items-center justify-end gap-2 lg:w-1/4",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/Header.tsx:78:11",
+							"data-uid": "src/components/Header.tsx:103:11",
 							"data-prohibitions": "[]",
 							className: "relative hidden md:block max-w-[200px] w-full",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, {
-								"data-uid": "src/components/Header.tsx:79:13",
+								"data-uid": "src/components/Header.tsx:104:13",
 								"data-prohibitions": "[editContent]",
 								className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/Header.tsx:80:13",
+								"data-uid": "src/components/Header.tsx:105:13",
 								"data-prohibitions": "[editContent]",
 								placeholder: "Buscar itens...",
 								value: searchTerm,
@@ -27137,79 +27142,79 @@ function Header() {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/Header.tsx:89:11",
+							"data-uid": "src/components/Header.tsx:114:11",
 							"data-prohibitions": "[editContent]",
 							variant: "ghost",
 							size: "icon",
 							className: "md:hidden",
 							onClick: () => setIsMobileSearchOpen(!isMobileSearchOpen),
 							children: isMobileSearchOpen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, {
-								"data-uid": "src/components/Header.tsx:95:35",
+								"data-uid": "src/components/Header.tsx:120:35",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5"
 							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, {
-								"data-uid": "src/components/Header.tsx:95:63",
+								"data-uid": "src/components/Header.tsx:120:63",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5"
 							})
 						}),
 						isAuthenticated ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenu, {
-							"data-uid": "src/components/Header.tsx:99:13",
+							"data-uid": "src/components/Header.tsx:124:13",
 							"data-prohibitions": "[editContent]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuTrigger, {
-								"data-uid": "src/components/Header.tsx:100:15",
+								"data-uid": "src/components/Header.tsx:125:15",
 								"data-prohibitions": "[editContent]",
 								asChild: true,
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									"data-uid": "src/components/Header.tsx:101:17",
+									"data-uid": "src/components/Header.tsx:126:17",
 									"data-prohibitions": "[editContent]",
 									variant: "ghost",
 									className: "hidden sm:flex gap-2 text-sm font-medium",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, {
-										"data-uid": "src/components/Header.tsx:102:19",
+										"data-uid": "src/components/Header.tsx:127:19",
 										"data-prohibitions": "[editContent]",
 										className: "w-4 h-4 text-primary"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/Header.tsx:103:19",
+										"data-uid": "src/components/Header.tsx:128:19",
 										"data-prohibitions": "[editContent]",
 										className: "truncate max-w-[100px]",
 										children: user?.name
 									})]
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuContent, {
-								"data-uid": "src/components/Header.tsx:106:15",
+								"data-uid": "src/components/Header.tsx:131:15",
 								"data-prohibitions": "[]",
 								align: "end",
 								className: "w-48",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
-										"data-uid": "src/components/Header.tsx:107:17",
+										"data-uid": "src/components/Header.tsx:132:17",
 										"data-prohibitions": "[]",
 										asChild: true,
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-											"data-uid": "src/components/Header.tsx:108:19",
+											"data-uid": "src/components/Header.tsx:133:19",
 											"data-prohibitions": "[]",
 											to: "/dashboard",
 											children: "Minha Conta"
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
-										"data-uid": "src/components/Header.tsx:110:17",
+										"data-uid": "src/components/Header.tsx:135:17",
 										"data-prohibitions": "[]",
 										asChild: true,
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-											"data-uid": "src/components/Header.tsx:111:19",
+											"data-uid": "src/components/Header.tsx:136:19",
 											"data-prohibitions": "[]",
 											to: "/dashboard",
 											children: "Meus Pedidos"
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuSeparator, {
-										"data-uid": "src/components/Header.tsx:113:17",
+										"data-uid": "src/components/Header.tsx:138:17",
 										"data-prohibitions": "[editContent]"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
-										"data-uid": "src/components/Header.tsx:114:17",
+										"data-uid": "src/components/Header.tsx:139:17",
 										"data-prohibitions": "[]",
 										onClick: logout,
 										className: "text-destructive focus:text-destructive cursor-pointer",
@@ -27218,31 +27223,31 @@ function Header() {
 								]
 							})]
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/Header.tsx:123:13",
+							"data-uid": "src/components/Header.tsx:148:13",
 							"data-prohibitions": "[]",
 							variant: "ghost",
 							size: "icon",
 							onClick: () => setIsAuthModalOpen(true),
 							className: "relative hover:text-accent hover:bg-transparent",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, {
-								"data-uid": "src/components/Header.tsx:129:15",
+								"data-uid": "src/components/Header.tsx:154:15",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5"
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							"data-uid": "src/components/Header.tsx:133:11",
+							"data-uid": "src/components/Header.tsx:158:11",
 							"data-prohibitions": "[editContent]",
 							variant: "ghost",
 							size: "icon",
 							onClick: () => setIsCartOpen(true),
 							className: "relative hover:text-accent hover:bg-transparent",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShoppingCart, {
-								"data-uid": "src/components/Header.tsx:139:13",
+								"data-uid": "src/components/Header.tsx:164:13",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5"
 							}), totalItems > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								"data-uid": "src/components/Header.tsx:141:15",
+								"data-uid": "src/components/Header.tsx:166:15",
 								"data-prohibitions": "[editContent]",
 								className: "absolute top-1.5 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground ring-2 ring-background animate-fade-in-up",
 								children: totalItems
@@ -27252,19 +27257,19 @@ function Header() {
 				})
 			]
 		}), isMobileSearchOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			"data-uid": "src/components/Header.tsx:151:9",
+			"data-uid": "src/components/Header.tsx:176:9",
 			"data-prohibitions": "[]",
 			className: "absolute top-20 left-0 w-full p-4 bg-background border-b border-border md:hidden z-50 animate-in slide-in-from-top-2",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/Header.tsx:152:11",
+				"data-uid": "src/components/Header.tsx:177:11",
 				"data-prohibitions": "[]",
 				className: "relative",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, {
-					"data-uid": "src/components/Header.tsx:153:13",
+					"data-uid": "src/components/Header.tsx:178:13",
 					"data-prohibitions": "[editContent]",
 					className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					"data-uid": "src/components/Header.tsx:154:13",
+					"data-uid": "src/components/Header.tsx:179:13",
 					"data-prohibitions": "[editContent]",
 					placeholder: "Buscar moedas, cédulas, anos...",
 					value: searchTerm,
@@ -31224,14 +31229,33 @@ var YEARS = [
 	"Pós 2000"
 ];
 function Catalog() {
+	const location = useLocation();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const searchParam = searchParams.get("search") || "";
-	const [selectedCats, setSelectedCats] = (0, import_react.useState)(searchParams.getAll("cat"));
+	const selectedCats = searchParams.getAll("cat");
 	const [selectedOrigins, setSelectedOrigins] = (0, import_react.useState)([]);
 	const [selectedYears, setSelectedYears] = (0, import_react.useState)([]);
 	const [sortOrder, setSortOrder] = (0, import_react.useState)("newest");
+	(0, import_react.useEffect)(() => {
+		if (location.pathname === "/catalogo" && location.search === "") {
+			setSelectedOrigins([]);
+			setSelectedYears([]);
+			setSortOrder("newest");
+		}
+	}, [location.pathname, location.search]);
 	const toggleFilter = (setFn, val) => {
 		setFn((prev) => prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]);
+	};
+	const toggleCategory = (cat) => {
+		const newParams = new URLSearchParams(searchParams);
+		const cats = newParams.getAll("cat");
+		newParams.delete("cat");
+		if (cats.includes(cat)) cats.filter((c) => c !== cat).forEach((c) => newParams.append("cat", c));
+		else {
+			cats.forEach((c) => newParams.append("cat", c));
+			newParams.append("cat", cat);
+		}
+		setSearchParams(newParams);
 	};
 	const filteredProducts = (0, import_react.useMemo)(() => {
 		let result = [...mockProducts];
@@ -31273,34 +31297,34 @@ function Catalog() {
 		sortOrder
 	]);
 	const FiltersContent = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Catalog.tsx:84:5",
+		"data-uid": "src/pages/Catalog.tsx:108:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-8",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/Catalog.tsx:85:7",
+				"data-uid": "src/pages/Catalog.tsx:109:7",
 				"data-prohibitions": "[editContent]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					"data-uid": "src/pages/Catalog.tsx:86:9",
+					"data-uid": "src/pages/Catalog.tsx:110:9",
 					"data-prohibitions": "[]",
 					className: "font-serif font-bold text-lg mb-4 flex items-center border-b pb-2",
 					children: "Categorias"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/pages/Catalog.tsx:89:9",
+					"data-uid": "src/pages/Catalog.tsx:113:9",
 					"data-prohibitions": "[editContent]",
 					className: "space-y-3",
 					children: CATEGORIES.map((cat) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Catalog.tsx:91:13",
+						"data-uid": "src/pages/Catalog.tsx:115:13",
 						"data-prohibitions": "[editContent]",
 						className: "flex items-center space-x-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkbox, {
-							"data-uid": "src/pages/Catalog.tsx:92:15",
+							"data-uid": "src/pages/Catalog.tsx:116:15",
 							"data-prohibitions": "[editContent]",
 							id: `cat-${cat}`,
 							checked: selectedCats.includes(cat),
-							onCheckedChange: () => toggleFilter(setSelectedCats, cat)
+							onCheckedChange: () => toggleCategory(cat)
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/pages/Catalog.tsx:97:15",
+							"data-uid": "src/pages/Catalog.tsx:121:15",
 							"data-prohibitions": "[editContent]",
 							htmlFor: `cat-${cat}`,
 							className: "text-sm font-medium cursor-pointer",
@@ -31310,29 +31334,29 @@ function Catalog() {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/Catalog.tsx:105:7",
+				"data-uid": "src/pages/Catalog.tsx:129:7",
 				"data-prohibitions": "[editContent]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					"data-uid": "src/pages/Catalog.tsx:106:9",
+					"data-uid": "src/pages/Catalog.tsx:130:9",
 					"data-prohibitions": "[]",
 					className: "font-serif font-bold text-lg mb-4 flex items-center border-b pb-2",
 					children: "País"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/pages/Catalog.tsx:107:9",
+					"data-uid": "src/pages/Catalog.tsx:131:9",
 					"data-prohibitions": "[editContent]",
 					className: "space-y-3",
 					children: ORIGINS.map((orig) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Catalog.tsx:109:13",
+						"data-uid": "src/pages/Catalog.tsx:133:13",
 						"data-prohibitions": "[editContent]",
 						className: "flex items-center space-x-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkbox, {
-							"data-uid": "src/pages/Catalog.tsx:110:15",
+							"data-uid": "src/pages/Catalog.tsx:134:15",
 							"data-prohibitions": "[editContent]",
 							id: `orig-${orig}`,
 							checked: selectedOrigins.includes(orig),
 							onCheckedChange: () => toggleFilter(setSelectedOrigins, orig)
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/pages/Catalog.tsx:115:15",
+							"data-uid": "src/pages/Catalog.tsx:139:15",
 							"data-prohibitions": "[editContent]",
 							htmlFor: `orig-${orig}`,
 							className: "text-sm font-medium cursor-pointer",
@@ -31342,29 +31366,29 @@ function Catalog() {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/Catalog.tsx:123:7",
+				"data-uid": "src/pages/Catalog.tsx:147:7",
 				"data-prohibitions": "[editContent]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					"data-uid": "src/pages/Catalog.tsx:124:9",
+					"data-uid": "src/pages/Catalog.tsx:148:9",
 					"data-prohibitions": "[]",
 					className: "font-serif font-bold text-lg mb-4 flex items-center border-b pb-2",
 					children: "Ano de Emissão"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/pages/Catalog.tsx:127:9",
+					"data-uid": "src/pages/Catalog.tsx:151:9",
 					"data-prohibitions": "[editContent]",
 					className: "space-y-3",
 					children: YEARS.map((yearGroup) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Catalog.tsx:129:13",
+						"data-uid": "src/pages/Catalog.tsx:153:13",
 						"data-prohibitions": "[editContent]",
 						className: "flex items-center space-x-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Checkbox, {
-							"data-uid": "src/pages/Catalog.tsx:130:15",
+							"data-uid": "src/pages/Catalog.tsx:154:15",
 							"data-prohibitions": "[editContent]",
 							id: `year-${yearGroup}`,
 							checked: selectedYears.includes(yearGroup),
 							onCheckedChange: () => toggleFilter(setSelectedYears, yearGroup)
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/pages/Catalog.tsx:135:15",
+							"data-uid": "src/pages/Catalog.tsx:159:15",
 							"data-prohibitions": "[editContent]",
 							htmlFor: `year-${yearGroup}`,
 							className: "text-sm font-medium cursor-pointer",
@@ -31376,103 +31400,103 @@ function Catalog() {
 		]
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Catalog.tsx:146:5",
+		"data-uid": "src/pages/Catalog.tsx:170:5",
 		"data-prohibitions": "[editContent]",
 		className: "container mx-auto px-4 py-8 md:py-12",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/pages/Catalog.tsx:147:7",
+			"data-uid": "src/pages/Catalog.tsx:171:7",
 			"data-prohibitions": "[]",
 			className: "mb-8",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-				"data-uid": "src/pages/Catalog.tsx:148:9",
+				"data-uid": "src/pages/Catalog.tsx:172:9",
 				"data-prohibitions": "[]",
 				className: "text-3xl md:text-5xl font-serif font-bold mb-4",
 				children: "Catálogo Completo"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				"data-uid": "src/pages/Catalog.tsx:149:9",
+				"data-uid": "src/pages/Catalog.tsx:173:9",
 				"data-prohibitions": "[]",
 				className: "text-muted-foreground text-lg",
 				children: "Encontre peças raras para valorizar sua coleção."
 			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/pages/Catalog.tsx:154:7",
+			"data-uid": "src/pages/Catalog.tsx:178:7",
 			"data-prohibitions": "[editContent]",
 			className: "flex flex-col lg:flex-row gap-8",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("aside", {
-				"data-uid": "src/pages/Catalog.tsx:156:9",
+				"data-uid": "src/pages/Catalog.tsx:180:9",
 				"data-prohibitions": "[]",
 				className: "hidden lg:block w-64 shrink-0 pr-8 border-r border-border",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/pages/Catalog.tsx:157:11",
+					"data-uid": "src/pages/Catalog.tsx:181:11",
 					"data-prohibitions": "[]",
 					className: "sticky top-28",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FiltersContent, {
-						"data-uid": "src/pages/Catalog.tsx:158:13",
+						"data-uid": "src/pages/Catalog.tsx:182:13",
 						"data-prohibitions": "[editContent]"
 					})
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/Catalog.tsx:163:9",
+				"data-uid": "src/pages/Catalog.tsx:187:9",
 				"data-prohibitions": "[editContent]",
 				className: "flex-1",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/Catalog.tsx:165:11",
+					"data-uid": "src/pages/Catalog.tsx:189:11",
 					"data-prohibitions": "[editContent]",
 					className: "flex flex-col sm:flex-row justify-between items-center bg-card p-4 rounded-xl border border-border shadow-sm mb-6 gap-4",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Catalog.tsx:166:13",
+						"data-uid": "src/pages/Catalog.tsx:190:13",
 						"data-prohibitions": "[editContent]",
 						className: "flex items-center gap-2 w-full sm:w-auto",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Sheet, {
-							"data-uid": "src/pages/Catalog.tsx:167:15",
+							"data-uid": "src/pages/Catalog.tsx:191:15",
 							"data-prohibitions": "[]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTrigger, {
-								"data-uid": "src/pages/Catalog.tsx:168:17",
+								"data-uid": "src/pages/Catalog.tsx:192:17",
 								"data-prohibitions": "[]",
 								asChild: true,
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									"data-uid": "src/pages/Catalog.tsx:169:19",
+									"data-uid": "src/pages/Catalog.tsx:193:19",
 									"data-prohibitions": "[]",
 									variant: "outline",
 									className: "lg:hidden w-full sm:w-auto flex gap-2",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Funnel, {
-										"data-uid": "src/pages/Catalog.tsx:170:21",
+										"data-uid": "src/pages/Catalog.tsx:194:21",
 										"data-prohibitions": "[editContent]",
 										className: "w-4 h-4"
 									}), " Filtros"]
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetContent, {
-								"data-uid": "src/pages/Catalog.tsx:173:17",
+								"data-uid": "src/pages/Catalog.tsx:197:17",
 								"data-prohibitions": "[]",
 								side: "left",
 								className: "w-[300px] sm:w-[400px] overflow-y-auto",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetHeader, {
-									"data-uid": "src/pages/Catalog.tsx:174:19",
+									"data-uid": "src/pages/Catalog.tsx:198:19",
 									"data-prohibitions": "[]",
 									className: "mb-6",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetTitle, {
-										"data-uid": "src/pages/Catalog.tsx:175:21",
+										"data-uid": "src/pages/Catalog.tsx:199:21",
 										"data-prohibitions": "[]",
 										className: "font-serif text-2xl flex items-center gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, {
-											"data-uid": "src/pages/Catalog.tsx:176:23",
+											"data-uid": "src/pages/Catalog.tsx:200:23",
 											"data-prohibitions": "[editContent]",
 											className: "w-5 h-5"
 										}), " Filtros Avançados"]
 									})
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FiltersContent, {
-									"data-uid": "src/pages/Catalog.tsx:179:19",
+									"data-uid": "src/pages/Catalog.tsx:203:19",
 									"data-prohibitions": "[editContent]"
 								})]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							"data-uid": "src/pages/Catalog.tsx:182:15",
+							"data-uid": "src/pages/Catalog.tsx:206:15",
 							"data-prohibitions": "[editContent]",
 							className: "text-sm text-muted-foreground hidden sm:inline-block",
 							children: [
 								"Exibindo ",
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-									"data-uid": "src/pages/Catalog.tsx:183:26",
+									"data-uid": "src/pages/Catalog.tsx:207:26",
 									"data-prohibitions": "[editContent]",
 									className: "text-foreground",
 									children: filteredProducts.length
@@ -31482,27 +31506,27 @@ function Catalog() {
 							]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Catalog.tsx:188:13",
+						"data-uid": "src/pages/Catalog.tsx:212:13",
 						"data-prohibitions": "[editContent]",
 						className: "flex flex-wrap items-center gap-2 w-full sm:w-auto",
 						children: [searchParam && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Catalog.tsx:190:17",
+							"data-uid": "src/pages/Catalog.tsx:214:17",
 							"data-prohibitions": "[editContent]",
 							className: "flex items-center bg-muted px-3 py-1.5 rounded-full text-sm",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, {
-									"data-uid": "src/pages/Catalog.tsx:191:19",
+									"data-uid": "src/pages/Catalog.tsx:215:19",
 									"data-prohibitions": "[editContent]",
 									className: "w-3.5 h-3.5 mr-2 text-muted-foreground"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									"data-uid": "src/pages/Catalog.tsx:192:19",
+									"data-uid": "src/pages/Catalog.tsx:216:19",
 									"data-prohibitions": "[editContent]",
 									className: "max-w-[120px] truncate",
 									children: searchParam
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									"data-uid": "src/pages/Catalog.tsx:193:19",
+									"data-uid": "src/pages/Catalog.tsx:217:19",
 									"data-prohibitions": "[]",
 									onClick: () => {
 										searchParams.delete("search");
@@ -31513,49 +31537,49 @@ function Catalog() {
 								})
 							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-							"data-uid": "src/pages/Catalog.tsx:204:15",
+							"data-uid": "src/pages/Catalog.tsx:228:15",
 							"data-prohibitions": "[]",
 							value: sortOrder,
 							onValueChange: setSortOrder,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-								"data-uid": "src/pages/Catalog.tsx:205:17",
+								"data-uid": "src/pages/Catalog.tsx:229:17",
 								"data-prohibitions": "[]",
 								className: "w-full sm:w-[180px] bg-background",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-									"data-uid": "src/pages/Catalog.tsx:206:19",
+									"data-uid": "src/pages/Catalog.tsx:230:19",
 									"data-prohibitions": "[editContent]",
 									placeholder: "Ordenar"
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectContent, {
-								"data-uid": "src/pages/Catalog.tsx:208:17",
+								"data-uid": "src/pages/Catalog.tsx:232:17",
 								"data-prohibitions": "[]",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-										"data-uid": "src/pages/Catalog.tsx:209:19",
+										"data-uid": "src/pages/Catalog.tsx:233:19",
 										"data-prohibitions": "[]",
 										value: "newest",
 										children: "Mais recentes"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-										"data-uid": "src/pages/Catalog.tsx:210:19",
+										"data-uid": "src/pages/Catalog.tsx:234:19",
 										"data-prohibitions": "[]",
 										value: "price_asc",
 										children: "Menor Preço"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-										"data-uid": "src/pages/Catalog.tsx:211:19",
+										"data-uid": "src/pages/Catalog.tsx:235:19",
 										"data-prohibitions": "[]",
 										value: "price_desc",
 										children: "Maior Preço"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-										"data-uid": "src/pages/Catalog.tsx:212:19",
+										"data-uid": "src/pages/Catalog.tsx:236:19",
 										"data-prohibitions": "[]",
 										value: "year_asc",
 										children: "Ano (Antigo - Novo)"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-										"data-uid": "src/pages/Catalog.tsx:213:19",
+										"data-uid": "src/pages/Catalog.tsx:237:19",
 										"data-prohibitions": "[]",
 										value: "year_desc",
 										children: "Ano (Novo - Antigo)"
@@ -31565,50 +31589,46 @@ function Catalog() {
 						})]
 					})]
 				}), filteredProducts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/Catalog.tsx:221:13",
+					"data-uid": "src/pages/Catalog.tsx:245:13",
 					"data-prohibitions": "[]",
 					className: "text-center py-20 bg-muted/30 rounded-xl border border-dashed border-border",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							"data-uid": "src/pages/Catalog.tsx:222:15",
+							"data-uid": "src/pages/Catalog.tsx:246:15",
 							"data-prohibitions": "[]",
 							className: "text-xl font-serif font-bold text-primary mb-2",
 							children: "Nenhum item encontrado"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							"data-uid": "src/pages/Catalog.tsx:225:15",
+							"data-uid": "src/pages/Catalog.tsx:249:15",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground",
 							children: "Tente remover alguns filtros ou buscar por outras palavras."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/pages/Catalog.tsx:228:15",
+							"data-uid": "src/pages/Catalog.tsx:252:15",
 							"data-prohibitions": "[]",
 							variant: "outline",
 							onClick: () => {
-								setSelectedCats([]);
 								setSelectedOrigins([]);
 								setSelectedYears([]);
-								if (searchParam) {
-									searchParams.delete("search");
-									setSearchParams(searchParams);
-								}
+								setSearchParams(new URLSearchParams());
 							},
 							className: "mt-4",
 							children: "Limpar Filtros"
 						})
 					]
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/pages/Catalog.tsx:245:13",
+					"data-uid": "src/pages/Catalog.tsx:265:13",
 					"data-prohibitions": "[editContent]",
 					className: "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6",
 					children: filteredProducts.map((product) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/pages/Catalog.tsx:247:17",
+						"data-uid": "src/pages/Catalog.tsx:267:17",
 						"data-prohibitions": "[]",
 						className: "animate-fade-in-up",
 						style: { animationDuration: "0.4s" },
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProductCard, {
-							"data-uid": "src/pages/Catalog.tsx:252:19",
+							"data-uid": "src/pages/Catalog.tsx:272:19",
 							"data-prohibitions": "[editContent]",
 							product
 						})
@@ -33874,4 +33894,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-B0Gjgp9M.js.map
+//# sourceMappingURL=index-DV4XSSiq.js.map
