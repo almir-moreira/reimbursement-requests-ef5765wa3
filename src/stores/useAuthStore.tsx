@@ -1,22 +1,43 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
+import { Product } from '@/lib/mock-data'
 
-interface User {
+export interface OrderItem {
+  product: Product
+  quantity: number
+}
+
+export interface Address {
+  cep: string
+  street: string
+  number: string
+  complement: string
+  city: string
+  state: string
+}
+
+export interface Order {
+  id: string
+  date: string
+  status: string
+  total: number
+  items: OrderItem[]
+  shippingAddress?: Address
+}
+
+export interface User {
   name: string
   email: string
-  address?: {
-    cep: string
-    street: string
-    number: string
-    complement: string
-  }
+  address?: Address
+  orders: Order[]
 }
 
 interface AuthContextData {
   user: User | null
   isAuthenticated: boolean
-  login: (name: string, email: string) => void
+  login: (name: string, email: string, address?: Address) => void
   logout: () => void
-  updateAddress: (address: User['address']) => void
+  updateAddress: (address: Address) => void
+  addOrder: (order: Order) => void
   isAuthModalOpen: boolean
   setIsAuthModalOpen: (open: boolean) => void
 }
@@ -27,15 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
-  const login = (name: string, email: string) => {
-    setUser({ name, email })
+  const login = (name: string, email: string, address?: Address) => {
+    setUser({ name, email, address, orders: [] })
     setIsAuthModalOpen(false)
   }
 
   const logout = () => setUser(null)
 
-  const updateAddress = (address: User['address']) => {
+  const updateAddress = (address: Address) => {
     if (user) setUser({ ...user, address })
+  }
+
+  const addOrder = (order: Order) => {
+    if (user) setUser({ ...user, orders: [order, ...user.orders] })
   }
 
   return (
@@ -46,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         updateAddress,
+        addOrder,
         isAuthModalOpen,
         setIsAuthModalOpen,
       }}

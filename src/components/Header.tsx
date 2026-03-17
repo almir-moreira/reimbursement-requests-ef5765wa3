@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom'
-import { Search, ShoppingCart, User, Menu } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import useCartStore from '@/stores/useCartStore'
@@ -15,6 +16,16 @@ import {
 export function Header() {
   const { totalItems, setIsCartOpen } = useCartStore()
   const { isAuthenticated, user, setIsAuthModalOpen, logout } = useAuthStore()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
+  const navigate = useNavigate()
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(searchTerm.trim())}`)
+      setIsMobileSearchOpen(false)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-lg border-b border-border shadow-sm transition-all duration-300">
@@ -68,12 +79,20 @@ export function Header() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar itens..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearch}
               className="pl-9 bg-muted/50 border-transparent focus-visible:border-accent rounded-full h-10"
             />
           </div>
 
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Search className="w-5 h-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+          >
+            {isMobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
           </Button>
 
           {isAuthenticated ? (
@@ -94,7 +113,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={logout}
-                  className="text-destructive focus:text-destructive"
+                  className="text-destructive focus:text-destructive cursor-pointer"
                 >
                   Sair
                 </DropdownMenuItem>
@@ -119,13 +138,30 @@ export function Header() {
           >
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
-              <span className="absolute 2 top-1.5 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground ring-2 ring-background animate-fade-in-up">
+              <span className="absolute top-1.5 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground ring-2 ring-background animate-fade-in-up">
                 {totalItems}
               </span>
             )}
           </Button>
         </div>
       </div>
+
+      {/* Mobile Search Bar */}
+      {isMobileSearchOpen && (
+        <div className="absolute top-20 left-0 w-full p-4 bg-background border-b border-border md:hidden z-50 animate-in slide-in-from-top-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar moedas, cédulas, anos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearch}
+              className="pl-9 w-full bg-muted/50"
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
     </header>
   )
 }

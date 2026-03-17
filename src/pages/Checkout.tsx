@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import useCartStore from '@/stores/useCartStore'
 import useAuthStore from '@/stores/useAuthStore'
@@ -14,26 +15,31 @@ import { formatCurrency } from '@/lib/mock-data'
 export default function Checkout() {
   const navigate = useNavigate()
   const { items, totalPrice, clearCart } = useCartStore()
-  const { isAuthenticated, user, setIsAuthModalOpen, updateAddress } = useAuthStore()
+  const { isAuthenticated, user, setIsAuthModalOpen, updateAddress, addOrder } = useAuthStore()
 
   const [step, setStep] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('pix')
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Address state
   const [address, setAddress] = useState({
     cep: user?.address?.cep || '',
     street: user?.address?.street || '',
     number: user?.address?.number || '',
     complement: user?.address?.complement || '',
+    city: user?.address?.city || '',
+    state: user?.address?.state || '',
   })
 
   useEffect(() => {
-    if (items.length === 0 && step !== 4) {
-      navigate('/')
-    }
+    if (items.length === 0 && step !== 4) navigate('/')
     if (isAuthenticated && step === 1) setStep(2)
   }, [items.length, isAuthenticated, navigate, step])
+
+  useEffect(() => {
+    if (user?.address) {
+      setAddress(user.address)
+    }
+  }, [user?.address])
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,26 +51,34 @@ export default function Checkout() {
     }
   }
 
+  const frete = 25.0
+  const total = paymentMethod === 'pix' ? totalPrice * 0.95 + frete : totalPrice + frete
+
   const handleFinalize = () => {
     setIsProcessing(true)
-    // Simulate API call
     setTimeout(() => {
       setIsProcessing(false)
-      setStep(4) // Success screen
+      const orderId = `ND-${Math.floor(Math.random() * 100000)}`
+      addOrder({
+        id: orderId,
+        date: new Date().toLocaleDateString('pt-BR'),
+        status: 'Aprovado',
+        total: total,
+        items: [...items],
+        shippingAddress: address,
+      })
 
-      // Admin Notification Logic Simulation
+      setStep(4)
+
       toast({
-        title: '🛒 Novo Pedido Recebido (Admin)',
-        description: `Pedido #${Math.floor(Math.random() * 10000)} de ${user?.name}. ${items.length} itens. Valor: ${formatCurrency(totalPrice)}.`,
+        title: '📧 Admin Alert: Novo Pedido Confirmado',
+        description: `Pedido ${orderId} - Cliente: ${user?.name}. Valor Pago: ${formatCurrency(total)}. Destino: ${address.city}/${address.state}.`,
         duration: 8000,
       })
 
       clearCart()
     }, 2000)
   }
-
-  const frete = 25.0
-  const total = totalPrice + frete
 
   if (step === 4) {
     return (
@@ -80,14 +94,15 @@ export default function Checkout() {
           para envio. Um email de confirmação foi enviado.
         </p>
         <div className="bg-muted/50 p-6 rounded-xl border border-border w-full max-w-md mb-8">
-          <h3 className="font-bold mb-4">Resumo do Pedido</h3>
-          <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">Nº do Pedido:</span>{' '}
-            <span>#{(Math.random() * 100000).toFixed(0)}</span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">Status:</span>{' '}
-            <Badge className="bg-success text-white hover:bg-success">Aprovado</Badge>
+          <h3 className="font-bold mb-4 text-center">Resumo da Entrega</h3>
+          <div className="space-y-2 text-sm text-center text-muted-foreground mb-6">
+            <p>
+              {address.street}, {address.number} {address.complement && `- ${address.complement}`}
+            </p>
+            <p>
+              {address.city} - {address.state}
+            </p>
+            <p>CEP: {address.cep}</p>
           </div>
           <Separator className="my-4" />
           <div className="flex justify-between font-bold text-lg">
@@ -106,9 +121,7 @@ export default function Checkout() {
       <h1 className="text-3xl font-serif font-bold mb-8">Finalizar Compra</h1>
 
       <div className="flex flex-col lg:flex-row gap-12">
-        {/* Checkout Steps */}
         <div className="flex-1">
-          {/* Stepper Header */}
           <div className="flex items-center justify-between mb-8 relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted z-0"></div>
             <div
@@ -137,7 +150,6 @@ export default function Checkout() {
           </div>
 
           <div className="bg-card border border-border shadow-sm rounded-xl p-6 lg:p-8">
-            {/* Step 1: Auth */}
             {step === 1 && (
               <div className="text-center py-8">
                 <ShieldCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -157,21 +169,10 @@ export default function Checkout() {
               </div>
             )}
 
-            {/* Step 2: Address */}
             {step === 2 && (
               <form onSubmit={handleNextStep}>
                 <h2 className="text-2xl font-serif font-bold mb-6">Onde devemos entregar?</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="cep">CEP</Label>
-                    <Input
-                      id="cep"
-                      required
-                      value={address.cep}
-                      onChange={(e) => setAddress({ ...address, cep: e.target.value })}
-                      placeholder="00000-000"
-                    />
-                  </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="street">Endereço (Rua, Avenida)</Label>
                     <Input
@@ -198,6 +199,34 @@ export default function Checkout() {
                       onChange={(e) => setAddress({ ...address, complement: e.target.value })}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Cidade</Label>
+                    <Input
+                      id="city"
+                      required
+                      value={address.city}
+                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="state">Estado / UF</Label>
+                    <Input
+                      id="state"
+                      required
+                      value={address.state}
+                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cep">CEP</Label>
+                    <Input
+                      id="cep"
+                      required
+                      value={address.cep}
+                      onChange={(e) => setAddress({ ...address, cep: e.target.value })}
+                      placeholder="00000-000"
+                    />
+                  </div>
                 </div>
                 <Button type="submit" size="lg" className="w-full md:w-auto bg-primary">
                   Ir para Pagamento
@@ -205,7 +234,6 @@ export default function Checkout() {
               </form>
             )}
 
-            {/* Step 3: Payment */}
             {step === 3 && (
               <form onSubmit={handleNextStep}>
                 <h2 className="text-2xl font-serif font-bold mb-6">Método de Pagamento</h2>
@@ -224,7 +252,7 @@ export default function Checkout() {
                       <div>
                         <div className="font-bold text-base">PIX (Aprovação Imediata)</div>
                         <div className="text-sm text-muted-foreground font-normal">
-                          Ganhe 5% de desconto (já aplicado)
+                          Ganhe 5% de desconto (já aplicado no resumo)
                         </div>
                       </div>
                     </Label>
@@ -309,7 +337,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Order Summary Sidebar */}
         <div className="w-full lg:w-[400px]">
           <div className="bg-muted/30 border border-border rounded-xl p-6 sticky top-24">
             <h3 className="font-serif font-bold text-xl mb-4">Resumo da Compra</h3>
@@ -360,21 +387,11 @@ export default function Checkout() {
 
             <div className="flex justify-between items-center">
               <span className="font-bold text-lg">Total</span>
-              <span className="font-bold text-2xl text-primary">
-                {formatCurrency(paymentMethod === 'pix' ? total - totalPrice * 0.05 : total)}
-              </span>
+              <span className="font-bold text-2xl text-primary">{formatCurrency(total)}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
-
-function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${className}`}>
-      {children}
-    </span>
   )
 }

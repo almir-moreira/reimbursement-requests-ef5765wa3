@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Package, User, MapPin, LogOut } from 'lucide-react'
+import { Package, User, MapPin, LogOut, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import useAuthStore from '@/stores/useAuthStore'
-import { formatCurrency, mockProducts } from '@/lib/mock-data'
+import { formatCurrency } from '@/lib/mock-data'
 
 export default function Dashboard() {
   const { user, isAuthenticated, logout } = useAuthStore()
@@ -20,23 +20,7 @@ export default function Dashboard() {
 
   if (!user) return null
 
-  // Mock past orders
-  const mockOrders = [
-    {
-      id: 'ND-8472',
-      date: '15/10/2023',
-      status: 'Entregue',
-      total: 350.0,
-      items: [mockProducts[3]], // Florim
-    },
-    {
-      id: 'ND-9921',
-      date: '02/11/2023',
-      status: 'Em Trânsito',
-      total: 45.0,
-      items: [mockProducts[0]], // 100 Cruzeiros
-    },
-  ]
+  const orders = user.orders || []
 
   const handleLogout = () => {
     logout()
@@ -81,7 +65,7 @@ export default function Dashboard() {
         <TabsContent value="pedidos" className="space-y-6">
           <h2 className="text-xl font-serif font-bold mb-4">Histórico de Compras</h2>
 
-          {mockOrders.length === 0 ? (
+          {orders.length === 0 ? (
             <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-border">
               <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-medium text-foreground mb-2">Nenhum pedido encontrado</h3>
@@ -92,7 +76,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {mockOrders.map((order) => (
+              {orders.map((order) => (
                 <Card key={order.id} className="overflow-hidden">
                   <div className="bg-muted/50 px-6 py-4 border-b border-border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
@@ -102,7 +86,7 @@ export default function Dashboard() {
                       <span className="font-medium">{order.date}</span>
                     </div>
                     <div>
-                      <span className="text-sm text-muted-foreground block">Total</span>
+                      <span className="text-sm text-muted-foreground block">Total Pago</span>
                       <span className="font-bold text-primary">{formatCurrency(order.total)}</span>
                     </div>
                     <div className="sm:text-right">
@@ -132,21 +116,21 @@ export default function Dashboard() {
                         <div key={i} className="py-4 flex gap-4 first:pt-0 last:pb-0">
                           <div className="w-20 h-20 rounded border bg-card shrink-0">
                             <img
-                              src={item.images[0]}
+                              src={item.product.images[0]}
                               alt=""
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-bold text-sm lg:text-base">{item.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Ref: {item.catalogNumber}
+                            <h4 className="font-bold text-sm lg:text-base">{item.product.name}</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Ref: {item.product.catalogNumber} &bull; Qtd: {item.quantity}
                             </p>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="mt-2 h-8 text-xs"
-                              onClick={() => navigate(`/produto/${item.id}`)}
+                              className="mt-3 h-8 text-xs"
+                              onClick={() => navigate(`/produto/${item.product.id}`)}
                             >
                               Comprar Novamente
                             </Button>
@@ -154,6 +138,23 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
+
+                    {order.shippingAddress && (
+                      <div className="mt-6 pt-4 border-t border-border flex items-start gap-3 text-sm">
+                        <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-semibold block mb-1">Destino de Entrega:</span>
+                          <span className="text-muted-foreground">
+                            {order.shippingAddress.street}, {order.shippingAddress.number}{' '}
+                            {order.shippingAddress.complement &&
+                              `- ${order.shippingAddress.complement}`}
+                            <br />
+                            {order.shippingAddress.city} - {order.shippingAddress.state} (CEP:{' '}
+                            {order.shippingAddress.cep})
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -188,7 +189,7 @@ export default function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="font-serif flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary" /> Endereço de Entrega
+                  <MapPin className="w-5 h-5 text-primary" /> Endereço de Entrega Padrão
                 </CardTitle>
                 <CardDescription>Onde suas coleções serão entregues.</CardDescription>
               </CardHeader>
@@ -201,6 +202,9 @@ export default function Dashboard() {
                     {user.address.complement && (
                       <p className="text-sm text-muted-foreground">{user.address.complement}</p>
                     )}
+                    <p className="text-sm text-muted-foreground">
+                      {user.address.city} - {user.address.state}
+                    </p>
                     <p className="text-sm text-muted-foreground">CEP: {user.address.cep}</p>
                   </div>
                 ) : (

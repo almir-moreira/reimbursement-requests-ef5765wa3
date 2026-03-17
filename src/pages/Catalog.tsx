@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Filter, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { Filter, SlidersHorizontal, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -17,14 +17,17 @@ import { mockProducts, ItemCategory } from '@/lib/mock-data'
 
 const CATEGORIES: ItemCategory[] = ['Cédulas', 'Moedas', 'Medalhas', 'Coleções']
 const ORIGINS = ['Brasil', 'Estados Unidos', 'Europa', 'Ásia']
-const MATERIALS = ['Papel', 'Prata', 'Ouro', 'Níquel', 'Bronze']
+const YEARS = ['Anterior a 1900', '1900 - 1950', '1951 - 2000', 'Pós 2000']
+const MATERIALS = ['Papel', 'Prata', 'Ouro', 'Níquel', 'Cobre', 'Polímero']
 
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const searchParam = searchParams.get('search') || ''
 
   // States for filters
   const [selectedCats, setSelectedCats] = useState<string[]>(searchParams.getAll('cat'))
   const [selectedOrigins, setSelectedOrigins] = useState<string[]>([])
+  const [selectedYears, setSelectedYears] = useState<string[]>([])
   const [sortOrder, setSortOrder] = useState('newest')
 
   const toggleFilter = (setFn: React.Dispatch<React.SetStateAction<string[]>>, val: string) => {
@@ -33,9 +36,32 @@ export default function Catalog() {
 
   const filteredProducts = useMemo(() => {
     let result = [...mockProducts]
+
+    if (searchParam) {
+      const q = searchParam.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.year.toString().includes(q) ||
+          p.origin.toLowerCase().includes(q),
+      )
+    }
+
     if (selectedCats.length > 0) result = result.filter((p) => selectedCats.includes(p.category))
     if (selectedOrigins.length > 0)
       result = result.filter((p) => selectedOrigins.includes(p.origin))
+    if (selectedYears.length > 0) {
+      result = result.filter((p) => {
+        return selectedYears.some((y) => {
+          if (y === 'Anterior a 1900') return p.year < 1900
+          if (y === '1900 - 1950') return p.year >= 1900 && p.year <= 1950
+          if (y === '1951 - 2000') return p.year >= 1951 && p.year <= 2000
+          if (y === 'Pós 2000') return p.year > 2000
+          return false
+        })
+      })
+    }
 
     switch (sortOrder) {
       case 'price_asc':
@@ -50,10 +76,9 @@ export default function Catalog() {
       case 'year_desc':
         result.sort((a, b) => b.year - a.year)
         break
-      // newest is default, mock data order
     }
     return result
-  }, [selectedCats, selectedOrigins, sortOrder])
+  }, [searchParam, selectedCats, selectedOrigins, selectedYears, sortOrder])
 
   const FiltersContent = () => (
     <div className="space-y-8">
@@ -69,10 +94,7 @@ export default function Catalog() {
                 checked={selectedCats.includes(cat)}
                 onCheckedChange={() => toggleFilter(setSelectedCats, cat)}
               />
-              <Label
-                htmlFor={`cat-${cat}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
+              <Label htmlFor={`cat-${cat}`} className="text-sm font-medium cursor-pointer">
                 {cat}
               </Label>
             </div>
@@ -81,9 +103,7 @@ export default function Catalog() {
       </div>
 
       <div>
-        <h3 className="font-serif font-bold text-lg mb-4 flex items-center border-b pb-2">
-          Origem
-        </h3>
+        <h3 className="font-serif font-bold text-lg mb-4 flex items-center border-b pb-2">País</h3>
         <div className="space-y-3">
           {ORIGINS.map((orig) => (
             <div key={orig} className="flex items-center space-x-2">
@@ -92,10 +112,7 @@ export default function Catalog() {
                 checked={selectedOrigins.includes(orig)}
                 onCheckedChange={() => toggleFilter(setSelectedOrigins, orig)}
               />
-              <Label
-                htmlFor={`orig-${orig}`}
-                className="text-sm font-medium leading-none cursor-pointer"
-              >
+              <Label htmlFor={`orig-${orig}`} className="text-sm font-medium cursor-pointer">
                 {orig}
               </Label>
             </div>
@@ -105,14 +122,18 @@ export default function Catalog() {
 
       <div>
         <h3 className="font-serif font-bold text-lg mb-4 flex items-center border-b pb-2">
-          Material
+          Ano de Emissão
         </h3>
         <div className="space-y-3">
-          {MATERIALS.map((mat) => (
-            <div key={mat} className="flex items-center space-x-2">
-              <Checkbox id={`mat-${mat}`} />
-              <Label htmlFor={`mat-${mat}`} className="text-sm font-medium cursor-pointer">
-                {mat}
+          {YEARS.map((yearGroup) => (
+            <div key={yearGroup} className="flex items-center space-x-2">
+              <Checkbox
+                id={`year-${yearGroup}`}
+                checked={selectedYears.includes(yearGroup)}
+                onCheckedChange={() => toggleFilter(setSelectedYears, yearGroup)}
+              />
+              <Label htmlFor={`year-${yearGroup}`} className="text-sm font-medium cursor-pointer">
+                {yearGroup}
               </Label>
             </div>
           ))}
@@ -123,7 +144,6 @@ export default function Catalog() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      {/* Header Area */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4">Catálogo Completo</h1>
         <p className="text-muted-foreground text-lg">
@@ -150,7 +170,7 @@ export default function Catalog() {
                     <Filter className="w-4 h-4" /> Filtros
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
                   <SheetHeader className="mb-6">
                     <SheetTitle className="font-serif text-2xl flex items-center gap-2">
                       <SlidersHorizontal className="w-5 h-5" /> Filtros Avançados
@@ -165,11 +185,25 @@ export default function Catalog() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-sm font-medium whitespace-nowrap">Ordenar por:</span>
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              {searchParam && (
+                <div className="flex items-center bg-muted px-3 py-1.5 rounded-full text-sm">
+                  <Search className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
+                  <span className="max-w-[120px] truncate">{searchParam}</span>
+                  <button
+                    onClick={() => {
+                      searchParams.delete('search')
+                      setSearchParams(searchParams)
+                    }}
+                    className="ml-2 text-muted-foreground hover:text-foreground"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <Select value={sortOrder} onValueChange={setSortOrder}>
                 <SelectTrigger className="w-full sm:w-[180px] bg-background">
-                  <SelectValue placeholder="Selecione..." />
+                  <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais recentes</SelectItem>
@@ -189,13 +223,18 @@ export default function Catalog() {
                 Nenhum item encontrado
               </h3>
               <p className="text-muted-foreground">
-                Tente remover alguns filtros para ver mais resultados.
+                Tente remover alguns filtros ou buscar por outras palavras.
               </p>
               <Button
                 variant="outline"
                 onClick={() => {
                   setSelectedCats([])
                   setSelectedOrigins([])
+                  setSelectedYears([])
+                  if (searchParam) {
+                    searchParams.delete('search')
+                    setSearchParams(searchParams)
+                  }
                 }}
                 className="mt-4"
               >

@@ -133,6 +133,39 @@ export const mockProducts: Product[] = [
     stock: 20,
     isNew: true,
   },
+  {
+    id: 'p7',
+    name: 'Moeda 400 Réis 1823 - Império do Brasil - Cobre',
+    shortName: '400 Réis 1823',
+    price: 150.0,
+    category: 'Moedas',
+    origin: 'Brasil',
+    year: 1823,
+    material: 'Cobre',
+    condition: 'VF',
+    catalogNumber: 'KM 362',
+    description:
+      'Moeda do Primeiro Reinado (D. Pedro I). Peça robusta de cobre. Muito procurada por colecionadores do período imperial.',
+    images: ['https://img.usecurling.com/p/800/600?q=antique%20copper%20coin&color=orange'],
+    stock: 3,
+  },
+  {
+    id: 'p8',
+    name: 'Cédula 5 Libras - Bank of England - Polímero',
+    shortName: '5 Libras UK',
+    price: 85.0,
+    category: 'Cédulas',
+    origin: 'Europa',
+    year: 2016,
+    material: 'Polímero',
+    condition: 'UNC',
+    catalogNumber: 'Pick 394',
+    description:
+      'Primeira cédula de polímero do Banco da Inglaterra. Traz o retrato de Sir Winston Churchill. Flor de estampa.',
+    images: ['https://img.usecurling.com/p/800/600?q=pound%20banknote&color=blue'],
+    stock: 10,
+    isNew: true,
+  },
 ]
 
 export const formatCurrency = (value: number) => {
