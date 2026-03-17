@@ -6,9 +6,8 @@
 
 @layer base {
   :root {
-    /* Numismatica Digital Theme */
-    --background: 210 40% 98%; /* Light Gray F1F5F9 */
-    --foreground: 222 47% 11%; /* Deep Navy 0F172A */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -16,33 +15,33 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 222 47% 11%; /* Deep Navy */
+    --primary: 222 47% 11%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 214 32% 91%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 214 32% 91%;
+    --muted: 214 32% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 48 84% 38%; /* Antique Gold #B59410 */
-    --accent-foreground: 0 0% 100%;
+    --accent: 214 32% 91%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 160 84% 39%; /* Emerald */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 48 84% 38%; /* Focus ring is Gold */
+    --ring: 222 47% 11%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222 47% 11%; /* Deep Navy Background */
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
     --card: 215 28% 17%;
@@ -51,7 +50,7 @@
     --popover: 215 28% 17%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 48 84% 38%; /* Gold primary in dark mode */
+    --primary: 210 40% 98%;
     --primary-foreground: 222 47% 11%;
 
     --secondary: 215 28% 17%;
@@ -60,15 +59,15 @@
     --muted: 215 28% 17%;
     --muted-foreground: 214 32% 91%;
 
-    --accent: 48 84% 38%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 215 28% 17%;
     --input: 215 28% 17%;
-    --ring: 48 84% 38%;
+    --ring: 210 40% 98%;
   }
 
   section[aria-label='Notifications alt+T'] {
@@ -84,20 +83,12 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-serif tracking-tight text-primary;
-  }
 }
 
 @layer utilities {
   @keyframes fade-in-up {
     from {
-      transform: translateY(20px);
+      transform: translateY(10px);
       opacity: 0;
     }
     to {
@@ -107,6 +98,6 @@
   }
 
   .animate-fade-in-up {
-    animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }

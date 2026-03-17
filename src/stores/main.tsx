@@ -1,14 +1,14 @@
 import React, { ReactNode } from 'react'
-import { CartProvider } from './useCartStore'
 import { AuthProvider } from './useAuthStore'
-import { AdminProvider } from './useAdminStore'
+import { MasterDataProvider } from './useMasterDataStore'
+import { ReimbursementProvider } from './useReimbursementStore'
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <CartProvider>
-        <AdminProvider>{children}</AdminProvider>
-      </CartProvider>
+      <MasterDataProvider>
+        <ReimbursementProvider>{children}</ReimbursementProvider>
+      </MasterDataProvider>
     </AuthProvider>
   )
 }

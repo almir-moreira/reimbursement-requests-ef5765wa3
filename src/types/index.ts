@@ -1,0 +1,63 @@
+export type Role = 'requester' | 'qc' | 'co' | 'finance' | 'admin'
+export type RequestStatus = 'Pending' | 'Checked' | 'Approved' | 'Paid' | 'Rejected'
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: Role
+  address?: string
+  city?: string
+  state?: string
+  country?: string
+  zipCode?: string
+  phone?: string
+  organization?: string
+  bankHolder?: string
+  bankName?: string
+  bankAccount?: string
+  iban?: string
+  bic?: string
+  swift?: string
+  bankCode?: string
+  bankCountry?: string
+  additionalBankInfo?: string
+}
+
+export interface Expense {
+  id: string
+  description: string
+  amount: number
+  currency: string
+  account?: string
+  workorder?: string
+  exchangeRate?: number
+  amountEuros?: number
+}
+
+export interface Attachment {
+  id: string
+  description: string
+  fileName: string
+}
+
+export interface HistoryLog {
+  id: string
+  date: string
+  action: string
+  userId: string
+  comments?: string
+}
+
+export interface ReimbursementRequest {
+  id: string
+  status: RequestStatus
+  eventId: string
+  requesterId: string
+  requesterDetails: Partial<User>
+  expenses: Expense[]
+  signature: string
+  date: string
+  attachments: Attachment[]
+  history: HistoryLog[]
+}

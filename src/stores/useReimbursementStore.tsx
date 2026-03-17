@@ -1,0 +1,34 @@
+import { createContext, useContext, useState, ReactNode } from 'react'
+import { ReimbursementRequest } from '@/types'
+
+interface ReimbursementContextData {
+  requests: ReimbursementRequest[]
+  addRequest: (req: ReimbursementRequest) => void
+  updateRequest: (id: string, req: Partial<ReimbursementRequest>) => void
+}
+
+const ReimbursementContext = createContext<ReimbursementContextData | undefined>(undefined)
+
+export function ReimbursementProvider({ children }: { children: ReactNode }) {
+  const [requests, setRequests] = useState<ReimbursementRequest[]>([])
+
+  const addRequest = (req: ReimbursementRequest) => {
+    setRequests((prev) => [req, ...prev])
+  }
+
+  const updateRequest = (id: string, req: Partial<ReimbursementRequest>) => {
+    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, ...req } : r)))
+  }
+
+  return (
+    <ReimbursementContext.Provider value={{ requests, addRequest, updateRequest }}>
+      {children}
+    </ReimbursementContext.Provider>
+  )
+}
+
+export default function useReimbursementStore() {
+  const context = useContext(ReimbursementContext)
+  if (!context) throw new Error('useReimbursementStore must be used within ReimbursementProvider')
+  return context
+}
