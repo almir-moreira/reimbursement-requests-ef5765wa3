@@ -18138,7 +18138,7 @@ function handleAndDispatchCustomEvent$1(name, handler, detail, { discrete }) {
 	if (discrete) dispatchDiscreteCustomEvent(target, event);
 	else target.dispatchEvent(event);
 }
-var Root$6 = DismissableLayer;
+var Root$7 = DismissableLayer;
 var Branch = DismissableLayerBranch;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-use-layout-effect@1.1.1_@types+react@19.2.14_react@19.2.4/node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs
@@ -18159,7 +18159,7 @@ var Portal$2 = import_react.forwardRef((props, forwardedRef) => {
 Portal$2.displayName = PORTAL_NAME$3;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-presence@1.1.5_@types+react-dom@19.2.3_@types+react@19.2.14__@types+rea_c01c26c80b5ab5e3ecefbda6eca51ad1/node_modules/@radix-ui/react-presence/dist/index.mjs
-function useStateMachine(initialState, machine) {
+function useStateMachine$1(initialState, machine) {
 	return import_react.useReducer((state, event) => {
 		return machine[state][event] ?? state;
 	}, initialState);
@@ -18177,7 +18177,7 @@ function usePresence(present) {
 	const stylesRef = import_react.useRef(null);
 	const prevPresentRef = import_react.useRef(present);
 	const prevAnimationNameRef = import_react.useRef("none");
-	const [state, send] = useStateMachine(present ? "mounted" : "unmounted", {
+	const [state, send] = useStateMachine$1(present ? "mounted" : "unmounted", {
 		mounted: {
 			UNMOUNT: "unmounted",
 			ANIMATION_OUT: "unmountSuspended"
@@ -18338,7 +18338,7 @@ var VisuallyHidden = import_react.forwardRef((props, forwardedRef) => {
 	});
 });
 VisuallyHidden.displayName = NAME$3;
-var Root$5 = VisuallyHidden;
+var Root$6 = VisuallyHidden;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-toast@1.2.15_@types+react-dom@19.2.3_@types+react@19.2.14__@types+react_4581e89c6ba13e4159ce65546c8b2a16/node_modules/@radix-ui/react-toast/dist/index.mjs
 var PROVIDER_NAME$1 = "ToastProvider";
@@ -18372,13 +18372,13 @@ var ToastProvider$1 = (props) => {
 	});
 };
 ToastProvider$1.displayName = PROVIDER_NAME$1;
-var VIEWPORT_NAME$1 = "ToastViewport";
+var VIEWPORT_NAME$2 = "ToastViewport";
 var VIEWPORT_DEFAULT_HOTKEY = ["F8"];
 var VIEWPORT_PAUSE = "toast.viewportPause";
 var VIEWPORT_RESUME = "toast.viewportResume";
 var ToastViewport$1 = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeToast, hotkey = VIEWPORT_DEFAULT_HOTKEY, label = "Notifications ({hotkey})", ...viewportProps } = props;
-	const context = useToastProviderContext(VIEWPORT_NAME$1, __scopeToast);
+	const context = useToastProviderContext(VIEWPORT_NAME$2, __scopeToast);
 	const getItems = useCollection$2(__scopeToast);
 	const wrapperRef = import_react.useRef(null);
 	const headFocusProxyRef = import_react.useRef(null);
@@ -18494,7 +18494,7 @@ var ToastViewport$1 = import_react.forwardRef((props, forwardedRef) => {
 		]
 	});
 });
-ToastViewport$1.displayName = VIEWPORT_NAME$1;
+ToastViewport$1.displayName = VIEWPORT_NAME$2;
 var FOCUS_PROXY_NAME = "ToastFocusProxy";
 var FocusProxy = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeToast, onFocusFromOutsideViewport, ...proxyProps } = props;
@@ -18638,7 +18638,7 @@ var ToastImpl = import_react.forwardRef((props, forwardedRef) => {
 		onClose: handleClose,
 		children: import_react_dom.createPortal(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Collection$2.ItemSlot, {
 			scope: __scopeToast,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$6, {
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$7, {
 				asChild: true,
 				onEscapeKeyDown: composeEventHandlers(onEscapeKeyDown, () => {
 					if (!context.isFocusedToastEscapeKeyDownRef.current) handleClose();
@@ -18867,7 +18867,7 @@ function focusFirst$2(candidates) {
 	});
 }
 var Provider$1 = ToastProvider$1;
-var Viewport$1 = ToastViewport$1;
+var Viewport$2 = ToastViewport$1;
 var Root2$3 = Toast$1;
 var Title$1 = ToastTitle$1;
 var Description$1 = ToastDescription$1;
@@ -19076,6 +19076,22 @@ var CircleCheckBig = createLucideIcon("circle-check-big", [["path", {
 	d: "m9 11 3 3L22 4",
 	key: "1pflzl"
 }]]);
+var CircleX = createLucideIcon("circle-x", [
+	["circle", {
+		cx: "12",
+		cy: "12",
+		r: "10",
+		key: "1mglay"
+	}],
+	["path", {
+		d: "m15 9-6 6",
+		key: "1uzhvr"
+	}],
+	["path", {
+		d: "m9 9 6 6",
+		key: "z0biqf"
+	}]
+]);
 var Clock = createLucideIcon("clock", [["circle", {
 	cx: "12",
 	cy: "12",
@@ -20730,14 +20746,14 @@ function cn(...inputs) {
 //#endregion
 //#region src/components/ui/toast.tsx
 var ToastProvider = Provider$1;
-var ToastViewport = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Viewport$1, {
+var ToastViewport = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Viewport$2, {
 	"data-uid": "src/components/ui/toast.tsx:15:3",
 	"data-prohibitions": "[editContent]",
 	ref,
 	className: cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className),
 	...props
 }));
-ToastViewport.displayName = Viewport$1.displayName;
+ToastViewport.displayName = Viewport$2.displayName;
 var toastVariants = cva("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full", {
 	variants: { variant: {
 		default: "border bg-background text-foreground",
@@ -22513,7 +22529,7 @@ var Arrow$1 = import_react.forwardRef((props, forwardedRef) => {
 	});
 });
 Arrow$1.displayName = NAME$2;
-var Root$4 = Arrow$1;
+var Root$5 = Arrow$1;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-use-size@1.1.1_@types+react@19.2.14_react@19.2.4/node_modules/@radix-ui/react-use-size/dist/index.mjs
 function useSize(element) {
@@ -22734,7 +22750,7 @@ var PopperArrow = import_react.forwardRef(function PopperArrow2(props, forwarded
 			}[contentContext.placedSide],
 			visibility: contentContext.shouldHideArrow ? "hidden" : void 0
 		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$4, {
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$5, {
 			...arrowProps,
 			ref: forwardedRef,
 			style: {
@@ -23118,7 +23134,7 @@ var TooltipContentImpl = import_react.forwardRef((props, forwardedRef) => {
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Slottable, { children }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VisuallyHiddenContentContextProvider, {
 				scope: __scopeTooltip,
 				isInside: true,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$5, {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$6, {
 					id: context.contentId,
 					role: "tooltip",
 					children: ariaLabel || children
@@ -23291,8 +23307,18 @@ TooltipContent.displayName = Content2$1.displayName;
 //#region src/stores/useAuthStore.tsx
 var AuthContext = (0, import_react.createContext)(void 0);
 function AuthProvider({ children }) {
-	const [user, setUser] = (0, import_react.useState)(null);
+	const [user, setUser] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("auth_user_v2");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return null;
+	});
 	const [lang, setLang] = (0, import_react.useState)("en");
+	(0, import_react.useEffect)(() => {
+		if (user) localStorage.setItem("auth_user_v2", JSON.stringify(user));
+		else localStorage.removeItem("auth_user_v2");
+	}, [user]);
 	const login = (email, role) => {
 		setUser({
 			id: `usr-${Date.now()}`,
@@ -23324,7 +23350,7 @@ function AuthProvider({ children }) {
 		});
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AuthContext.Provider, {
-		"data-uid": "src/stores/useAuthStore.tsx:50:5",
+		"data-uid": "src/stores/useAuthStore.tsx:65:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			user,
@@ -23363,7 +23389,12 @@ var translations = {
 		bankInfo: "Bank Information",
 		expenseDetails: "Expense Details",
 		attachments: "Attachments",
-		printPdf: "Print PDF"
+		printPdf: "Print PDF",
+		Pending: "Pending",
+		Checked: "Checked",
+		Approved: "Approved",
+		Paid: "Paid",
+		Rejected: "Rejected"
 	},
 	ar: {
 		dashboard: "لوحة القيادة",
@@ -23383,7 +23414,12 @@ var translations = {
 		bankInfo: "المعلومات المصرفية",
 		expenseDetails: "تفاصيل النفقات",
 		attachments: "المرفقات",
-		printPdf: "طباعة PDF"
+		printPdf: "طباعة PDF",
+		Pending: "قيد الانتظار",
+		Checked: "تم الفحص",
+		Approved: "موافق عليه",
+		Paid: "مدفوع",
+		Rejected: "مرفوض"
 	}
 };
 function useTranslation() {
@@ -23616,10 +23652,10 @@ Separator$2.displayName = NAME$1;
 function isValidOrientation(orientation) {
 	return ORIENTATIONS.includes(orientation);
 }
-var Root$3 = Separator$2;
+var Root$4 = Separator$2;
 //#endregion
 //#region src/components/ui/separator.tsx
-var Separator$1 = import_react.forwardRef(({ className, orientation = "horizontal", decorative = true, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$3, {
+var Separator$1 = import_react.forwardRef(({ className, orientation = "horizontal", decorative = true, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$4, {
 	"data-uid": "src/components/ui/separator.tsx:11:3",
 	"data-prohibitions": "[editContent]",
 	ref,
@@ -23628,7 +23664,7 @@ var Separator$1 = import_react.forwardRef(({ className, orientation = "horizonta
 	className: cn("shrink-0 bg-border", orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className),
 	...props
 }));
-Separator$1.displayName = Root$3.displayName;
+Separator$1.displayName = Root$4.displayName;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-focus-scope@1.1.7_@types+react-dom@19.2.3_@types+react@19.2.14__@types+_f62f3af4ca2ba305a7aecf04c8534604/node_modules/@radix-ui/react-focus-scope/dist/index.mjs
 var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
@@ -24932,7 +24968,7 @@ var DescriptionWarning = ({ contentRef, descriptionId }) => {
 	]);
 	return null;
 };
-var Root$2 = Dialog;
+var Root$3 = Dialog;
 var Portal$1 = DialogPortal;
 var Overlay = DialogOverlay;
 var Content$1 = DialogContent;
@@ -24941,7 +24977,7 @@ var Description = DialogDescription;
 var Close = DialogClose;
 //#endregion
 //#region src/components/ui/sheet.tsx
-var Sheet = Root$2;
+var Sheet = Root$3;
 var SheetPortal = Portal$1;
 var SheetOverlay = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Overlay, {
 	"data-uid": "src/components/ui/sheet.tsx:21:3",
@@ -25655,18 +25691,18 @@ var Label$2 = import_react.forwardRef((props, forwardedRef) => {
 	});
 });
 Label$2.displayName = NAME;
-var Root$1 = Label$2;
+var Root$2 = Label$2;
 //#endregion
 //#region src/components/ui/label.tsx
 var labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
-var Label$1 = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$1, {
+var Label$1 = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$2, {
 	"data-uid": "src/components/ui/label.tsx:16:3",
 	"data-prohibitions": "[editContent]",
 	ref,
 	className: cn(labelVariants(), className),
 	...props
 }));
-Label$1.displayName = Root$1.displayName;
+Label$1.displayName = Root$2.displayName;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+number@1.1.1/node_modules/@radix-ui/number/dist/index.mjs
 function clamp(value, [min, max]) {
@@ -26252,11 +26288,11 @@ var SelectPopperPosition = import_react.forwardRef((props, forwardedRef) => {
 });
 SelectPopperPosition.displayName = POPPER_POSITION_NAME;
 var [SelectViewportProvider, useSelectViewportContext] = createSelectContext(CONTENT_NAME$1, {});
-var VIEWPORT_NAME = "SelectViewport";
+var VIEWPORT_NAME$1 = "SelectViewport";
 var SelectViewport = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeSelect, nonce, ...viewportProps } = props;
-	const contentContext = useSelectContentContext(VIEWPORT_NAME, __scopeSelect);
-	const viewportContext = useSelectViewportContext(VIEWPORT_NAME, __scopeSelect);
+	const contentContext = useSelectContentContext(VIEWPORT_NAME$1, __scopeSelect);
+	const viewportContext = useSelectViewportContext(VIEWPORT_NAME$1, __scopeSelect);
 	const composedRefs = useComposedRefs(forwardedRef, contentContext.onViewportChange);
 	const prevScrollTopRef = import_react.useRef(0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", {
@@ -26302,7 +26338,7 @@ var SelectViewport = import_react.forwardRef((props, forwardedRef) => {
 		})
 	})] });
 });
-SelectViewport.displayName = VIEWPORT_NAME;
+SelectViewport.displayName = VIEWPORT_NAME$1;
 var GROUP_NAME$1 = "SelectGroup";
 var [SelectGroupContextProvider, useSelectGroupContext] = createSelectContext(GROUP_NAME$1);
 var SelectGroup$1 = import_react.forwardRef((props, forwardedRef) => {
@@ -26637,7 +26673,7 @@ var Value = SelectValue$1;
 var Icon = SelectIcon;
 var Portal = SelectPortal;
 var Content2 = SelectContent$1;
-var Viewport = SelectViewport;
+var Viewport$1 = SelectViewport;
 var Label = SelectLabel$1;
 var Item$1 = SelectItem$1;
 var ItemText = SelectItemText;
@@ -26708,7 +26744,7 @@ var SelectContent = import_react.forwardRef(({ className, children, position = "
 				"data-uid": "src/components/ui/select.tsx:78:7",
 				"data-prohibitions": "[editContent]"
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Viewport, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Viewport$1, {
 				"data-uid": "src/components/ui/select.tsx:79:7",
 				"data-prohibitions": "[editContent]",
 				className: cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"),
@@ -26952,7 +26988,16 @@ function Login() {
 //#region src/stores/useReimbursementStore.tsx
 var ReimbursementContext = (0, import_react.createContext)(void 0);
 function ReimbursementProvider({ children }) {
-	const [requests, setRequests] = (0, import_react.useState)([]);
+	const [requests, setRequests] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("reimbursement_requests_v2");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return [];
+	});
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("reimbursement_requests_v2", JSON.stringify(requests));
+	}, [requests]);
 	const addRequest = (req) => {
 		setRequests((prev) => [req, ...prev]);
 	};
@@ -26963,7 +27008,7 @@ function ReimbursementProvider({ children }) {
 		} : r));
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReimbursementContext.Provider, {
-		"data-uid": "src/stores/useReimbursementStore.tsx:24:5",
+		"data-uid": "src/stores/useReimbursementStore.tsx:34:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			requests,
@@ -26989,6 +27034,7 @@ function Dashboard() {
 	const pending = userRequests.filter((r) => r.status === "Pending").length;
 	const approved = userRequests.filter((r) => r.status === "Approved" || r.status === "Checked").length;
 	const paid = userRequests.filter((r) => r.status === "Paid").length;
+	const rejected = userRequests.filter((r) => r.status === "Rejected").length;
 	const stats = [
 		{
 			title: "Total Requests",
@@ -27013,49 +27059,55 @@ function Dashboard() {
 			value: paid,
 			icon: DollarSign,
 			color: "text-success"
+		},
+		{
+			title: "Rejected",
+			value: rejected,
+			icon: CircleX,
+			color: "text-destructive"
 		}
 	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Dashboard.tsx:30:5",
+		"data-uid": "src/pages/Dashboard.tsx:32:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-			"data-uid": "src/pages/Dashboard.tsx:31:7",
+			"data-uid": "src/pages/Dashboard.tsx:33:7",
 			"data-prohibitions": "[editContent]",
 			className: "text-3xl font-serif font-bold text-primary",
 			children: t("dashboard")
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			"data-uid": "src/pages/Dashboard.tsx:33:7",
+			"data-uid": "src/pages/Dashboard.tsx:35:7",
 			"data-prohibitions": "[editContent]",
-			className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8",
+			className: "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8",
 			children: stats.map((stat, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-				"data-uid": "src/pages/Dashboard.tsx:35:11",
+				"data-uid": "src/pages/Dashboard.tsx:37:11",
 				"data-prohibitions": "[editContent]",
 				className: "border-border shadow-sm hover:shadow-md transition-shadow",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-					"data-uid": "src/pages/Dashboard.tsx:36:13",
+					"data-uid": "src/pages/Dashboard.tsx:38:13",
 					"data-prohibitions": "[editContent]",
 					className: "flex flex-row items-center justify-between pb-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-						"data-uid": "src/pages/Dashboard.tsx:37:15",
+						"data-uid": "src/pages/Dashboard.tsx:39:15",
 						"data-prohibitions": "[editContent]",
 						className: "text-sm font-medium text-muted-foreground",
 						children: stat.title
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/pages/Dashboard.tsx:40:15",
+						"data-uid": "src/pages/Dashboard.tsx:42:15",
 						"data-prohibitions": "[editContent]",
 						className: `p-2 rounded-full bg-muted ${stat.color} bg-opacity-20`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(stat.icon, {
-							"data-uid": "src/pages/Dashboard.tsx:41:17",
+							"data-uid": "src/pages/Dashboard.tsx:43:17",
 							"data-prohibitions": "[editContent]",
 							className: `w-5 h-5 ${stat.color}`
 						})
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-					"data-uid": "src/pages/Dashboard.tsx:44:13",
+					"data-uid": "src/pages/Dashboard.tsx:46:13",
 					"data-prohibitions": "[editContent]",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/pages/Dashboard.tsx:45:15",
+						"data-uid": "src/pages/Dashboard.tsx:47:15",
 						"data-prohibitions": "[editContent]",
 						className: "text-4xl font-bold text-primary",
 						children: stat.value
@@ -27693,11 +27745,11 @@ function RequestsList() {
 									variant: "outline",
 									className: `
                     ${req.status === "Paid" ? "bg-success/10 text-success border-success/20" : ""}
-                    ${req.status === "Rejected" ? "bg-destructive/10 text-destructive border-destructive/20" : ""}
+                    ${req.status === "Rejected" ? "bg-destructive/10 text-destructive border-destructive/20 font-bold" : ""}
                     ${req.status === "Pending" ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : ""}
                     ${req.status === "Approved" || req.status === "Checked" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" : ""}
                   `,
-									children: req.status
+									children: t(req.status) || req.status
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
@@ -27742,52 +27794,109 @@ function RequestsList() {
 }
 //#endregion
 //#region src/stores/useMasterDataStore.tsx
-var initialEvents = [{
-	id: "Workshop",
-	name: "Workshop",
-	costCenter: "Events",
-	account: "ACC-01",
-	workorder: "WO-01"
-}, {
-	id: "Conference",
-	name: "Conference",
-	costCenter: "Events",
-	account: "ACC-02",
-	workorder: "WO-02"
-}];
-var initialRates = [
-	{
-		currency: "KES",
-		rateToUsd: .0076
-	},
-	{
-		currency: "EUR",
-		rateToUsd: 1.08
-	},
-	{
-		currency: "USD",
-		rateToUsd: 1
-	}
-];
-var initialCountries = [
-	"Kenya",
-	"Portugal",
-	"USA",
-	"Egypt",
-	"UAE"
-];
+var initialData = {
+	events: [{
+		id: "ev-1",
+		name: "Workshop",
+		costCenter: "CC-01",
+		account: "ACC-01",
+		workorder: "WO-01"
+	}, {
+		id: "ev-2",
+		name: "Conference",
+		costCenter: "CC-01",
+		account: "ACC-02",
+		workorder: "WO-02"
+	}],
+	exchangeRates: [
+		{
+			id: "r-1",
+			currency: "KES",
+			rateToUsd: .0076
+		},
+		{
+			id: "r-2",
+			currency: "EUR",
+			rateToUsd: 1.08
+		},
+		{
+			id: "r-3",
+			currency: "USD",
+			rateToUsd: 1
+		}
+	],
+	countries: [
+		{
+			id: "c-1",
+			name: "Kenya"
+		},
+		{
+			id: "c-2",
+			name: "Portugal"
+		},
+		{
+			id: "c-3",
+			name: "USA"
+		},
+		{
+			id: "c-4",
+			name: "Egypt"
+		},
+		{
+			id: "c-5",
+			name: "UAE"
+		}
+	],
+	costCenters: [{
+		id: "cc-1",
+		code: "CC-01",
+		name: "Operations"
+	}],
+	accounts: [{
+		id: "a-1",
+		code: "ACC-01",
+		name: "Travel"
+	}, {
+		id: "a-2",
+		code: "ACC-02",
+		name: "Meals"
+	}],
+	workorders: [{
+		id: "w-1",
+		code: "WO-01",
+		name: "Field Visit"
+	}],
+	requesters: [{
+		id: "req-1",
+		name: "John Doe",
+		email: "john@example.com",
+		organization: "WHO"
+	}]
+};
 var MasterDataContext = (0, import_react.createContext)(void 0);
 function MasterDataProvider({ children }) {
-	const [events] = (0, import_react.useState)(initialEvents);
-	const [exchangeRates] = (0, import_react.useState)(initialRates);
-	const [countries] = (0, import_react.useState)(initialCountries);
+	const [state, setState] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("master_data_v2");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return initialData;
+	});
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("master_data_v2", JSON.stringify(state));
+	}, [state]);
+	const updateData = (key, data) => {
+		setState((prev) => ({
+			...prev,
+			[key]: data
+		}));
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MasterDataContext.Provider, {
-		"data-uid": "src/stores/useMasterDataStore.tsx:49:5",
+		"data-uid": "src/stores/useMasterDataStore.tsx:107:5",
 		"data-prohibitions": "[editContent]",
 		value: {
-			events,
-			exchangeRates,
-			countries
+			...state,
+			updateData
 		},
 		children
 	});
@@ -27801,113 +27910,157 @@ function useMasterDataStore() {
 //#region src/components/requests/RequestHeader.tsx
 function RequestHeader({ formData, onChange, readOnly }) {
 	const { events } = useMasterDataStore();
+	const { t } = useTranslation();
 	const reqUser = formData.requesterDetails || {};
+	const handleEventChange = (eventId) => {
+		const event = events.find((e) => e.id === eventId);
+		onChange({
+			eventId,
+			costCenter: event?.costCenter || "",
+			account: event?.account || "",
+			workorder: event?.workorder || ""
+		});
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/RequestHeader.tsx:24:5",
+		"data-uid": "src/components/requests/RequestHeader.tsx:36:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-8",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:25:7",
+				"data-uid": "src/components/requests/RequestHeader.tsx:37:7",
 				"data-prohibitions": "[editContent]",
-				className: "grid grid-cols-1 md:grid-cols-4 gap-6",
+				className: "grid grid-cols-1 md:grid-cols-6 gap-6",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:26:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:38:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:27:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:39:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Id"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:28:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:40:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
 							value: formData.id || "",
-							className: "bg-muted/50 font-mono"
+							className: "bg-muted/50 font-mono text-xs"
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:30:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:42:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:31:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:43:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
-							children: "Form status"
+							children: "Status"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:32:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:44:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
-							value: formData.status || "",
+							value: t(formData.status || ""),
 							className: "bg-muted/50 font-semibold"
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:34:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:46:9",
 						"data-prohibitions": "[editContent]",
 						className: "space-y-2 md:col-span-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:35:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:47:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Event"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:36:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:48:11",
 							"data-prohibitions": "[editContent]",
 							disabled: readOnly,
 							value: formData.eventId,
-							onValueChange: (v) => onChange({ eventId: v }),
+							onValueChange: handleEventChange,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:41:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:49:13",
 								"data-prohibitions": "[]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-									"data-uid": "src/components/requests/RequestHeader.tsx:42:15",
+									"data-uid": "src/components/requests/RequestHeader.tsx:50:15",
 									"data-prohibitions": "[editContent]",
 									placeholder: "Select Event"
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectContent, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:44:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:52:13",
 								"data-prohibitions": "[editContent]",
 								children: events.map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-									"data-uid": "src/components/requests/RequestHeader.tsx:46:17",
+									"data-uid": "src/components/requests/RequestHeader.tsx:54:17",
 									"data-prohibitions": "[editContent]",
 									value: e.id,
 									children: e.name
 								}, e.id))
 							})]
 						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/requests/RequestHeader.tsx:61:9",
+						"data-prohibitions": "[]",
+						className: "space-y-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+							"data-uid": "src/components/requests/RequestHeader.tsx:62:11",
+							"data-prohibitions": "[]",
+							className: "text-muted-foreground text-xs uppercase",
+							children: "Account"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							"data-uid": "src/components/requests/RequestHeader.tsx:63:11",
+							"data-prohibitions": "[editContent]",
+							disabled: true,
+							value: formData.account || "",
+							className: "bg-muted/50 font-mono text-xs"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/requests/RequestHeader.tsx:69:9",
+						"data-prohibitions": "[]",
+						className: "space-y-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+							"data-uid": "src/components/requests/RequestHeader.tsx:70:11",
+							"data-prohibitions": "[]",
+							className: "text-muted-foreground text-xs uppercase",
+							children: "Workorder"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							"data-uid": "src/components/requests/RequestHeader.tsx:71:11",
+							"data-prohibitions": "[editContent]",
+							disabled: true,
+							value: formData.workorder || "",
+							className: "bg-muted/50 font-mono text-xs"
+						})]
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:55:7",
+				"data-uid": "src/components/requests/RequestHeader.tsx:79:7",
 				"data-prohibitions": "[]",
 				className: "space-y-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:56:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:80:9",
 					"data-prohibitions": "[]",
 					className: "text-sm font-semibold border-b pb-2",
 					children: "Requester Info"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:57:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:81:9",
 					"data-prohibitions": "[]",
 					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:58:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:82:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:59:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:83:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Requester"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:60:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:84:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.name || "",
@@ -27915,16 +28068,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:62:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:86:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:63:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:87:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Email"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:64:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:88:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.email || "",
@@ -27932,16 +28085,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:66:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:90:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:67:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:91:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Organization"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:68:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:92:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.organization || "",
@@ -27949,16 +28102,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:71:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:95:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:72:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:96:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Address"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:73:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:97:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.address || "",
@@ -27966,16 +28119,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:75:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:99:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:76:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:100:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "City"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:77:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:101:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.city || "",
@@ -27983,16 +28136,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:79:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:103:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:80:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:104:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "State"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:81:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:105:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.state || "",
@@ -28000,16 +28153,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:84:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:108:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:85:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:109:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "ZIP Code"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:86:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:110:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.zipCode || "",
@@ -28017,16 +28170,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:88:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:112:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:89:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:113:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Country"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:90:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:114:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.country || "",
@@ -28034,16 +28187,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:92:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:116:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:93:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:117:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Telephone"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:94:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:118:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.phone || "",
@@ -28054,30 +28207,30 @@ function RequestHeader({ formData, onChange, readOnly }) {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:99:7",
+				"data-uid": "src/components/requests/RequestHeader.tsx:123:7",
 				"data-prohibitions": "[]",
 				className: "space-y-4 pt-6 border-t border-border",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:100:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:124:9",
 					"data-prohibitions": "[]",
 					className: "font-serif font-bold text-xl text-primary",
 					children: "Bank Information"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:101:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:125:9",
 					"data-prohibitions": "[]",
 					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:102:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:126:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:103:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:127:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Holder"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:104:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:128:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.bankHolder || "",
@@ -28085,16 +28238,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:106:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:130:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:107:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:131:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Bank Name"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:108:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:132:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.bankName || "",
@@ -28102,16 +28255,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:110:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:134:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:111:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:135:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Account Number"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:112:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:136:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.bankAccount || "",
@@ -28119,16 +28272,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:115:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:139:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:116:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:140:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "IBAN"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:117:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:141:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.iban || "",
@@ -28136,16 +28289,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:119:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:143:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:120:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:144:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "SWIFT"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:121:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:145:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.swift || "",
@@ -28153,53 +28306,19 @@ function RequestHeader({ formData, onChange, readOnly }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:123:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:147:11",
 							"data-prohibitions": "[]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:124:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:148:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "BIC"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:125:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:149:13",
 								"data-prohibitions": "[editContent]",
 								disabled: true,
 								value: reqUser.bic || "",
-								className: "bg-muted/30"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:128:11",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:129:13",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Bank Code"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:130:13",
-								"data-prohibitions": "[editContent]",
-								disabled: true,
-								value: reqUser.bankCode || "",
-								className: "bg-muted/30"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:132:11",
-							"data-prohibitions": "[]",
-							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:133:13",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Bank Country"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:134:13",
-								"data-prohibitions": "[editContent]",
-								disabled: true,
-								value: reqUser.bankCountry || "",
 								className: "bg-muted/30"
 							})]
 						})
@@ -28230,10 +28349,15 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 			...newExps[index],
 			[field]: value
 		};
-		if (isInternal && (field === "amount" || field === "currency" || field === "exchangeRate")) {
-			const amt = Number(newExps[index].amount) || 0;
-			const rate = Number(newExps[index].exchangeRate) || 1;
-			newExps[index].amountEuros = amt * rate * .92;
+		if (field === "amount" || field === "currency") {
+			const amt = Number(field === "amount" ? value : newExps[index].amount) || 0;
+			const curr = field === "currency" ? value : newExps[index].currency || "USD";
+			const usdRate = exchangeRates.find((r) => r.currency === curr)?.rateToUsd || 1;
+			const eurRateToUsd = exchangeRates.find((r) => r.currency === "EUR")?.rateToUsd || 1.08;
+			const amountUsd = amt * usdRate;
+			const amountEur = amountUsd / eurRateToUsd;
+			newExps[index].amountUsd = amountUsd;
+			newExps[index].amountEuros = amountEur;
 		}
 		onChange({ expenses: newExps });
 	};
@@ -28242,100 +28366,85 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 	};
 	const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/ExpenseDetails.tsx:56:5",
+		"data-uid": "src/components/requests/ExpenseDetails.tsx:64:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 pt-6 border-t border-border",
 		dir: lang === "ar" ? "rtl" : "ltr",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:57:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:65:7",
 				"data-prohibitions": "[]",
 				className: "font-serif font-bold text-xl text-primary",
 				children: "Expense Details"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:58:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:66:7",
 				"data-prohibitions": "[editContent]",
 				className: "overflow-x-auto border border-border rounded-lg",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:59:9",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:67:9",
 					"data-prohibitions": "[editContent]",
 					className: "w-full text-sm",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:60:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:68:11",
 						"data-prohibitions": "[editContent]",
 						className: "bg-muted/50",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:61:13",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:69:13",
 							"data-prohibitions": "[editContent]",
 							className: "text-start text-muted-foreground",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:62:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:70:15",
 									"data-prohibitions": "[]",
-									className: "p-3 font-semibold min-w-[200px] text-start",
+									className: "p-3 font-semibold min-w-[250px] text-start",
 									children: "Description"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:63:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:71:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-32 text-start",
 									children: "Amount"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:64:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:72:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-32 text-start",
 									children: "Currency"
 								}),
-								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:67:19",
-										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32 text-start",
-										children: "Account"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:68:19",
-										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32 text-start",
-										children: "Workorder"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:69:19",
-										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-24 text-start",
-										children: "Exch. Rate"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:70:19",
-										"data-prohibitions": "[]",
-										className: "p-3 font-semibold w-32 text-start",
-										children: "Amt Euros"
-									})
-								] }),
+								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:75:19",
+									"data-prohibitions": "[]",
+									className: "p-3 font-semibold w-32 text-start",
+									children: "Amt (USD)"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:76:19",
+									"data-prohibitions": "[]",
+									className: "p-3 font-semibold w-32 text-start",
+									children: "Amt (EUR)"
+								})] }),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:73:29",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:79:29",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-12 text-start"
 								})
 							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:76:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:82:11",
 						"data-prohibitions": "[editContent]",
 						className: "divide-y divide-border",
 						children: [expenses.map((exp, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:78:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:84:15",
 							"data-prohibitions": "[editContent]",
 							className: "hover:bg-muted/20",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:79:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:85:17",
 									"data-prohibitions": "[]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:80:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:86:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.description,
@@ -28343,42 +28452,42 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:86:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:92:17",
 									"data-prohibitions": "[]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:87:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:93:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										type: "number",
-										value: exp.amount,
+										value: exp.amount || "",
 										onChange: (e) => updateExp(i, "amount", e.target.value)
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:94:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:100:17",
 									"data-prohibitions": "[editContent]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:95:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:101:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.currency,
 										onValueChange: (v) => updateExp(i, "currency", v),
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:100:21",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:106:21",
 											"data-prohibitions": "[]",
 											dir: lang === "ar" ? "rtl" : "ltr",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:101:23",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:107:23",
 												"data-prohibitions": "[editContent]"
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectContent, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:103:21",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:109:21",
 											"data-prohibitions": "[editContent]",
 											dir: lang === "ar" ? "rtl" : "ltr",
 											children: exchangeRates.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:105:25",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:111:25",
 												"data-prohibitions": "[editContent]",
 												value: r.currency,
 												children: r.currency
@@ -28386,70 +28495,42 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 										})]
 									})
 								}),
-								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:114:21",
-										"data-prohibitions": "[]",
-										className: "p-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:115:23",
-											"data-prohibitions": "[editContent]",
-											disabled: readOnly && user?.role !== "qc",
-											value: exp.account || "",
-											onChange: (e) => updateExp(i, "account", e.target.value)
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:121:21",
-										"data-prohibitions": "[]",
-										className: "p-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:122:23",
-											"data-prohibitions": "[editContent]",
-											disabled: readOnly && user?.role !== "qc",
-											value: exp.workorder || "",
-											onChange: (e) => updateExp(i, "workorder", e.target.value)
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:128:21",
-										"data-prohibitions": "[]",
-										className: "p-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:129:23",
-											"data-prohibitions": "[editContent]",
-											disabled: readOnly && user?.role !== "qc",
-											type: "number",
-											value: exp.exchangeRate || "",
-											onChange: (e) => updateExp(i, "exchangeRate", e.target.value)
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:136:21",
-										"data-prohibitions": "[]",
-										className: "p-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:137:23",
-											"data-prohibitions": "[editContent]",
-											disabled: true,
-											value: exp.amountEuros?.toFixed(2) || "",
-											className: "bg-muted/30 font-bold text-end"
-										})
+								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:120:21",
+									"data-prohibitions": "[]",
+									className: "p-2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:121:23",
+										"data-prohibitions": "[editContent]",
+										disabled: true,
+										value: exp.amountUsd?.toFixed(2) || "",
+										className: "bg-muted/30 text-end font-mono text-xs"
 									})
-								] }),
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:127:21",
+									"data-prohibitions": "[]",
+									className: "p-2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:128:23",
+										"data-prohibitions": "[editContent]",
+										disabled: true,
+										value: exp.amountEuros?.toFixed(2) || "",
+										className: "bg-muted/30 font-bold text-end text-primary"
+									})
+								})] }),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:146:19",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:137:19",
 									"data-prohibitions": "[]",
 									className: "p-2 text-center",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:147:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:138:21",
 										"data-prohibitions": "[]",
 										variant: "ghost",
 										size: "icon",
 										onClick: () => removeExp(i),
 										className: "text-destructive hover:bg-destructive/10",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:153:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:144:23",
 											"data-prohibitions": "[editContent]",
 											className: "w-4 h-4"
 										})
@@ -28457,12 +28538,12 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 								})
 							]
 						}, exp.id)), expenses.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:160:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:151:15",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								"data-uid": "src/components/requests/ExpenseDetails.tsx:161:17",
+								"data-uid": "src/components/requests/ExpenseDetails.tsx:152:17",
 								"data-prohibitions": "[]",
-								colSpan: isInternal ? 8 : 4,
+								colSpan: isInternal ? 6 : 4,
 								className: "text-center p-6 text-muted-foreground",
 								children: "No expenses added."
 							})
@@ -28471,34 +28552,34 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 				})
 			}),
 			!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:170:9",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:161:9",
 				"data-prohibitions": "[]",
 				type: "button",
 				variant: "outline",
 				size: "sm",
 				onClick: addExpense,
-				className: "text-success border-success hover:bg-success/10",
+				className: "text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:177:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:168:11",
 					"data-prohibitions": "[editContent]",
 					className: "w-4 h-4 mr-2"
 				}), " Add Row"]
 			}),
 			isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:181:9",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:172:9",
 				"data-prohibitions": "[]",
 				className: "flex justify-end mt-4 pt-4 border-t border-border/50",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:182:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:173:11",
 					"data-prohibitions": "[]",
 					className: "w-64 space-y-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:183:13",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:174:13",
 						"data-prohibitions": "[]",
 						className: "text-end block text-muted-foreground uppercase text-xs",
 						children: "Total Amount in Euros"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:186:13",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:177:13",
 						"data-prohibitions": "[editContent]",
 						disabled: true,
 						value: totalEuros.toFixed(2),
@@ -28644,62 +28725,120 @@ function Attachments({ formData, onChange, readOnly }) {
 function ApprovalSection({ formData, onAction }) {
 	const { user } = useAuthStore();
 	const [comments, setComments] = (0, import_react.useState)("");
-	if (!user || user.role === "requester" || formData.status === "Paid" || formData.status === "Rejected") return null;
-	if (!(user.role === "qc" && formData.status === "Pending" || user.role === "co" && formData.status === "Checked" || user.role === "finance" && formData.status === "Approved")) return null;
+	if (!user || user.role === "requester") return null;
+	const canApprove = user.role === "qc" && formData.status === "Pending" || user.role === "co" && formData.status === "Checked" || user.role === "finance" && formData.status === "Approved";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/ApprovalSection.tsx:35:5",
+		"data-uid": "src/components/requests/ApprovalSection.tsx:26:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 pt-6 border-t border-border mt-10 bg-[#4a8ebf]/5 p-6 rounded-xl border border-[#4a8ebf]/20",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				"data-uid": "src/components/requests/ApprovalSection.tsx:36:7",
+				"data-uid": "src/components/requests/ApprovalSection.tsx:27:7",
 				"data-prohibitions": "[]",
 				className: "font-serif font-bold text-xl text-[#4a8ebf]",
-				children: "Quality Check and Approval"
+				children: "Workflow Signatures"
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/ApprovalSection.tsx:38:7",
-				"data-prohibitions": "[]",
-				className: "space-y-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-					"data-uid": "src/components/requests/ApprovalSection.tsx:39:9",
-					"data-prohibitions": "[]",
-					className: "text-sm font-semibold",
-					children: "Comments / Rejection Reason"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					"data-uid": "src/components/requests/ApprovalSection.tsx:40:9",
+			(formData.qcSignature || formData.coSignature) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				"data-uid": "src/components/requests/ApprovalSection.tsx:30:9",
+				"data-prohibitions": "[editContent]",
+				className: "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6",
+				children: [formData.qcSignature && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/components/requests/ApprovalSection.tsx:32:13",
 					"data-prohibitions": "[editContent]",
-					value: comments,
-					onChange: (e) => setComments(e.target.value),
-					placeholder: "Required if rejecting...",
-					className: "bg-white"
+					className: "bg-white p-4 rounded-lg border border-border shadow-sm",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:33:15",
+							"data-prohibitions": "[]",
+							className: "text-xs uppercase text-muted-foreground font-bold mb-1",
+							children: "Quality Control Approved"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:36:15",
+							"data-prohibitions": "[editContent]",
+							className: "font-medium text-sm",
+							children: formData.qcSignature.name
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:37:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-xs text-muted-foreground",
+							children: new Date(formData.qcSignature.date).toLocaleString()
+						})
+					]
+				}), formData.coSignature && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/components/requests/ApprovalSection.tsx:43:13",
+					"data-prohibitions": "[editContent]",
+					className: "bg-white p-4 rounded-lg border border-border shadow-sm",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:44:15",
+							"data-prohibitions": "[]",
+							className: "text-xs uppercase text-muted-foreground font-bold mb-1",
+							children: "Certifying Officer Approved"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:47:15",
+							"data-prohibitions": "[editContent]",
+							className: "font-medium text-sm",
+							children: formData.coSignature.name
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:48:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-xs text-muted-foreground",
+							children: new Date(formData.coSignature.date).toLocaleString()
+						})
+					]
 				})]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/ApprovalSection.tsx:48:7",
+			canApprove && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				"data-uid": "src/components/requests/ApprovalSection.tsx:57:9",
 				"data-prohibitions": "[editContent]",
-				className: "flex gap-4 pt-4 border-t border-[#4a8ebf]/10",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					"data-uid": "src/components/requests/ApprovalSection.tsx:49:9",
-					"data-prohibitions": "[editContent]",
-					onClick: () => onAction(user.role === "qc" ? "Checked" : user.role === "co" ? "Approved" : "Paid", comments),
-					className: "bg-success hover:bg-success/90 h-12 px-8 text-md font-bold",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:58:11",
-						"data-prohibitions": "[editContent]",
-						className: "w-5 h-5 mr-2"
-					}), user.role === "finance" ? "Process Payment" : "Approve Request"]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					"data-uid": "src/components/requests/ApprovalSection.tsx:61:9",
+				className: "space-y-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/components/requests/ApprovalSection.tsx:58:11",
 					"data-prohibitions": "[]",
-					onClick: () => onAction("Rejected", comments),
-					variant: "destructive",
-					className: "h-12 px-8 text-md font-bold",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:66:11",
+					className: "space-y-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:59:13",
+						"data-prohibitions": "[]",
+						className: "text-sm font-semibold",
+						children: "Comments / Rejection Reason"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:60:13",
 						"data-prohibitions": "[editContent]",
-						className: "w-5 h-5 mr-2"
-					}), "Reject Request"]
+						value: comments,
+						onChange: (e) => setComments(e.target.value),
+						placeholder: "Required if rejecting...",
+						className: "bg-white max-w-xl"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/components/requests/ApprovalSection.tsx:68:11",
+					"data-prohibitions": "[editContent]",
+					className: "flex flex-wrap gap-4 pt-4 border-t border-[#4a8ebf]/10",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:69:13",
+						"data-prohibitions": "[editContent]",
+						onClick: () => onAction(user.role === "qc" ? "Checked" : user.role === "co" ? "Approved" : "Paid", comments),
+						className: "bg-success hover:bg-success/90 h-12 px-8 text-md font-bold",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:78:15",
+							"data-prohibitions": "[editContent]",
+							className: "w-5 h-5 mr-2"
+						}), user.role === "finance" ? "Process Payment" : "Approve Request"]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:81:13",
+						"data-prohibitions": "[]",
+						onClick: () => onAction("Rejected", comments),
+						variant: "destructive",
+						className: "h-12 px-8 text-md font-bold",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:86:15",
+							"data-prohibitions": "[editContent]",
+							className: "w-5 h-5 mr-2"
+						}), "Reject Request"]
+					})]
 				})]
 			})
 		]
@@ -28729,7 +28868,7 @@ function RequestForm() {
 				id: `h-${Date.now()}`,
 				date: (/* @__PURE__ */ new Date()).toISOString(),
 				action: "Created",
-				userId: user.id
+				userId: user.name || "Requester"
 			}]
 		});
 		else if (existing) setFormData(existing);
@@ -28739,7 +28878,7 @@ function RequestForm() {
 		user
 	]);
 	if (!formData.id) return null;
-	const readOnly = !isNew && user?.role === "requester";
+	const readOnly = !(isNew || user?.role === "qc" && formData.status === "Pending");
 	const handleSave = () => {
 		if (isNew) {
 			addRequest(formData);
@@ -28758,66 +28897,73 @@ function RequestForm() {
 			});
 			return;
 		}
-		const newHistory = [...formData.history || [], {
-			id: `h-${Date.now()}`,
+		const signature = {
+			name: user?.name || "",
 			date: (/* @__PURE__ */ new Date()).toISOString(),
-			action: status,
-			userId: user?.id || "",
-			comments
-		}];
-		updateRequest(formData.id, {
+			role: user?.role || ""
+		};
+		const updates = {
 			status,
-			history: newHistory
-		});
+			history: [...formData.history || [], {
+				id: `h-${Date.now()}`,
+				date: (/* @__PURE__ */ new Date()).toISOString(),
+				action: status,
+				userId: user?.name || "",
+				comments
+			}]
+		};
+		if (status === "Checked" && user?.role === "qc") updates.qcSignature = signature;
+		if (status === "Approved" && user?.role === "co") updates.coSignature = signature;
+		updateRequest(formData.id, updates);
 		toast({ title: `Request ${status}` });
 		navigate("/requests");
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/RequestForm.tsx:89:5",
+		"data-uid": "src/pages/RequestForm.tsx:105:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 max-w-6xl mx-auto pb-20 animate-fade-in-up",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/RequestForm.tsx:90:7",
+				"data-uid": "src/pages/RequestForm.tsx:106:7",
 				"data-prohibitions": "[editContent]",
 				className: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					"data-uid": "src/pages/RequestForm.tsx:91:9",
+					"data-uid": "src/pages/RequestForm.tsx:107:9",
 					"data-prohibitions": "[]",
 					variant: "outline",
 					onClick: () => navigate(-1),
 					className: "bg-background",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, {
-						"data-uid": "src/pages/RequestForm.tsx:92:11",
+						"data-uid": "src/pages/RequestForm.tsx:108:11",
 						"data-prohibitions": "[editContent]",
 						className: "w-4 h-4 mr-2"
 					}), " Back to List"]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/RequestForm.tsx:94:9",
+					"data-uid": "src/pages/RequestForm.tsx:110:9",
 					"data-prohibitions": "[editContent]",
 					className: "flex gap-3 w-full sm:w-auto",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						"data-uid": "src/pages/RequestForm.tsx:95:11",
+						"data-uid": "src/pages/RequestForm.tsx:111:11",
 						"data-prohibitions": "[]",
 						variant: "outline",
 						onClick: () => window.print(),
 						className: "flex-1 sm:flex-none bg-background",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Printer, {
-							"data-uid": "src/pages/RequestForm.tsx:100:13",
+							"data-uid": "src/pages/RequestForm.tsx:116:13",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
 						}), " Print PDF"]
 					}), !readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						"data-uid": "src/pages/RequestForm.tsx:103:13",
+						"data-uid": "src/pages/RequestForm.tsx:119:13",
 						"data-prohibitions": "[editContent]",
 						onClick: handleSave,
 						className: "flex-1 sm:flex-none bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold px-6",
 						children: [isNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, {
-							"data-uid": "src/pages/RequestForm.tsx:107:24",
+							"data-uid": "src/pages/RequestForm.tsx:123:24",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, {
-							"data-uid": "src/pages/RequestForm.tsx:107:60",
+							"data-uid": "src/pages/RequestForm.tsx:123:60",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
 						}), isNew ? "Submit Request" : "Save Changes"]
@@ -28825,26 +28971,35 @@ function RequestForm() {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-				"data-uid": "src/pages/RequestForm.tsx:114:7",
-				"data-prohibitions": "[]",
+				"data-uid": "src/pages/RequestForm.tsx:130:7",
+				"data-prohibitions": "[editContent]",
 				className: "print:shadow-none print:border-none border-border shadow-sm overflow-hidden",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
-					"data-uid": "src/pages/RequestForm.tsx:115:9",
-					"data-prohibitions": "[]",
-					className: "bg-[#4a8ebf] text-white py-4 print:bg-gray-200 print:text-black",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-						"data-uid": "src/pages/RequestForm.tsx:116:11",
-						"data-prohibitions": "[]",
-						className: "text-xl tracking-wide",
-						children: "Reimbursement Request Form"
+					"data-uid": "src/pages/RequestForm.tsx:131:9",
+					"data-prohibitions": "[editContent]",
+					className: `text-white py-4 print:bg-gray-200 print:text-black ${formData.status === "Rejected" ? "bg-destructive" : "bg-[#4a8ebf]"}`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardTitle, {
+						"data-uid": "src/pages/RequestForm.tsx:134:11",
+						"data-prohibitions": "[editContent]",
+						className: "text-xl tracking-wide flex items-center gap-3",
+						children: [
+							"Reimbursement Request Form",
+							" ",
+							formData.status === "Rejected" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								"data-uid": "src/pages/RequestForm.tsx:137:15",
+								"data-prohibitions": "[]",
+								className: "text-sm bg-white/20 px-2 py-0.5 rounded ml-auto",
+								children: "REJECTED"
+							})
+						]
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardContent, {
-					"data-uid": "src/pages/RequestForm.tsx:118:9",
+					"data-uid": "src/pages/RequestForm.tsx:141:9",
 					"data-prohibitions": "[]",
 					className: "p-6 md:p-10 space-y-8",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestHeader, {
-							"data-uid": "src/pages/RequestForm.tsx:119:11",
+							"data-uid": "src/pages/RequestForm.tsx:142:11",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -28854,7 +29009,7 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExpenseDetails, {
-							"data-uid": "src/pages/RequestForm.tsx:125:11",
+							"data-uid": "src/pages/RequestForm.tsx:148:11",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -28864,20 +29019,20 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/RequestForm.tsx:131:11",
+							"data-uid": "src/pages/RequestForm.tsx:154:11",
 							"data-prohibitions": "[]",
 							className: "grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/RequestForm.tsx:132:13",
+								"data-uid": "src/pages/RequestForm.tsx:155:13",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/RequestForm.tsx:133:15",
+									"data-uid": "src/pages/RequestForm.tsx:156:15",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
 									children: "Signature"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/RequestForm.tsx:134:15",
+									"data-uid": "src/pages/RequestForm.tsx:157:15",
 									"data-prohibitions": "[editContent]",
 									disabled: readOnly,
 									value: formData.signature || "",
@@ -28889,16 +29044,16 @@ function RequestForm() {
 									placeholder: "Type your full name as signature"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/RequestForm.tsx:142:13",
+								"data-uid": "src/pages/RequestForm.tsx:165:13",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/RequestForm.tsx:143:15",
+									"data-uid": "src/pages/RequestForm.tsx:166:15",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
 									children: "Date"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/RequestForm.tsx:144:15",
+									"data-uid": "src/pages/RequestForm.tsx:167:15",
 									"data-prohibitions": "[editContent]",
 									disabled: true,
 									type: "date",
@@ -28908,7 +29063,7 @@ function RequestForm() {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Attachments, {
-							"data-uid": "src/pages/RequestForm.tsx:148:11",
+							"data-uid": "src/pages/RequestForm.tsx:171:11",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -28918,7 +29073,7 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ApprovalSection, {
-							"data-uid": "src/pages/RequestForm.tsx:154:11",
+							"data-uid": "src/pages/RequestForm.tsx:177:11",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onAction: handleAction
@@ -28927,51 +29082,57 @@ function RequestForm() {
 				})]
 			}),
 			!isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-				"data-uid": "src/pages/RequestForm.tsx:159:9",
+				"data-uid": "src/pages/RequestForm.tsx:182:9",
 				"data-prohibitions": "[editContent]",
 				className: "print:hidden border-border shadow-sm mt-10",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
-					"data-uid": "src/pages/RequestForm.tsx:160:11",
+					"data-uid": "src/pages/RequestForm.tsx:183:11",
 					"data-prohibitions": "[]",
 					className: "bg-muted/30 border-b border-border",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-						"data-uid": "src/pages/RequestForm.tsx:161:13",
+						"data-uid": "src/pages/RequestForm.tsx:184:13",
 						"data-prohibitions": "[]",
 						className: "text-lg",
 						children: "Audit History"
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-					"data-uid": "src/pages/RequestForm.tsx:163:11",
+					"data-uid": "src/pages/RequestForm.tsx:186:11",
 					"data-prohibitions": "[editContent]",
 					className: "p-0",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/pages/RequestForm.tsx:164:13",
+						"data-uid": "src/pages/RequestForm.tsx:187:13",
 						"data-prohibitions": "[editContent]",
 						className: "divide-y divide-border",
 						children: formData.history?.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/RequestForm.tsx:166:17",
+							"data-uid": "src/pages/RequestForm.tsx:189:17",
 							"data-prohibitions": "[editContent]",
 							className: "flex flex-col sm:flex-row gap-2 sm:gap-6 p-4 text-sm hover:bg-muted/20 transition-colors",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:170:19",
+									"data-uid": "src/pages/RequestForm.tsx:193:19",
 									"data-prohibitions": "[editContent]",
 									className: "w-48 text-muted-foreground font-mono text-xs",
 									children: new Date(h.date).toLocaleString()
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:173:19",
+									"data-uid": "src/pages/RequestForm.tsx:196:19",
 									"data-prohibitions": "[editContent]",
 									className: "w-40 font-bold",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/pages/RequestForm.tsx:174:21",
+										"data-uid": "src/pages/RequestForm.tsx:197:21",
 										"data-prohibitions": "[editContent]",
 										className: `px-2 py-1 rounded-md ${h.action === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`,
 										children: h.action
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:180:19",
+									"data-uid": "src/pages/RequestForm.tsx:203:19",
+									"data-prohibitions": "[editContent]",
+									className: "w-40 text-muted-foreground truncate",
+									children: h.userId
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									"data-uid": "src/pages/RequestForm.tsx:204:19",
 									"data-prohibitions": "[editContent]",
 									className: "flex-1 text-muted-foreground",
 									children: h.comments || "System update"
@@ -29166,7 +29327,7 @@ function focusFirst(candidates, preventScroll = false) {
 function wrapArray(array, startIndex) {
 	return array.map((_, index) => array[(startIndex + index) % array.length]);
 }
-var Root = RovingFocusGroup;
+var Root$1 = RovingFocusGroup;
 var Item = RovingFocusGroupItem;
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-tabs@1.1.13_@types+react-dom@19.2.3_@types+react@19.2.14__@types+react@_2ad0945e3cb98dc5bbfaaf29c105e977/node_modules/@radix-ui/react-tabs/dist/index.mjs
@@ -29205,7 +29366,7 @@ var TabsList$1 = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeTabs, loop = true, ...listProps } = props;
 	const context = useTabsContext(TAB_LIST_NAME, __scopeTabs);
 	const rovingFocusGroupScope = useRovingFocusGroupScope(__scopeTabs);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root, {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$1, {
 		asChild: true,
 		...rovingFocusGroupScope,
 		orientation: context.orientation,
@@ -29330,261 +29491,1023 @@ var TabsContent = import_react.forwardRef(({ className, ...props }, ref) => /* @
 }));
 TabsContent.displayName = Content.displayName;
 //#endregion
+//#region src/components/master-data/CrudTable.tsx
+function CrudTable({ columns, data, onChange, newItemTemplate }) {
+	const handleUpdate = (index, key, value) => {
+		const newData = [...data];
+		newData[index] = {
+			...newData[index],
+			[key]: value
+		};
+		onChange(newData);
+	};
+	const handleAdd = () => {
+		onChange([...data, {
+			...newItemTemplate,
+			id: `item-${Date.now()}`
+		}]);
+	};
+	const handleRemove = (index) => {
+		onChange(data.filter((_, i) => i !== index));
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"data-uid": "src/components/master-data/CrudTable.tsx:42:5",
+		"data-prohibitions": "[editContent]",
+		className: "space-y-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			"data-uid": "src/components/master-data/CrudTable.tsx:43:7",
+			"data-prohibitions": "[editContent]",
+			className: "border border-border rounded-lg overflow-hidden",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
+				"data-uid": "src/components/master-data/CrudTable.tsx:44:9",
+				"data-prohibitions": "[editContent]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
+					"data-uid": "src/components/master-data/CrudTable.tsx:45:11",
+					"data-prohibitions": "[editContent]",
+					className: "bg-muted/50",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+						"data-uid": "src/components/master-data/CrudTable.tsx:46:13",
+						"data-prohibitions": "[editContent]",
+						children: [columns.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+							"data-uid": "src/components/master-data/CrudTable.tsx:48:17",
+							"data-prohibitions": "[editContent]",
+							children: col.label
+						}, col.key)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+							"data-uid": "src/components/master-data/CrudTable.tsx:50:15",
+							"data-prohibitions": "[]",
+							className: "w-16"
+						})]
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableBody, {
+					"data-uid": "src/components/master-data/CrudTable.tsx:53:11",
+					"data-prohibitions": "[editContent]",
+					children: [data.map((row, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+						"data-uid": "src/components/master-data/CrudTable.tsx:55:15",
+						"data-prohibitions": "[editContent]",
+						children: [columns.map((col) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+							"data-uid": "src/components/master-data/CrudTable.tsx:57:19",
+							"data-prohibitions": "[]",
+							className: "p-2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/components/master-data/CrudTable.tsx:58:21",
+								"data-prohibitions": "[editContent]",
+								type: col.type || "text",
+								value: row[col.key] || "",
+								onChange: (e) => handleUpdate(i, col.key, col.type === "number" ? Number(e.target.value) : e.target.value),
+								className: "h-8 text-sm bg-transparent border-transparent hover:border-input focus:border-input"
+							})
+						}, col.key)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+							"data-uid": "src/components/master-data/CrudTable.tsx:72:17",
+							"data-prohibitions": "[]",
+							className: "p-2 text-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								"data-uid": "src/components/master-data/CrudTable.tsx:73:19",
+								"data-prohibitions": "[]",
+								variant: "ghost",
+								size: "icon",
+								onClick: () => handleRemove(i),
+								className: "h-8 w-8 text-destructive hover:bg-destructive/10",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
+									"data-uid": "src/components/master-data/CrudTable.tsx:79:21",
+									"data-prohibitions": "[editContent]",
+									className: "w-4 h-4"
+								})
+							})
+						})]
+					}, row.id || i)), data.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableRow, {
+						"data-uid": "src/components/master-data/CrudTable.tsx:85:15",
+						"data-prohibitions": "[]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+							"data-uid": "src/components/master-data/CrudTable.tsx:86:17",
+							"data-prohibitions": "[]",
+							colSpan: columns.length + 1,
+							className: "text-center py-6 text-muted-foreground",
+							children: "No records found. Click 'Add Record' to create one."
+						})
+					})]
+				})]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+			"data-uid": "src/components/master-data/CrudTable.tsx:97:7",
+			"data-prohibitions": "[]",
+			variant: "outline",
+			size: "sm",
+			onClick: handleAdd,
+			className: "text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
+				"data-uid": "src/components/master-data/CrudTable.tsx:103:9",
+				"data-prohibitions": "[editContent]",
+				className: "w-4 h-4 mr-2"
+			}), " Add Record"]
+		})]
+	});
+}
+//#endregion
+//#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+react-scroll-area@1.2.10_@types+react-dom@19.2.3_@types+react@19.2.14__@types_155614c2fe5222bb9b221068b09efefc/node_modules/@radix-ui/react-scroll-area/dist/index.mjs
+function useStateMachine(initialState, machine) {
+	return import_react.useReducer((state, event) => {
+		return machine[state][event] ?? state;
+	}, initialState);
+}
+var SCROLL_AREA_NAME = "ScrollArea";
+var [createScrollAreaContext, createScrollAreaScope] = createContextScope(SCROLL_AREA_NAME);
+var [ScrollAreaProvider, useScrollAreaContext] = createScrollAreaContext(SCROLL_AREA_NAME);
+var ScrollArea$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeScrollArea, type = "hover", dir, scrollHideDelay = 600, ...scrollAreaProps } = props;
+	const [scrollArea, setScrollArea] = import_react.useState(null);
+	const [viewport, setViewport] = import_react.useState(null);
+	const [content, setContent] = import_react.useState(null);
+	const [scrollbarX, setScrollbarX] = import_react.useState(null);
+	const [scrollbarY, setScrollbarY] = import_react.useState(null);
+	const [cornerWidth, setCornerWidth] = import_react.useState(0);
+	const [cornerHeight, setCornerHeight] = import_react.useState(0);
+	const [scrollbarXEnabled, setScrollbarXEnabled] = import_react.useState(false);
+	const [scrollbarYEnabled, setScrollbarYEnabled] = import_react.useState(false);
+	const composedRefs = useComposedRefs(forwardedRef, (node) => setScrollArea(node));
+	const direction = useDirection(dir);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaProvider, {
+		scope: __scopeScrollArea,
+		type,
+		dir: direction,
+		scrollHideDelay,
+		scrollArea,
+		viewport,
+		onViewportChange: setViewport,
+		content,
+		onContentChange: setContent,
+		scrollbarX,
+		onScrollbarXChange: setScrollbarX,
+		scrollbarXEnabled,
+		onScrollbarXEnabledChange: setScrollbarXEnabled,
+		scrollbarY,
+		onScrollbarYChange: setScrollbarY,
+		scrollbarYEnabled,
+		onScrollbarYEnabledChange: setScrollbarYEnabled,
+		onCornerWidthChange: setCornerWidth,
+		onCornerHeightChange: setCornerHeight,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+			dir: direction,
+			...scrollAreaProps,
+			ref: composedRefs,
+			style: {
+				position: "relative",
+				["--radix-scroll-area-corner-width"]: cornerWidth + "px",
+				["--radix-scroll-area-corner-height"]: cornerHeight + "px",
+				...props.style
+			}
+		})
+	});
+});
+ScrollArea$1.displayName = SCROLL_AREA_NAME;
+var VIEWPORT_NAME = "ScrollAreaViewport";
+var ScrollAreaViewport = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeScrollArea, children, nonce, ...viewportProps } = props;
+	const context = useScrollAreaContext(VIEWPORT_NAME, __scopeScrollArea);
+	const composedRefs = useComposedRefs(forwardedRef, import_react.useRef(null), context.onViewportChange);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", {
+		dangerouslySetInnerHTML: { __html: `[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}` },
+		nonce
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+		"data-radix-scroll-area-viewport": "",
+		...viewportProps,
+		ref: composedRefs,
+		style: {
+			overflowX: context.scrollbarXEnabled ? "scroll" : "hidden",
+			overflowY: context.scrollbarYEnabled ? "scroll" : "hidden",
+			...props.style
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			ref: context.onContentChange,
+			style: {
+				minWidth: "100%",
+				display: "table"
+			},
+			children
+		})
+	})] });
+});
+ScrollAreaViewport.displayName = VIEWPORT_NAME;
+var SCROLLBAR_NAME = "ScrollAreaScrollbar";
+var ScrollAreaScrollbar = import_react.forwardRef((props, forwardedRef) => {
+	const { forceMount, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const { onScrollbarXEnabledChange, onScrollbarYEnabledChange } = context;
+	const isHorizontal = props.orientation === "horizontal";
+	import_react.useEffect(() => {
+		isHorizontal ? onScrollbarXEnabledChange(true) : onScrollbarYEnabledChange(true);
+		return () => {
+			isHorizontal ? onScrollbarXEnabledChange(false) : onScrollbarYEnabledChange(false);
+		};
+	}, [
+		isHorizontal,
+		onScrollbarXEnabledChange,
+		onScrollbarYEnabledChange
+	]);
+	return context.type === "hover" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarHover, {
+		...scrollbarProps,
+		ref: forwardedRef,
+		forceMount
+	}) : context.type === "scroll" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarScroll, {
+		...scrollbarProps,
+		ref: forwardedRef,
+		forceMount
+	}) : context.type === "auto" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarAuto, {
+		...scrollbarProps,
+		ref: forwardedRef,
+		forceMount
+	}) : context.type === "always" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarVisible, {
+		...scrollbarProps,
+		ref: forwardedRef
+	}) : null;
+});
+ScrollAreaScrollbar.displayName = SCROLLBAR_NAME;
+var ScrollAreaScrollbarHover = import_react.forwardRef((props, forwardedRef) => {
+	const { forceMount, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const [visible, setVisible] = import_react.useState(false);
+	import_react.useEffect(() => {
+		const scrollArea = context.scrollArea;
+		let hideTimer = 0;
+		if (scrollArea) {
+			const handlePointerEnter = () => {
+				window.clearTimeout(hideTimer);
+				setVisible(true);
+			};
+			const handlePointerLeave = () => {
+				hideTimer = window.setTimeout(() => setVisible(false), context.scrollHideDelay);
+			};
+			scrollArea.addEventListener("pointerenter", handlePointerEnter);
+			scrollArea.addEventListener("pointerleave", handlePointerLeave);
+			return () => {
+				window.clearTimeout(hideTimer);
+				scrollArea.removeEventListener("pointerenter", handlePointerEnter);
+				scrollArea.removeEventListener("pointerleave", handlePointerLeave);
+			};
+		}
+	}, [context.scrollArea, context.scrollHideDelay]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || visible,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarAuto, {
+			"data-state": visible ? "visible" : "hidden",
+			...scrollbarProps,
+			ref: forwardedRef
+		})
+	});
+});
+var ScrollAreaScrollbarScroll = import_react.forwardRef((props, forwardedRef) => {
+	const { forceMount, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const isHorizontal = props.orientation === "horizontal";
+	const debounceScrollEnd = useDebounceCallback(() => send("SCROLL_END"), 100);
+	const [state, send] = useStateMachine("hidden", {
+		hidden: { SCROLL: "scrolling" },
+		scrolling: {
+			SCROLL_END: "idle",
+			POINTER_ENTER: "interacting"
+		},
+		interacting: {
+			SCROLL: "interacting",
+			POINTER_LEAVE: "idle"
+		},
+		idle: {
+			HIDE: "hidden",
+			SCROLL: "scrolling",
+			POINTER_ENTER: "interacting"
+		}
+	});
+	import_react.useEffect(() => {
+		if (state === "idle") {
+			const hideTimer = window.setTimeout(() => send("HIDE"), context.scrollHideDelay);
+			return () => window.clearTimeout(hideTimer);
+		}
+	}, [
+		state,
+		context.scrollHideDelay,
+		send
+	]);
+	import_react.useEffect(() => {
+		const viewport = context.viewport;
+		const scrollDirection = isHorizontal ? "scrollLeft" : "scrollTop";
+		if (viewport) {
+			let prevScrollPos = viewport[scrollDirection];
+			const handleScroll = () => {
+				const scrollPos = viewport[scrollDirection];
+				if (prevScrollPos !== scrollPos) {
+					send("SCROLL");
+					debounceScrollEnd();
+				}
+				prevScrollPos = scrollPos;
+			};
+			viewport.addEventListener("scroll", handleScroll);
+			return () => viewport.removeEventListener("scroll", handleScroll);
+		}
+	}, [
+		context.viewport,
+		isHorizontal,
+		send,
+		debounceScrollEnd
+	]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || state !== "hidden",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarVisible, {
+			"data-state": state === "hidden" ? "hidden" : "visible",
+			...scrollbarProps,
+			ref: forwardedRef,
+			onPointerEnter: composeEventHandlers(props.onPointerEnter, () => send("POINTER_ENTER")),
+			onPointerLeave: composeEventHandlers(props.onPointerLeave, () => send("POINTER_LEAVE"))
+		})
+	});
+});
+var ScrollAreaScrollbarAuto = import_react.forwardRef((props, forwardedRef) => {
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const { forceMount, ...scrollbarProps } = props;
+	const [visible, setVisible] = import_react.useState(false);
+	const isHorizontal = props.orientation === "horizontal";
+	const handleResize = useDebounceCallback(() => {
+		if (context.viewport) {
+			const isOverflowX = context.viewport.offsetWidth < context.viewport.scrollWidth;
+			const isOverflowY = context.viewport.offsetHeight < context.viewport.scrollHeight;
+			setVisible(isHorizontal ? isOverflowX : isOverflowY);
+		}
+	}, 10);
+	useResizeObserver(context.viewport, handleResize);
+	useResizeObserver(context.content, handleResize);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || visible,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarVisible, {
+			"data-state": visible ? "visible" : "hidden",
+			...scrollbarProps,
+			ref: forwardedRef
+		})
+	});
+});
+var ScrollAreaScrollbarVisible = import_react.forwardRef((props, forwardedRef) => {
+	const { orientation = "vertical", ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const thumbRef = import_react.useRef(null);
+	const pointerOffsetRef = import_react.useRef(0);
+	const [sizes, setSizes] = import_react.useState({
+		content: 0,
+		viewport: 0,
+		scrollbar: {
+			size: 0,
+			paddingStart: 0,
+			paddingEnd: 0
+		}
+	});
+	const thumbRatio = getThumbRatio(sizes.viewport, sizes.content);
+	const commonProps = {
+		...scrollbarProps,
+		sizes,
+		onSizesChange: setSizes,
+		hasThumb: Boolean(thumbRatio > 0 && thumbRatio < 1),
+		onThumbChange: (thumb) => thumbRef.current = thumb,
+		onThumbPointerUp: () => pointerOffsetRef.current = 0,
+		onThumbPointerDown: (pointerPos) => pointerOffsetRef.current = pointerPos
+	};
+	function getScrollPosition(pointerPos, dir) {
+		return getScrollPositionFromPointer(pointerPos, pointerOffsetRef.current, sizes, dir);
+	}
+	if (orientation === "horizontal") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarX, {
+		...commonProps,
+		ref: forwardedRef,
+		onThumbPositionChange: () => {
+			if (context.viewport && thumbRef.current) {
+				const scrollPos = context.viewport.scrollLeft;
+				const offset = getThumbOffsetFromScroll(scrollPos, sizes, context.dir);
+				thumbRef.current.style.transform = `translate3d(${offset}px, 0, 0)`;
+			}
+		},
+		onWheelScroll: (scrollPos) => {
+			if (context.viewport) context.viewport.scrollLeft = scrollPos;
+		},
+		onDragScroll: (pointerPos) => {
+			if (context.viewport) context.viewport.scrollLeft = getScrollPosition(pointerPos, context.dir);
+		}
+	});
+	if (orientation === "vertical") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarY, {
+		...commonProps,
+		ref: forwardedRef,
+		onThumbPositionChange: () => {
+			if (context.viewport && thumbRef.current) {
+				const scrollPos = context.viewport.scrollTop;
+				const offset = getThumbOffsetFromScroll(scrollPos, sizes);
+				thumbRef.current.style.transform = `translate3d(0, ${offset}px, 0)`;
+			}
+		},
+		onWheelScroll: (scrollPos) => {
+			if (context.viewport) context.viewport.scrollTop = scrollPos;
+		},
+		onDragScroll: (pointerPos) => {
+			if (context.viewport) context.viewport.scrollTop = getScrollPosition(pointerPos);
+		}
+	});
+	return null;
+});
+var ScrollAreaScrollbarX = import_react.forwardRef((props, forwardedRef) => {
+	const { sizes, onSizesChange, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const [computedStyle, setComputedStyle] = import_react.useState();
+	const ref = import_react.useRef(null);
+	const composeRefs = useComposedRefs(forwardedRef, ref, context.onScrollbarXChange);
+	import_react.useEffect(() => {
+		if (ref.current) setComputedStyle(getComputedStyle(ref.current));
+	}, [ref]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarImpl, {
+		"data-orientation": "horizontal",
+		...scrollbarProps,
+		ref: composeRefs,
+		sizes,
+		style: {
+			bottom: 0,
+			left: context.dir === "rtl" ? "var(--radix-scroll-area-corner-width)" : 0,
+			right: context.dir === "ltr" ? "var(--radix-scroll-area-corner-width)" : 0,
+			["--radix-scroll-area-thumb-width"]: getThumbSize(sizes) + "px",
+			...props.style
+		},
+		onThumbPointerDown: (pointerPos) => props.onThumbPointerDown(pointerPos.x),
+		onDragScroll: (pointerPos) => props.onDragScroll(pointerPos.x),
+		onWheelScroll: (event, maxScrollPos) => {
+			if (context.viewport) {
+				const scrollPos = context.viewport.scrollLeft + event.deltaX;
+				props.onWheelScroll(scrollPos);
+				if (isScrollingWithinScrollbarBounds(scrollPos, maxScrollPos)) event.preventDefault();
+			}
+		},
+		onResize: () => {
+			if (ref.current && context.viewport && computedStyle) onSizesChange({
+				content: context.viewport.scrollWidth,
+				viewport: context.viewport.offsetWidth,
+				scrollbar: {
+					size: ref.current.clientWidth,
+					paddingStart: toInt(computedStyle.paddingLeft),
+					paddingEnd: toInt(computedStyle.paddingRight)
+				}
+			});
+		}
+	});
+});
+var ScrollAreaScrollbarY = import_react.forwardRef((props, forwardedRef) => {
+	const { sizes, onSizesChange, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
+	const [computedStyle, setComputedStyle] = import_react.useState();
+	const ref = import_react.useRef(null);
+	const composeRefs = useComposedRefs(forwardedRef, ref, context.onScrollbarYChange);
+	import_react.useEffect(() => {
+		if (ref.current) setComputedStyle(getComputedStyle(ref.current));
+	}, [ref]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbarImpl, {
+		"data-orientation": "vertical",
+		...scrollbarProps,
+		ref: composeRefs,
+		sizes,
+		style: {
+			top: 0,
+			right: context.dir === "ltr" ? 0 : void 0,
+			left: context.dir === "rtl" ? 0 : void 0,
+			bottom: "var(--radix-scroll-area-corner-height)",
+			["--radix-scroll-area-thumb-height"]: getThumbSize(sizes) + "px",
+			...props.style
+		},
+		onThumbPointerDown: (pointerPos) => props.onThumbPointerDown(pointerPos.y),
+		onDragScroll: (pointerPos) => props.onDragScroll(pointerPos.y),
+		onWheelScroll: (event, maxScrollPos) => {
+			if (context.viewport) {
+				const scrollPos = context.viewport.scrollTop + event.deltaY;
+				props.onWheelScroll(scrollPos);
+				if (isScrollingWithinScrollbarBounds(scrollPos, maxScrollPos)) event.preventDefault();
+			}
+		},
+		onResize: () => {
+			if (ref.current && context.viewport && computedStyle) onSizesChange({
+				content: context.viewport.scrollHeight,
+				viewport: context.viewport.offsetHeight,
+				scrollbar: {
+					size: ref.current.clientHeight,
+					paddingStart: toInt(computedStyle.paddingTop),
+					paddingEnd: toInt(computedStyle.paddingBottom)
+				}
+			});
+		}
+	});
+});
+var [ScrollbarProvider, useScrollbarContext] = createScrollAreaContext(SCROLLBAR_NAME);
+var ScrollAreaScrollbarImpl = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeScrollArea, sizes, hasThumb, onThumbChange, onThumbPointerUp, onThumbPointerDown, onThumbPositionChange, onDragScroll, onWheelScroll, onResize, ...scrollbarProps } = props;
+	const context = useScrollAreaContext(SCROLLBAR_NAME, __scopeScrollArea);
+	const [scrollbar, setScrollbar] = import_react.useState(null);
+	const composeRefs = useComposedRefs(forwardedRef, (node) => setScrollbar(node));
+	const rectRef = import_react.useRef(null);
+	const prevWebkitUserSelectRef = import_react.useRef("");
+	const viewport = context.viewport;
+	const maxScrollPos = sizes.content - sizes.viewport;
+	const handleWheelScroll = useCallbackRef$1(onWheelScroll);
+	const handleThumbPositionChange = useCallbackRef$1(onThumbPositionChange);
+	const handleResize = useDebounceCallback(onResize, 10);
+	function handleDragScroll(event) {
+		if (rectRef.current) onDragScroll({
+			x: event.clientX - rectRef.current.left,
+			y: event.clientY - rectRef.current.top
+		});
+	}
+	import_react.useEffect(() => {
+		const handleWheel = (event) => {
+			const element = event.target;
+			if (scrollbar?.contains(element)) handleWheelScroll(event, maxScrollPos);
+		};
+		document.addEventListener("wheel", handleWheel, { passive: false });
+		return () => document.removeEventListener("wheel", handleWheel, { passive: false });
+	}, [
+		viewport,
+		scrollbar,
+		maxScrollPos,
+		handleWheelScroll
+	]);
+	import_react.useEffect(handleThumbPositionChange, [sizes, handleThumbPositionChange]);
+	useResizeObserver(scrollbar, handleResize);
+	useResizeObserver(context.content, handleResize);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollbarProvider, {
+		scope: __scopeScrollArea,
+		scrollbar,
+		hasThumb,
+		onThumbChange: useCallbackRef$1(onThumbChange),
+		onThumbPointerUp: useCallbackRef$1(onThumbPointerUp),
+		onThumbPositionChange: handleThumbPositionChange,
+		onThumbPointerDown: useCallbackRef$1(onThumbPointerDown),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+			...scrollbarProps,
+			ref: composeRefs,
+			style: {
+				position: "absolute",
+				...scrollbarProps.style
+			},
+			onPointerDown: composeEventHandlers(props.onPointerDown, (event) => {
+				if (event.button === 0) {
+					event.target.setPointerCapture(event.pointerId);
+					rectRef.current = scrollbar.getBoundingClientRect();
+					prevWebkitUserSelectRef.current = document.body.style.webkitUserSelect;
+					document.body.style.webkitUserSelect = "none";
+					if (context.viewport) context.viewport.style.scrollBehavior = "auto";
+					handleDragScroll(event);
+				}
+			}),
+			onPointerMove: composeEventHandlers(props.onPointerMove, handleDragScroll),
+			onPointerUp: composeEventHandlers(props.onPointerUp, (event) => {
+				const element = event.target;
+				if (element.hasPointerCapture(event.pointerId)) element.releasePointerCapture(event.pointerId);
+				document.body.style.webkitUserSelect = prevWebkitUserSelectRef.current;
+				if (context.viewport) context.viewport.style.scrollBehavior = "";
+				rectRef.current = null;
+			})
+		})
+	});
+});
+var THUMB_NAME = "ScrollAreaThumb";
+var ScrollAreaThumb = import_react.forwardRef((props, forwardedRef) => {
+	const { forceMount, ...thumbProps } = props;
+	const scrollbarContext = useScrollbarContext(THUMB_NAME, props.__scopeScrollArea);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || scrollbarContext.hasThumb,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaThumbImpl, {
+			ref: forwardedRef,
+			...thumbProps
+		})
+	});
+});
+var ScrollAreaThumbImpl = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeScrollArea, style, ...thumbProps } = props;
+	const scrollAreaContext = useScrollAreaContext(THUMB_NAME, __scopeScrollArea);
+	const scrollbarContext = useScrollbarContext(THUMB_NAME, __scopeScrollArea);
+	const { onThumbPositionChange } = scrollbarContext;
+	const composedRef = useComposedRefs(forwardedRef, (node) => scrollbarContext.onThumbChange(node));
+	const removeUnlinkedScrollListenerRef = import_react.useRef(void 0);
+	const debounceScrollEnd = useDebounceCallback(() => {
+		if (removeUnlinkedScrollListenerRef.current) {
+			removeUnlinkedScrollListenerRef.current();
+			removeUnlinkedScrollListenerRef.current = void 0;
+		}
+	}, 100);
+	import_react.useEffect(() => {
+		const viewport = scrollAreaContext.viewport;
+		if (viewport) {
+			const handleScroll = () => {
+				debounceScrollEnd();
+				if (!removeUnlinkedScrollListenerRef.current) {
+					removeUnlinkedScrollListenerRef.current = addUnlinkedScrollListener(viewport, onThumbPositionChange);
+					onThumbPositionChange();
+				}
+			};
+			onThumbPositionChange();
+			viewport.addEventListener("scroll", handleScroll);
+			return () => viewport.removeEventListener("scroll", handleScroll);
+		}
+	}, [
+		scrollAreaContext.viewport,
+		debounceScrollEnd,
+		onThumbPositionChange
+	]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+		"data-state": scrollbarContext.hasThumb ? "visible" : "hidden",
+		...thumbProps,
+		ref: composedRef,
+		style: {
+			width: "var(--radix-scroll-area-thumb-width)",
+			height: "var(--radix-scroll-area-thumb-height)",
+			...style
+		},
+		onPointerDownCapture: composeEventHandlers(props.onPointerDownCapture, (event) => {
+			const thumbRect = event.target.getBoundingClientRect();
+			const x = event.clientX - thumbRect.left;
+			const y = event.clientY - thumbRect.top;
+			scrollbarContext.onThumbPointerDown({
+				x,
+				y
+			});
+		}),
+		onPointerUp: composeEventHandlers(props.onPointerUp, scrollbarContext.onThumbPointerUp)
+	});
+});
+ScrollAreaThumb.displayName = THUMB_NAME;
+var CORNER_NAME = "ScrollAreaCorner";
+var ScrollAreaCorner = import_react.forwardRef((props, forwardedRef) => {
+	const context = useScrollAreaContext(CORNER_NAME, props.__scopeScrollArea);
+	const hasBothScrollbarsVisible = Boolean(context.scrollbarX && context.scrollbarY);
+	return context.type !== "scroll" && hasBothScrollbarsVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaCornerImpl, {
+		...props,
+		ref: forwardedRef
+	}) : null;
+});
+ScrollAreaCorner.displayName = CORNER_NAME;
+var ScrollAreaCornerImpl = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeScrollArea, ...cornerProps } = props;
+	const context = useScrollAreaContext(CORNER_NAME, __scopeScrollArea);
+	const [width, setWidth] = import_react.useState(0);
+	const [height, setHeight] = import_react.useState(0);
+	const hasSize = Boolean(width && height);
+	useResizeObserver(context.scrollbarX, () => {
+		const height2 = context.scrollbarX?.offsetHeight || 0;
+		context.onCornerHeightChange(height2);
+		setHeight(height2);
+	});
+	useResizeObserver(context.scrollbarY, () => {
+		const width2 = context.scrollbarY?.offsetWidth || 0;
+		context.onCornerWidthChange(width2);
+		setWidth(width2);
+	});
+	return hasSize ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+		...cornerProps,
+		ref: forwardedRef,
+		style: {
+			width,
+			height,
+			position: "absolute",
+			right: context.dir === "ltr" ? 0 : void 0,
+			left: context.dir === "rtl" ? 0 : void 0,
+			bottom: 0,
+			...props.style
+		}
+	}) : null;
+});
+function toInt(value) {
+	return value ? parseInt(value, 10) : 0;
+}
+function getThumbRatio(viewportSize, contentSize) {
+	const ratio = viewportSize / contentSize;
+	return isNaN(ratio) ? 0 : ratio;
+}
+function getThumbSize(sizes) {
+	const ratio = getThumbRatio(sizes.viewport, sizes.content);
+	const scrollbarPadding = sizes.scrollbar.paddingStart + sizes.scrollbar.paddingEnd;
+	const thumbSize = (sizes.scrollbar.size - scrollbarPadding) * ratio;
+	return Math.max(thumbSize, 18);
+}
+function getScrollPositionFromPointer(pointerPos, pointerOffset, sizes, dir = "ltr") {
+	const thumbSizePx = getThumbSize(sizes);
+	const thumbCenter = thumbSizePx / 2;
+	const offset = pointerOffset || thumbCenter;
+	const thumbOffsetFromEnd = thumbSizePx - offset;
+	const minPointerPos = sizes.scrollbar.paddingStart + offset;
+	const maxPointerPos = sizes.scrollbar.size - sizes.scrollbar.paddingEnd - thumbOffsetFromEnd;
+	const maxScrollPos = sizes.content - sizes.viewport;
+	const scrollRange = dir === "ltr" ? [0, maxScrollPos] : [maxScrollPos * -1, 0];
+	return linearScale([minPointerPos, maxPointerPos], scrollRange)(pointerPos);
+}
+function getThumbOffsetFromScroll(scrollPos, sizes, dir = "ltr") {
+	const thumbSizePx = getThumbSize(sizes);
+	const scrollbarPadding = sizes.scrollbar.paddingStart + sizes.scrollbar.paddingEnd;
+	const scrollbar = sizes.scrollbar.size - scrollbarPadding;
+	const maxScrollPos = sizes.content - sizes.viewport;
+	const maxThumbPos = scrollbar - thumbSizePx;
+	const scrollWithoutMomentum = clamp(scrollPos, dir === "ltr" ? [0, maxScrollPos] : [maxScrollPos * -1, 0]);
+	return linearScale([0, maxScrollPos], [0, maxThumbPos])(scrollWithoutMomentum);
+}
+function linearScale(input, output) {
+	return (value) => {
+		if (input[0] === input[1] || output[0] === output[1]) return output[0];
+		const ratio = (output[1] - output[0]) / (input[1] - input[0]);
+		return output[0] + ratio * (value - input[0]);
+	};
+}
+function isScrollingWithinScrollbarBounds(scrollPos, maxScrollPos) {
+	return scrollPos > 0 && scrollPos < maxScrollPos;
+}
+var addUnlinkedScrollListener = (node, handler = () => {}) => {
+	let prevPosition = {
+		left: node.scrollLeft,
+		top: node.scrollTop
+	};
+	let rAF = 0;
+	(function loop() {
+		const position = {
+			left: node.scrollLeft,
+			top: node.scrollTop
+		};
+		const isHorizontalScroll = prevPosition.left !== position.left;
+		const isVerticalScroll = prevPosition.top !== position.top;
+		if (isHorizontalScroll || isVerticalScroll) handler();
+		prevPosition = position;
+		rAF = window.requestAnimationFrame(loop);
+	})();
+	return () => window.cancelAnimationFrame(rAF);
+};
+function useDebounceCallback(callback, delay) {
+	const handleCallback = useCallbackRef$1(callback);
+	const debounceTimerRef = import_react.useRef(0);
+	import_react.useEffect(() => () => window.clearTimeout(debounceTimerRef.current), []);
+	return import_react.useCallback(() => {
+		window.clearTimeout(debounceTimerRef.current);
+		debounceTimerRef.current = window.setTimeout(handleCallback, delay);
+	}, [handleCallback, delay]);
+}
+function useResizeObserver(element, onResize) {
+	const handleResize = useCallbackRef$1(onResize);
+	useLayoutEffect2(() => {
+		let rAF = 0;
+		if (element) {
+			const resizeObserver = new ResizeObserver(() => {
+				cancelAnimationFrame(rAF);
+				rAF = window.requestAnimationFrame(handleResize);
+			});
+			resizeObserver.observe(element);
+			return () => {
+				window.cancelAnimationFrame(rAF);
+				resizeObserver.unobserve(element);
+			};
+		}
+	}, [element, handleResize]);
+}
+var Root = ScrollArea$1;
+var Viewport = ScrollAreaViewport;
+var Corner = ScrollAreaCorner;
+//#endregion
+//#region src/components/ui/scroll-area.tsx
+var ScrollArea = import_react.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Root, {
+	"data-uid": "src/components/ui/scroll-area.tsx:11:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("relative overflow-hidden", className),
+	...props,
+	children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Viewport, {
+			"data-uid": "src/components/ui/scroll-area.tsx:16:5",
+			"data-prohibitions": "[editContent]",
+			className: "h-full w-full rounded-[inherit]",
+			children
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollBar, {
+			"data-uid": "src/components/ui/scroll-area.tsx:19:5",
+			"data-prohibitions": "[editContent]"
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Corner, {
+			"data-uid": "src/components/ui/scroll-area.tsx:20:5",
+			"data-prohibitions": "[editContent]"
+		})
+	]
+}));
+ScrollArea.displayName = Root.displayName;
+var ScrollBar = import_react.forwardRef(({ className, orientation = "vertical", ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaScrollbar, {
+	"data-uid": "src/components/ui/scroll-area.tsx:29:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	orientation,
+	className: cn("flex touch-none select-none transition-colors", orientation === "vertical" && "h-full w-2.5 border-l border-l-transparent p-[1px]", orientation === "horizontal" && "h-2.5 flex-col border-t border-t-transparent p-[1px]", className),
+	...props,
+	children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollAreaThumb, {
+		"data-uid": "src/components/ui/scroll-area.tsx:40:5",
+		"data-prohibitions": "[editContent]",
+		className: "relative flex-1 rounded-full bg-border"
+	})
+}));
+ScrollBar.displayName = ScrollAreaScrollbar.displayName;
+//#endregion
 //#region src/pages/MasterData.tsx
 function MasterData() {
 	const { t } = useTranslation();
-	const { events, exchangeRates, countries } = useMasterDataStore();
+	const store = useMasterDataStore();
+	const tabs = [
+		{
+			key: "exchangeRates",
+			label: "Exchange Rates",
+			data: store.exchangeRates,
+			cols: [{
+				key: "currency",
+				label: "Currency"
+			}, {
+				key: "rateToUsd",
+				label: "Rate to USD",
+				type: "number"
+			}],
+			tpl: {
+				currency: "",
+				rateToUsd: 1
+			}
+		},
+		{
+			key: "events",
+			label: "Events Matrix",
+			data: store.events,
+			cols: [
+				{
+					key: "name",
+					label: "Name"
+				},
+				{
+					key: "costCenter",
+					label: "Cost Center"
+				},
+				{
+					key: "account",
+					label: "Account"
+				},
+				{
+					key: "workorder",
+					label: "Workorder"
+				}
+			],
+			tpl: {
+				name: "",
+				costCenter: "",
+				account: "",
+				workorder: ""
+			}
+		},
+		{
+			key: "countries",
+			label: "Countries",
+			data: store.countries,
+			cols: [{
+				key: "name",
+				label: "Country Name"
+			}],
+			tpl: { name: "" }
+		},
+		{
+			key: "costCenters",
+			label: "Cost Centers",
+			data: store.costCenters,
+			cols: [{
+				key: "code",
+				label: "Code"
+			}, {
+				key: "name",
+				label: "Name"
+			}],
+			tpl: {
+				code: "",
+				name: ""
+			}
+		},
+		{
+			key: "accounts",
+			label: "Accounts",
+			data: store.accounts,
+			cols: [{
+				key: "code",
+				label: "Code"
+			}, {
+				key: "name",
+				label: "Name"
+			}],
+			tpl: {
+				code: "",
+				name: ""
+			}
+		},
+		{
+			key: "workorders",
+			label: "Workorders",
+			data: store.workorders,
+			cols: [{
+				key: "code",
+				label: "Code"
+			}, {
+				key: "name",
+				label: "Name"
+			}],
+			tpl: {
+				code: "",
+				name: ""
+			}
+		},
+		{
+			key: "requesters",
+			label: "Requesters",
+			data: store.requesters,
+			cols: [
+				{
+					key: "name",
+					label: "Name"
+				},
+				{
+					key: "email",
+					label: "Email"
+				},
+				{
+					key: "organization",
+					label: "Organization"
+				}
+			],
+			tpl: {
+				name: "",
+				email: "",
+				organization: ""
+			}
+		}
+	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/MasterData.tsx:19:5",
+		"data-uid": "src/pages/MasterData.tsx:86:5",
 		"data-prohibitions": "[editContent]",
-		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
+		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-			"data-uid": "src/pages/MasterData.tsx:20:7",
+			"data-uid": "src/pages/MasterData.tsx:87:7",
 			"data-prohibitions": "[editContent]",
 			className: "text-3xl font-serif font-bold text-primary",
 			children: t("masterData")
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Tabs, {
-			"data-uid": "src/pages/MasterData.tsx:22:7",
+			"data-uid": "src/pages/MasterData.tsx:89:7",
 			"data-prohibitions": "[editContent]",
-			defaultValue: "rates",
+			defaultValue: "exchangeRates",
 			className: "w-full mt-8",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TabsList, {
-					"data-uid": "src/pages/MasterData.tsx:23:9",
-					"data-prohibitions": "[]",
-					className: "mb-6 h-12 w-full justify-start bg-muted/50 p-1",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
-							"data-uid": "src/pages/MasterData.tsx:24:11",
-							"data-prohibitions": "[]",
-							value: "rates",
-							className: "px-6 h-full data-[state=active]:bg-background",
-							children: "Exchange Rates"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
-							"data-uid": "src/pages/MasterData.tsx:27:11",
-							"data-prohibitions": "[]",
-							value: "events",
-							className: "px-6 h-full data-[state=active]:bg-background",
-							children: "Events Details"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
-							"data-uid": "src/pages/MasterData.tsx:30:11",
-							"data-prohibitions": "[]",
-							value: "countries",
-							className: "px-6 h-full data-[state=active]:bg-background",
-							children: "Countries"
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ScrollArea, {
+				"data-uid": "src/pages/MasterData.tsx:90:9",
+				"data-prohibitions": "[editContent]",
+				className: "w-full whitespace-nowrap pb-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsList, {
+					"data-uid": "src/pages/MasterData.tsx:91:11",
+					"data-prohibitions": "[editContent]",
+					className: "h-12 justify-start bg-muted/50 p-1",
+					children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
+						"data-uid": "src/pages/MasterData.tsx:93:15",
+						"data-prohibitions": "[editContent]",
+						value: tab.key,
+						className: "px-6 h-full data-[state=active]:bg-background",
+						children: tab.label
+					}, tab.key))
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollBar, {
+					"data-uid": "src/pages/MasterData.tsx:102:11",
+					"data-prohibitions": "[editContent]",
+					orientation: "horizontal"
+				})]
+			}), tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
+				"data-uid": "src/pages/MasterData.tsx:106:11",
+				"data-prohibitions": "[editContent]",
+				value: tab.key,
+				className: "mt-2",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					"data-uid": "src/pages/MasterData.tsx:107:13",
+					"data-prohibitions": "[editContent]",
+					className: "border-border shadow-sm",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
+						"data-uid": "src/pages/MasterData.tsx:108:15",
+						"data-prohibitions": "[editContent]",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
+							"data-uid": "src/pages/MasterData.tsx:109:17",
+							"data-prohibitions": "[editContent]",
+							className: "text-xl font-serif text-[#4a8ebf]",
+							children: tab.label
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardDescription, {
+							"data-uid": "src/pages/MasterData.tsx:110:17",
+							"data-prohibitions": "[editContent]",
+							children: [
+								"Manage your ",
+								tab.label.toLowerCase(),
+								" records in the system."
+							]
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
+						"data-uid": "src/pages/MasterData.tsx:114:15",
+						"data-prohibitions": "[]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CrudTable, {
+							"data-uid": "src/pages/MasterData.tsx:115:17",
+							"data-prohibitions": "[editContent]",
+							columns: tab.cols,
+							data: tab.data,
+							onChange: (newData) => store.updateData(tab.key, newData),
+							newItemTemplate: tab.tpl
 						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
-					"data-uid": "src/pages/MasterData.tsx:35:9",
-					"data-prohibitions": "[editContent]",
-					value: "rates",
-					className: "mt-0",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-						"data-uid": "src/pages/MasterData.tsx:36:11",
-						"data-prohibitions": "[editContent]",
-						className: "border-border shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-							"data-uid": "src/pages/MasterData.tsx:37:13",
-							"data-prohibitions": "[]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-								"data-uid": "src/pages/MasterData.tsx:38:15",
-								"data-prohibitions": "[]",
-								children: "Exchange Rates (vs USD)"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
-								"data-uid": "src/pages/MasterData.tsx:39:15",
-								"data-prohibitions": "[]",
-								children: "Manage currency conversion rates across the platform."
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-							"data-uid": "src/pages/MasterData.tsx:43:13",
-							"data-prohibitions": "[editContent]",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
-								"data-uid": "src/pages/MasterData.tsx:44:15",
-								"data-prohibitions": "[editContent]",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
-									"data-uid": "src/pages/MasterData.tsx:45:17",
-									"data-prohibitions": "[]",
-									className: "bg-muted/30",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-										"data-uid": "src/pages/MasterData.tsx:46:19",
-										"data-prohibitions": "[]",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-											"data-uid": "src/pages/MasterData.tsx:47:21",
-											"data-prohibitions": "[]",
-											children: "Currency Code"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-											"data-uid": "src/pages/MasterData.tsx:48:21",
-											"data-prohibitions": "[]",
-											children: "Conversion Rate"
-										})]
-									})
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableBody, {
-									"data-uid": "src/pages/MasterData.tsx:51:17",
-									"data-prohibitions": "[editContent]",
-									children: exchangeRates.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-										"data-uid": "src/pages/MasterData.tsx:53:21",
-										"data-prohibitions": "[editContent]",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-											"data-uid": "src/pages/MasterData.tsx:54:23",
-											"data-prohibitions": "[editContent]",
-											className: "font-bold text-primary",
-											children: r.currency
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-											"data-uid": "src/pages/MasterData.tsx:55:23",
-											"data-prohibitions": "[editContent]",
-											className: "font-mono",
-											children: r.rateToUsd
-										})]
-									}, r.currency))
-								})]
-							})
-						})]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
-					"data-uid": "src/pages/MasterData.tsx:64:9",
-					"data-prohibitions": "[editContent]",
-					value: "events",
-					className: "mt-0",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-						"data-uid": "src/pages/MasterData.tsx:65:11",
-						"data-prohibitions": "[editContent]",
-						className: "border-border shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-							"data-uid": "src/pages/MasterData.tsx:66:13",
-							"data-prohibitions": "[]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-								"data-uid": "src/pages/MasterData.tsx:67:15",
-								"data-prohibitions": "[]",
-								children: "Events Matrix"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
-								"data-uid": "src/pages/MasterData.tsx:68:15",
-								"data-prohibitions": "[]",
-								children: "Mapping of events to budget codes."
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-							"data-uid": "src/pages/MasterData.tsx:70:13",
-							"data-prohibitions": "[editContent]",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
-								"data-uid": "src/pages/MasterData.tsx:71:15",
-								"data-prohibitions": "[editContent]",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
-									"data-uid": "src/pages/MasterData.tsx:72:17",
-									"data-prohibitions": "[]",
-									className: "bg-muted/30",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-										"data-uid": "src/pages/MasterData.tsx:73:19",
-										"data-prohibitions": "[]",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-												"data-uid": "src/pages/MasterData.tsx:74:21",
-												"data-prohibitions": "[]",
-												children: "Event Name"
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-												"data-uid": "src/pages/MasterData.tsx:75:21",
-												"data-prohibitions": "[]",
-												children: "Cost Center"
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-												"data-uid": "src/pages/MasterData.tsx:76:21",
-												"data-prohibitions": "[]",
-												children: "Account Code"
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-												"data-uid": "src/pages/MasterData.tsx:77:21",
-												"data-prohibitions": "[]",
-												children: "Workorder"
-											})
-										]
-									})
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableBody, {
-									"data-uid": "src/pages/MasterData.tsx:80:17",
-									"data-prohibitions": "[editContent]",
-									children: events.map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-										"data-uid": "src/pages/MasterData.tsx:82:21",
-										"data-prohibitions": "[editContent]",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-												"data-uid": "src/pages/MasterData.tsx:83:23",
-												"data-prohibitions": "[editContent]",
-												className: "font-medium",
-												children: e.name
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-												"data-uid": "src/pages/MasterData.tsx:84:23",
-												"data-prohibitions": "[editContent]",
-												children: e.costCenter
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-												"data-uid": "src/pages/MasterData.tsx:85:23",
-												"data-prohibitions": "[editContent]",
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													"data-uid": "src/pages/MasterData.tsx:86:25",
-													"data-prohibitions": "[editContent]",
-													className: "bg-muted px-2 py-1 rounded font-mono text-xs",
-													children: e.account
-												})
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-												"data-uid": "src/pages/MasterData.tsx:90:23",
-												"data-prohibitions": "[editContent]",
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													"data-uid": "src/pages/MasterData.tsx:91:25",
-													"data-prohibitions": "[editContent]",
-													className: "bg-muted px-2 py-1 rounded font-mono text-xs",
-													children: e.workorder
-												})
-											})
-										]
-									}, e.id))
-								})]
-							})
-						})]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
-					"data-uid": "src/pages/MasterData.tsx:103:9",
-					"data-prohibitions": "[editContent]",
-					value: "countries",
-					className: "mt-0",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-						"data-uid": "src/pages/MasterData.tsx:104:11",
-						"data-prohibitions": "[editContent]",
-						className: "border-border shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-							"data-uid": "src/pages/MasterData.tsx:105:13",
-							"data-prohibitions": "[]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-								"data-uid": "src/pages/MasterData.tsx:106:15",
-								"data-prohibitions": "[]",
-								children: "Supported Countries"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
-								"data-uid": "src/pages/MasterData.tsx:107:15",
-								"data-prohibitions": "[]",
-								children: "List of available countries for requester profiles."
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-							"data-uid": "src/pages/MasterData.tsx:109:13",
-							"data-prohibitions": "[editContent]",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								"data-uid": "src/pages/MasterData.tsx:110:15",
-								"data-prohibitions": "[editContent]",
-								className: "flex flex-wrap gap-3",
-								children: countries.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/MasterData.tsx:112:19",
-									"data-prohibitions": "[editContent]",
-									className: "bg-primary/5 text-primary border border-primary/20 px-4 py-2 rounded-lg text-sm font-medium",
-									children: c
-								}, c))
-							})
-						})]
-					})
+					})]
 				})
-			]
+			}, tab.key))]
 		})]
 	});
 }
@@ -29712,4 +30635,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-Bcm0Zu9W.js.map
+//# sourceMappingURL=index-DdjwfdPz.js.map

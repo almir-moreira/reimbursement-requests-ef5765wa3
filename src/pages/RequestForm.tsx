@@ -41,7 +41,7 @@ export default function RequestForm() {
             id: `h-${Date.now()}`,
             date: new Date().toISOString(),
             action: 'Created',
-            userId: user.id,
+            userId: user.name || 'Requester',
           },
         ],
       })
@@ -52,7 +52,9 @@ export default function RequestForm() {
 
   if (!formData.id) return null
 
-  const readOnly = !isNew && user?.role === 'requester'
+  // Editing is allowed only when new or for QC when pending
+  const isEditingAllowed = isNew || (user?.role === 'qc' && formData.status === 'Pending')
+  const readOnly = !isEditingAllowed
 
   const handleSave = () => {
     if (isNew) {
@@ -70,17 +72,31 @@ export default function RequestForm() {
       toast({ title: 'Rejection reason is required', variant: 'destructive' })
       return
     }
-    const newHistory = [
-      ...(formData.history || []),
-      {
-        id: `h-${Date.now()}`,
-        date: new Date().toISOString(),
-        action: status,
-        userId: user?.id || '',
-        comments,
-      },
-    ]
-    updateRequest(formData.id!, { status: status as any, history: newHistory })
+
+    const signature = {
+      name: user?.name || '',
+      date: new Date().toISOString(),
+      role: user?.role || '',
+    }
+
+    const updates: Partial<ReimbursementRequest> = {
+      status: status as any,
+      history: [
+        ...(formData.history || []),
+        {
+          id: `h-${Date.now()}`,
+          date: new Date().toISOString(),
+          action: status,
+          userId: user?.name || '',
+          comments,
+        },
+      ],
+    }
+
+    if (status === 'Checked' && user?.role === 'qc') updates.qcSignature = signature
+    if (status === 'Approved' && user?.role === 'co') updates.coSignature = signature
+
+    updateRequest(formData.id!, updates)
     toast({ title: `Request ${status}` })
     navigate('/requests')
   }
@@ -112,8 +128,15 @@ export default function RequestForm() {
       </div>
 
       <Card className="print:shadow-none print:border-none border-border shadow-sm overflow-hidden">
-        <CardHeader className="bg-[#4a8ebf] text-white py-4 print:bg-gray-200 print:text-black">
-          <CardTitle className="text-xl tracking-wide">Reimbursement Request Form</CardTitle>
+        <CardHeader
+          className={`text-white py-4 print:bg-gray-200 print:text-black ${formData.status === 'Rejected' ? 'bg-destructive' : 'bg-[#4a8ebf]'}`}
+        >
+          <CardTitle className="text-xl tracking-wide flex items-center gap-3">
+            Reimbursement Request Form{' '}
+            {formData.status === 'Rejected' && (
+              <span className="text-sm bg-white/20 px-2 py-0.5 rounded ml-auto">REJECTED</span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6 md:p-10 space-y-8">
           <RequestHeader
@@ -177,6 +200,7 @@ export default function RequestForm() {
                       {h.action}
                     </span>
                   </div>
+                  <div className="w-40 text-muted-foreground truncate">{h.userId}</div>
                   <div className="flex-1 text-muted-foreground">
                     {h.comments || 'System update'}
                   </div>

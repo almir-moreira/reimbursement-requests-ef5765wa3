@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import useMasterDataStore from '@/stores/useMasterDataStore'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   formData: Partial<ReimbursementRequest>
@@ -18,26 +19,33 @@ interface Props {
 
 export function RequestHeader({ formData, onChange, readOnly }: Props) {
   const { events } = useMasterDataStore()
+  const { t } = useTranslation()
   const reqUser = formData.requesterDetails || {}
+
+  const handleEventChange = (eventId: string) => {
+    const event = events.find((e) => e.id === eventId)
+    onChange({
+      eventId,
+      costCenter: event?.costCenter || '',
+      account: event?.account || '',
+      workorder: event?.workorder || '',
+    })
+  }
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <div className="space-y-2">
           <Label className="text-muted-foreground text-xs uppercase">Id</Label>
-          <Input disabled value={formData.id || ''} className="bg-muted/50 font-mono" />
+          <Input disabled value={formData.id || ''} className="bg-muted/50 font-mono text-xs" />
         </div>
         <div className="space-y-2">
-          <Label className="text-muted-foreground text-xs uppercase">Form status</Label>
-          <Input disabled value={formData.status || ''} className="bg-muted/50 font-semibold" />
+          <Label className="text-muted-foreground text-xs uppercase">Status</Label>
+          <Input disabled value={t(formData.status || '')} className="bg-muted/50 font-semibold" />
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label className="text-muted-foreground text-xs uppercase">Event</Label>
-          <Select
-            disabled={readOnly}
-            value={formData.eventId}
-            onValueChange={(v) => onChange({ eventId: v })}
-          >
+          <Select disabled={readOnly} value={formData.eventId} onValueChange={handleEventChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select Event" />
             </SelectTrigger>
@@ -49,6 +57,22 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-muted-foreground text-xs uppercase">Account</Label>
+          <Input
+            disabled
+            value={formData.account || ''}
+            className="bg-muted/50 font-mono text-xs"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-muted-foreground text-xs uppercase">Workorder</Label>
+          <Input
+            disabled
+            value={formData.workorder || ''}
+            className="bg-muted/50 font-mono text-xs"
+          />
         </div>
       </div>
 
@@ -123,15 +147,6 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">BIC</Label>
             <Input disabled value={reqUser.bic || ''} className="bg-muted/30" />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs uppercase">Bank Code</Label>
-            <Input disabled value={reqUser.bankCode || ''} className="bg-muted/30" />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <Label className="text-muted-foreground text-xs uppercase">Bank Country</Label>
-            <Input disabled value={reqUser.bankCountry || ''} className="bg-muted/30" />
           </div>
         </div>
       </div>

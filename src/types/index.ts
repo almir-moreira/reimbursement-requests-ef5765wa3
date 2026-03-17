@@ -29,9 +29,7 @@ export interface Expense {
   description: string
   amount: number
   currency: string
-  account?: string
-  workorder?: string
-  exchangeRate?: number
+  amountUsd?: number
   amountEuros?: number
 }
 
@@ -49,10 +47,19 @@ export interface HistoryLog {
   comments?: string
 }
 
+export interface Signature {
+  name: string
+  date: string
+  role: string
+}
+
 export interface ReimbursementRequest {
   id: string
   status: RequestStatus
   eventId: string
+  costCenter?: string
+  account?: string
+  workorder?: string
   requesterId: string
   requesterDetails: Partial<User>
   expenses: Expense[]
@@ -60,4 +67,6 @@ export interface ReimbursementRequest {
   date: string
   attachments: Attachment[]
   history: HistoryLog[]
+  qcSignature?: Signature
+  coSignature?: Signature
 }

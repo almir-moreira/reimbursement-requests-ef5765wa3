@@ -59,12 +59,12 @@ export default function RequestsList() {
                     variant="outline"
                     className={`
                     ${req.status === 'Paid' ? 'bg-success/10 text-success border-success/20' : ''}
-                    ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : ''}
+                    ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold' : ''}
                     ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : ''}
                     ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
                   `}
                   >
-                    {req.status}
+                    {t(req.status) || req.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">

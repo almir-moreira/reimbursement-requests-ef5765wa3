@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, Role } from '@/types'
 
 interface AuthContextData {
@@ -13,8 +13,23 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('auth_user_v2')
+      if (saved) return JSON.parse(saved)
+    } catch {}
+    return null
+  })
+
   const [lang, setLang] = useState<'en' | 'ar'>('en')
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('auth_user_v2', JSON.stringify(user))
+    } else {
+      localStorage.removeItem('auth_user_v2')
+    }
+  }, [user])
 
   const login = (email: string, role: Role) => {
     setUser({

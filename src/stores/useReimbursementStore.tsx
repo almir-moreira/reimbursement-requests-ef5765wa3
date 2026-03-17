@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { ReimbursementRequest } from '@/types'
 
 interface ReimbursementContextData {
@@ -10,7 +10,17 @@ interface ReimbursementContextData {
 const ReimbursementContext = createContext<ReimbursementContextData | undefined>(undefined)
 
 export function ReimbursementProvider({ children }: { children: ReactNode }) {
-  const [requests, setRequests] = useState<ReimbursementRequest[]>([])
+  const [requests, setRequests] = useState<ReimbursementRequest[]>(() => {
+    try {
+      const saved = localStorage.getItem('reimbursement_requests_v2')
+      if (saved) return JSON.parse(saved)
+    } catch {}
+    return []
+  })
+
+  useEffect(() => {
+    localStorage.setItem('reimbursement_requests_v2', JSON.stringify(requests))
+  }, [requests])
 
   const addRequest = (req: ReimbursementRequest) => {
     setRequests((prev) => [req, ...prev])

@@ -20,6 +20,11 @@ const translations: Record<string, Record<string, string>> = {
     expenseDetails: 'Expense Details',
     attachments: 'Attachments',
     printPdf: 'Print PDF',
+    Pending: 'Pending',
+    Checked: 'Checked',
+    Approved: 'Approved',
+    Paid: 'Paid',
+    Rejected: 'Rejected',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -40,6 +45,11 @@ const translations: Record<string, Record<string, string>> = {
     expenseDetails: 'تفاصيل النفقات',
     attachments: 'المرفقات',
     printPdf: 'طباعة PDF',
+    Pending: 'قيد الانتظار',
+    Checked: 'تم الفحص',
+    Approved: 'موافق عليه',
+    Paid: 'مدفوع',
+    Rejected: 'مرفوض',
   },
 }
 
