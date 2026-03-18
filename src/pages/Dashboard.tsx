@@ -32,10 +32,16 @@ export default function Dashboard() {
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up">
       <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('dashboard')}</h1>
 
-      {user?.role === 'requester' && (
+      {user?.role === 'requester' ? (
         <p className="text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100">
           Welcome back, {user.name}. You can view the real-time status of all your reimbursement
-          requests below.
+          requests below. Check the "Requests" page to view detailed histories and manage
+          rejections.
+        </p>
+      ) : (
+        <p className="text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100">
+          Welcome back, {user?.name}. Here is an overview of the platform's current reimbursement
+          workflow.
         </p>
       )}
 

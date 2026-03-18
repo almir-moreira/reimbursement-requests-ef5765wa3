@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { User } from '@/types'
 
 export interface EventDetail {
   id: string
@@ -45,7 +44,6 @@ interface MasterDataState {
   costCenters: CostCenter[]
   accounts: Account[]
   workorders: Workorder[]
-  requesters: Partial<User>[]
 }
 
 interface MasterDataContextData extends MasterDataState {
@@ -81,23 +79,6 @@ const initialData: MasterDataState = {
     { id: 'a-2', code: '62001', name: 'Meals' },
   ],
   workorders: [{ id: 'w-1', code: 'P1134-12', name: 'Field Visit' }],
-  requesters: [
-    {
-      id: 'req-1',
-      name: 'Dorna Khan',
-      email: 'dorna@example.com',
-      organization: '',
-      address: 'Flat 71 Hope Quay, Rope Walk',
-      city: 'Bristol',
-      zipCode: 'BS1 6ZF',
-      phone: '+447946609450',
-      bankHolder: 'Dorna Khan',
-      bankName: 'HSBC UK',
-      iban: '20547565/GB25HBUK40166420547565',
-      swift: 'HBUKGB4196Y',
-      bankCode: '40-16-64',
-    },
-  ],
 }
 
 const MasterDataContext = createContext<MasterDataContextData | undefined>(undefined)
@@ -105,7 +86,7 @@ const MasterDataContext = createContext<MasterDataContextData | undefined>(undef
 export function MasterDataProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MasterDataState>(() => {
     try {
-      const saved = localStorage.getItem('master_data_v3')
+      const saved = localStorage.getItem('master_data_v4')
       if (saved) return JSON.parse(saved)
     } catch {
       // ignore
@@ -114,7 +95,7 @@ export function MasterDataProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
-    localStorage.setItem('master_data_v3', JSON.stringify(state))
+    localStorage.setItem('master_data_v4', JSON.stringify(state))
   }, [state])
 
   const updateData = (key: keyof MasterDataState, data: any) => {

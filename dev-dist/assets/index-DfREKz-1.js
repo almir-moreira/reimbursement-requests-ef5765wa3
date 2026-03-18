@@ -19291,6 +19291,13 @@ var Printer = createLucideIcon("printer", [
 		key: "1ue0tg"
 	}]
 ]);
+var RotateCcw = createLucideIcon("rotate-ccw", [["path", {
+	d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+	key: "1357e3"
+}], ["path", {
+	d: "M3 3v5h5",
+	key: "1xhq8a"
+}]]);
 var Save = createLucideIcon("save", [
 	["path", {
 		d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
@@ -23339,61 +23346,152 @@ var TooltipContent = import_react.forwardRef(({ className, sideOffset = 4, ...pr
 }));
 TooltipContent.displayName = Content2$1.displayName;
 //#endregion
+//#region src/lib/smtp.ts
+var sendEmail = async ({ to, subject, body }) => {
+	const actualTo = "almir.moreira@kaiciid.org";
+	const sender = "support@kaiciid.org";
+	console.log("--- SMTP EMAIL SENT ---");
+	console.log(`From: ${sender}`);
+	console.log(`Intended To: ${to}`);
+	console.log(`Actual To (Redirected): ${actualTo}`);
+	console.log(`Subject: ${subject}`);
+	console.log(`Body: ${body}`);
+	console.log("-----------------------");
+	toast({
+		title: "Email Notification Sent",
+		description: `To: ${actualTo} (Redirected from ${to}) | Subject: ${subject}`
+	});
+};
+//#endregion
 //#region src/stores/useAuthStore.tsx
+var initialUsers = [
+	{
+		id: "u-1",
+		name: "Admin User",
+		email: "admin@kaiciid.org",
+		password: "password",
+		role: "admin"
+	},
+	{
+		id: "u-2",
+		name: "Quality Control",
+		email: "qc@kaiciid.org",
+		password: "password",
+		role: "qc"
+	},
+	{
+		id: "u-3",
+		name: "Certifying Officer",
+		email: "co@kaiciid.org",
+		password: "password",
+		role: "co"
+	},
+	{
+		id: "u-4",
+		name: "Finance Dept",
+		email: "finance@kaiciid.org",
+		password: "password",
+		role: "finance"
+	},
+	{
+		id: "u-5",
+		name: "Dorna Khan",
+		email: "dorna@example.com",
+		password: "password",
+		role: "requester",
+		city: "Bristol",
+		bankName: "HSBC UK",
+		country: "UK",
+		address: "Flat 71 Hope Quay, Rope Walk",
+		zipCode: "BS1 6ZF",
+		phone: "+447946609450",
+		bankHolder: "Dorna Khan",
+		iban: "20547565/GB25HBUK40166420547565",
+		swift: "HBUKGB4196Y",
+		bankCode: "40-16-64"
+	}
+];
 var AuthContext = (0, import_react.createContext)(void 0);
 function AuthProvider({ children }) {
 	const [user, setUser] = (0, import_react.useState)(() => {
 		try {
-			const saved = localStorage.getItem("auth_user_v2");
+			const saved = localStorage.getItem("auth_user_v3");
 			if (saved) return JSON.parse(saved);
 		} catch {}
 		return null;
 	});
+	const [users, setUsers] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("auth_users_list_v3");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return initialUsers;
+	});
 	const [lang, setLang] = (0, import_react.useState)("en");
 	(0, import_react.useEffect)(() => {
-		if (user) localStorage.setItem("auth_user_v2", JSON.stringify(user));
-		else localStorage.removeItem("auth_user_v2");
+		if (user) localStorage.setItem("auth_user_v3", JSON.stringify(user));
+		else localStorage.removeItem("auth_user_v3");
 	}, [user]);
-	const login = (email, role) => {
-		setUser({
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("auth_users_list_v3", JSON.stringify(users));
+		if (user) {
+			const updatedUser = users.find((u) => u.id === user.id);
+			if (updatedUser && JSON.stringify(updatedUser) !== JSON.stringify(user)) setUser(updatedUser);
+		}
+	}, [users]);
+	const login = (email, password) => {
+		const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && (!password || u.password === password));
+		if (found) {
+			setUser(found);
+			return true;
+		}
+		return false;
+	};
+	const register = async (email, name, password) => {
+		const newUser = {
 			id: `usr-${Date.now()}`,
-			name: email.split("@")[0] || "John Doe",
 			email,
-			role,
-			country: "Kenya",
-			city: "Nairobi",
-			state: "Central",
-			zipCode: "11111",
-			phone: "212444555888",
-			organization: "African Union",
-			address: "Martin Luther King Av 1000",
-			bankHolder: "John Doe",
-			bankName: "Citybank",
-			bankAccount: "929-0029-0989",
-			iban: "KN999000888777666",
-			swift: "KN1234556",
-			bic: "999888777",
-			bankCode: "99910",
-			bankCountry: "Portugal"
+			name,
+			password,
+			role: "requester"
+		};
+		setUsers((prev) => [...prev, newUser]);
+		await sendEmail({
+			to: email,
+			subject: "Welcome to KAICIID Reimbursement Portal",
+			body: `Hi ${name},\n\nPlease confirm your email address to access the portal. You can now login with your credentials.`
 		});
 	};
 	const logout = () => setUser(null);
-	const updateUser = (data) => {
-		if (user) setUser({
-			...user,
+	const updateProfile = (id, data) => {
+		setUsers((prev) => prev.map((u) => u.id === id ? {
+			...u,
 			...data
-		});
+		} : u));
+	};
+	const adminAddUser = (data) => {
+		setUsers((prev) => [...prev, {
+			...data,
+			id: `usr-${Date.now()}`
+		}]);
+	};
+	const adminDeleteUser = (id) => {
+		setUsers((prev) => prev.filter((u) => u.id !== id));
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AuthContext.Provider, {
-		"data-uid": "src/stores/useAuthStore.tsx:67:5",
+		"data-uid": "src/stores/useAuthStore.tsx:144:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			user,
 			lang,
 			setLang,
+			users,
 			login,
+			register,
 			logout,
-			updateUser
+			updateProfile,
+			adminAddUser,
+			adminDeleteUser
 		},
 		children
 	});
@@ -25609,58 +25707,58 @@ function Layout() {
 		icon: Database
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarProvider, {
-		"data-uid": "src/components/Layout.tsx:49:5",
+		"data-uid": "src/components/Layout.tsx:58:5",
 		"data-prohibitions": "[editContent]",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/Layout.tsx:50:7",
+			"data-uid": "src/components/Layout.tsx:59:7",
 			"data-prohibitions": "[editContent]",
 			dir: lang === "ar" ? "rtl" : "ltr",
 			className: "flex min-h-screen w-full bg-background font-sans",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Sidebar, {
-				"data-uid": "src/components/Layout.tsx:54:9",
+				"data-uid": "src/components/Layout.tsx:63:9",
 				"data-prohibitions": "[editContent]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/Layout.tsx:55:11",
+					"data-uid": "src/components/Layout.tsx:64:11",
 					"data-prohibitions": "[editContent]",
-					className: "p-6 border-b border-border",
+					className: "p-6 border-b border-border hidden md:block",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						"data-uid": "src/components/Layout.tsx:56:13",
+						"data-uid": "src/components/Layout.tsx:65:13",
 						"data-prohibitions": "[]",
 						className: "font-bold text-2xl text-[#4a8ebf] uppercase tracking-wider mb-1",
 						children: "KAICIID"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/components/Layout.tsx:59:13",
+						"data-uid": "src/components/Layout.tsx:68:13",
 						"data-prohibitions": "[editContent]",
 						className: "font-serif font-semibold text-lg text-foreground/80",
 						children: lang === "en" ? "Reimbursement Portal" : "بوابة الاسترداد"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarContent, {
-					"data-uid": "src/components/Layout.tsx:63:11",
+					"data-uid": "src/components/Layout.tsx:72:11",
 					"data-prohibitions": "[editContent]",
 					className: "p-4 gap-2 mt-4",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarMenu, {
-						"data-uid": "src/components/Layout.tsx:64:13",
+						"data-uid": "src/components/Layout.tsx:73:13",
 						"data-prohibitions": "[editContent]",
 						children: navItems.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarMenuItem, {
-							"data-uid": "src/components/Layout.tsx:66:17",
+							"data-uid": "src/components/Layout.tsx:75:17",
 							"data-prohibitions": "[editContent]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarMenuButton, {
-								"data-uid": "src/components/Layout.tsx:67:19",
+								"data-uid": "src/components/Layout.tsx:76:19",
 								"data-prohibitions": "[editContent]",
 								asChild: true,
 								isActive: location.pathname.startsWith(item.path),
 								className: "text-md py-5",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-									"data-uid": "src/components/Layout.tsx:72:21",
+									"data-uid": "src/components/Layout.tsx:81:21",
 									"data-prohibitions": "[editContent]",
 									to: item.path,
 									className: "flex items-center gap-3",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(item.icon, {
-										"data-uid": "src/components/Layout.tsx:73:23",
+										"data-uid": "src/components/Layout.tsx:82:23",
 										"data-prohibitions": "[editContent]",
 										className: "w-5 h-5"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/Layout.tsx:74:23",
+										"data-uid": "src/components/Layout.tsx:83:23",
 										"data-prohibitions": "[editContent]",
 										children: item.name
 									})]
@@ -25670,63 +25768,111 @@ function Layout() {
 					})
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/Layout.tsx:83:9",
+				"data-uid": "src/components/Layout.tsx:92:9",
 				"data-prohibitions": "[editContent]",
 				className: "flex-1 flex flex-col min-w-0",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-					"data-uid": "src/components/Layout.tsx:84:11",
+					"data-uid": "src/components/Layout.tsx:93:11",
 					"data-prohibitions": "[editContent]",
-					className: "h-16 border-b border-border bg-card flex items-center justify-end px-6 gap-4 shrink-0 shadow-sm",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/Layout.tsx:85:13",
-							"data-prohibitions": "[editContent]",
-							className: "flex items-center gap-3 text-sm font-medium text-muted-foreground mr-auto lg:mr-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								"data-uid": "src/components/Layout.tsx:86:15",
+					className: "h-16 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 gap-4 shrink-0 shadow-sm",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/Layout.tsx:94:13",
+						"data-prohibitions": "[]",
+						className: "flex items-center gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarTrigger, {
+								"data-uid": "src/components/Layout.tsx:95:15",
 								"data-prohibitions": "[editContent]",
-								className: "bg-[#4a8ebf]/10 text-[#4a8ebf] px-3 py-1 rounded-md capitalize font-bold",
-								children: user.role
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								"data-uid": "src/components/Layout.tsx:89:15",
-								"data-prohibitions": "[editContent]",
-								className: "hidden sm:inline-block",
-								children: user.name
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/Layout.tsx:91:13",
-							"data-prohibitions": "[]",
-							variant: "outline",
-							size: "icon",
-							onClick: () => setLang(lang === "en" ? "ar" : "en"),
-							title: "Toggle Language",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, {
-								"data-uid": "src/components/Layout.tsx:97:15",
-								"data-prohibitions": "[editContent]",
-								className: "w-4 h-4"
+								className: "md:hidden"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/Layout.tsx:96:15",
+								"data-prohibitions": "[]",
+								className: "flex flex-col md:hidden",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:97:17",
+									"data-prohibitions": "[]",
+									className: "font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none",
+									children: "KAICIID"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:100:17",
+									"data-prohibitions": "[]",
+									className: "font-serif text-sm text-foreground/80 leading-tight",
+									children: "Reimbursement Portal"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/Layout.tsx:104:15",
+								"data-prohibitions": "[]",
+								className: "hidden md:flex flex-col ml-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:105:17",
+									"data-prohibitions": "[]",
+									className: "font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none",
+									children: "KAICIID"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:108:17",
+									"data-prohibitions": "[]",
+									className: "font-serif text-sm text-foreground/80 leading-tight",
+									children: "Reimbursement Portal"
+								})]
 							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/Layout.tsx:99:13",
-							"data-prohibitions": "[]",
-							variant: "ghost",
-							size: "icon",
-							onClick: handleLogout,
-							className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, {
-								"data-uid": "src/components/Layout.tsx:105:15",
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/Layout.tsx:114:13",
+						"data-prohibitions": "[editContent]",
+						className: "flex items-center gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/Layout.tsx:115:15",
 								"data-prohibitions": "[editContent]",
-								className: "w-5 h-5"
+								className: "flex items-center gap-3 text-sm font-medium text-muted-foreground mr-auto lg:mr-0",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:116:17",
+									"data-prohibitions": "[editContent]",
+									className: "bg-[#4a8ebf]/10 text-[#4a8ebf] px-3 py-1 rounded-md capitalize font-bold hidden sm:inline-block",
+									children: user.role
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"data-uid": "src/components/Layout.tsx:119:17",
+									"data-prohibitions": "[editContent]",
+									className: "hidden sm:inline-block",
+									children: user.name
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								"data-uid": "src/components/Layout.tsx:121:15",
+								"data-prohibitions": "[]",
+								variant: "outline",
+								size: "icon",
+								onClick: () => setLang(lang === "en" ? "ar" : "en"),
+								title: "Toggle Language",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, {
+									"data-uid": "src/components/Layout.tsx:127:17",
+									"data-prohibitions": "[editContent]",
+									className: "w-4 h-4"
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								"data-uid": "src/components/Layout.tsx:129:15",
+								"data-prohibitions": "[]",
+								variant: "ghost",
+								size: "icon",
+								onClick: handleLogout,
+								className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, {
+									"data-uid": "src/components/Layout.tsx:135:17",
+									"data-prohibitions": "[editContent]",
+									className: "w-5 h-5"
+								})
 							})
-						})
-					]
+						]
+					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-					"data-uid": "src/components/Layout.tsx:108:11",
+					"data-uid": "src/components/Layout.tsx:139:11",
 					"data-prohibitions": "[]",
 					className: "flex-1 overflow-auto p-4 md:p-8 bg-muted/20",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {
-						"data-uid": "src/components/Layout.tsx:109:13",
+						"data-uid": "src/components/Layout.tsx:140:13",
 						"data-prohibitions": "[editContent]"
 					})
 				})]
@@ -25761,6 +25907,1095 @@ var Label$1 = import_react.forwardRef(({ className, ...props }, ref) => /* @__PU
 	...props
 }));
 Label$1.displayName = Root$2.displayName;
+//#endregion
+//#region src/components/ui/card.tsx
+var Card = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:8:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("rounded-lg border bg-card text-card-foreground shadow-sm", className),
+	...props
+}));
+Card.displayName = "Card";
+var CardHeader = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:19:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("flex flex-col space-y-1.5 p-6", className),
+	...props
+}));
+CardHeader.displayName = "CardHeader";
+var CardTitle = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:26:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("text-2xl font-semibold leading-none tracking-tight", className),
+	...props
+}));
+CardTitle.displayName = "CardTitle";
+var CardDescription = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:37:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("text-sm text-muted-foreground", className),
+	...props
+}));
+CardDescription.displayName = "CardDescription";
+var CardContent = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:44:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("p-6 pt-0", className),
+	...props
+}));
+CardContent.displayName = "CardContent";
+var CardFooter = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/card.tsx:51:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("flex items-center p-6 pt-0", className),
+	...props
+}));
+CardFooter.displayName = "CardFooter";
+//#endregion
+//#region src/pages/Login.tsx
+function Login() {
+	const { login, register } = useAuthStore();
+	const navigate = useNavigate();
+	const [isRegistering, setIsRegistering] = (0, import_react.useState)(false);
+	const [email, setEmail] = (0, import_react.useState)("dorna@example.com");
+	const [password, setPassword] = (0, import_react.useState)("password");
+	const [name, setName] = (0, import_react.useState)("");
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		if (isRegistering) {
+			await register(email, name, password);
+			toast({ title: "Account created! Please log in." });
+			setIsRegistering(false);
+		} else if (login(email, password)) navigate("/dashboard");
+		else toast({
+			title: "Invalid credentials",
+			variant: "destructive"
+		});
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		"data-uid": "src/pages/Login.tsx:44:5",
+		"data-prohibitions": "[editContent]",
+		className: "min-h-screen flex items-center justify-center bg-muted/30 p-4",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+			"data-uid": "src/pages/Login.tsx:45:7",
+			"data-prohibitions": "[editContent]",
+			className: "w-full max-w-md shadow-elegant border-border",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
+					"data-uid": "src/pages/Login.tsx:46:9",
+					"data-prohibitions": "[editContent]",
+					className: "text-center pb-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							"data-uid": "src/pages/Login.tsx:47:11",
+							"data-prohibitions": "[]",
+							className: "font-bold text-3xl text-[#4a8ebf] uppercase tracking-wider mb-2",
+							children: "KAICIID"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
+							"data-uid": "src/pages/Login.tsx:50:11",
+							"data-prohibitions": "[]",
+							className: "text-xl font-serif text-foreground/80",
+							children: "Reimbursement Portal"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
+							"data-uid": "src/pages/Login.tsx:53:11",
+							"data-prohibitions": "[editContent]",
+							className: "pt-2",
+							children: isRegistering ? "Create an account to submit requests" : "Login to manage your requests"
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardContent, {
+					"data-uid": "src/pages/Login.tsx:59:9",
+					"data-prohibitions": "[editContent]",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						"data-uid": "src/pages/Login.tsx:60:11",
+						"data-prohibitions": "[editContent]",
+						onSubmit: handleSubmit,
+						className: "space-y-6",
+						children: [
+							isRegistering && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Login.tsx:62:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Login.tsx:63:17",
+									"data-prohibitions": "[]",
+									children: "Full Name"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Login.tsx:64:17",
+									"data-prohibitions": "[editContent]",
+									required: true,
+									value: name,
+									onChange: (e) => setName(e.target.value),
+									placeholder: "John Doe"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Login.tsx:72:13",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Login.tsx:73:15",
+									"data-prohibitions": "[]",
+									children: "Email"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Login.tsx:74:15",
+									"data-prohibitions": "[editContent]",
+									required: true,
+									type: "email",
+									value: email,
+									onChange: (e) => setEmail(e.target.value),
+									placeholder: "user@example.com"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Login.tsx:82:13",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Login.tsx:83:15",
+									"data-prohibitions": "[]",
+									children: "Password"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Login.tsx:84:15",
+									"data-prohibitions": "[editContent]",
+									required: true,
+									type: "password",
+									value: password,
+									onChange: (e) => setPassword(e.target.value),
+									placeholder: "••••••••"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								"data-uid": "src/pages/Login.tsx:93:13",
+								"data-prohibitions": "[editContent]",
+								type: "submit",
+								className: "w-full h-12 text-md bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold",
+								children: isRegistering ? "Register" : "Sign In"
+							})
+						]
+					}), !isRegistering && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/pages/Login.tsx:102:13",
+						"data-prohibitions": "[]",
+						className: "mt-6 p-4 bg-muted/50 rounded-lg text-xs text-muted-foreground",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/pages/Login.tsx:103:15",
+							"data-prohibitions": "[]",
+							className: "font-bold mb-1",
+							children: "Demo Accounts (pw: password):"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+							"data-uid": "src/pages/Login.tsx:104:15",
+							"data-prohibitions": "[]",
+							className: "space-y-1",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+									"data-uid": "src/pages/Login.tsx:105:17",
+									"data-prohibitions": "[]",
+									children: "admin@kaiciid.org (Admin)"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+									"data-uid": "src/pages/Login.tsx:106:17",
+									"data-prohibitions": "[]",
+									children: "qc@kaiciid.org (Quality Control)"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+									"data-uid": "src/pages/Login.tsx:107:17",
+									"data-prohibitions": "[]",
+									children: "co@kaiciid.org (Certifying Officer)"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+									"data-uid": "src/pages/Login.tsx:108:17",
+									"data-prohibitions": "[]",
+									children: "finance@kaiciid.org (Finance)"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+									"data-uid": "src/pages/Login.tsx:109:17",
+									"data-prohibitions": "[]",
+									children: "dorna@example.com (Requester)"
+								})
+							]
+						})]
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardFooter, {
+					"data-uid": "src/pages/Login.tsx:114:9",
+					"data-prohibitions": "[editContent]",
+					className: "flex justify-center border-t border-border pt-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						"data-uid": "src/pages/Login.tsx:115:11",
+						"data-prohibitions": "[editContent]",
+						variant: "link",
+						onClick: () => setIsRegistering(!isRegistering),
+						className: "text-[#4a8ebf]",
+						children: isRegistering ? "Already have an account? Sign In" : "Need an account? Create one"
+					})
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/stores/useReimbursementStore.tsx
+var ReimbursementContext = (0, import_react.createContext)(void 0);
+function ReimbursementProvider({ children }) {
+	const [requests, setRequests] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("reimbursement_requests_v2");
+			if (saved) return JSON.parse(saved);
+		} catch {}
+		return [];
+	});
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("reimbursement_requests_v2", JSON.stringify(requests));
+	}, [requests]);
+	const addRequest = (req) => {
+		setRequests((prev) => [req, ...prev]);
+	};
+	const updateRequest = (id, req) => {
+		setRequests((prev) => prev.map((r) => r.id === id ? {
+			...r,
+			...req
+		} : r));
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReimbursementContext.Provider, {
+		"data-uid": "src/stores/useReimbursementStore.tsx:36:5",
+		"data-prohibitions": "[editContent]",
+		value: {
+			requests,
+			addRequest,
+			updateRequest
+		},
+		children
+	});
+}
+function useReimbursementStore() {
+	const context = (0, import_react.useContext)(ReimbursementContext);
+	if (!context) throw new Error("useReimbursementStore must be used within ReimbursementProvider");
+	return context;
+}
+//#endregion
+//#region src/pages/Dashboard.tsx
+function Dashboard() {
+	const { t } = useTranslation();
+	const { requests } = useReimbursementStore();
+	const { user } = useAuthStore();
+	const userRequests = user?.role === "requester" ? requests.filter((r) => r.requesterId === user.id) : requests;
+	const total = userRequests.length;
+	const pending = userRequests.filter((r) => r.status === "Pending").length;
+	const approved = userRequests.filter((r) => r.status === "Approved" || r.status === "Checked").length;
+	const paid = userRequests.filter((r) => r.status === "Paid").length;
+	const rejected = userRequests.filter((r) => r.status === "Rejected").length;
+	const stats = [
+		{
+			title: "Total Requests",
+			value: total,
+			icon: FileText,
+			color: "text-[#4a8ebf]"
+		},
+		{
+			title: "Pending Approval",
+			value: pending,
+			icon: Clock,
+			color: "text-orange-500"
+		},
+		{
+			title: "In Progress (QC/CO)",
+			value: approved,
+			icon: CircleCheckBig,
+			color: "text-blue-500"
+		},
+		{
+			title: "Paid & Closed",
+			value: paid,
+			icon: DollarSign,
+			color: "text-success"
+		},
+		{
+			title: "Rejected",
+			value: rejected,
+			icon: CircleX,
+			color: "text-destructive"
+		}
+	];
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"data-uid": "src/pages/Dashboard.tsx:32:5",
+		"data-prohibitions": "[editContent]",
+		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				"data-uid": "src/pages/Dashboard.tsx:33:7",
+				"data-prohibitions": "[editContent]",
+				className: "text-3xl font-serif font-bold text-[#4a8ebf]",
+				children: t("dashboard")
+			}),
+			user?.role === "requester" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				"data-uid": "src/pages/Dashboard.tsx:36:9",
+				"data-prohibitions": "[editContent]",
+				className: "text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100",
+				children: [
+					"Welcome back, ",
+					user.name,
+					". You can view the real-time status of all your reimbursement requests below. Check the \"Requests\" page to view detailed histories and manage rejections."
+				]
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				"data-uid": "src/pages/Dashboard.tsx:42:9",
+				"data-prohibitions": "[editContent]",
+				className: "text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100",
+				children: [
+					"Welcome back, ",
+					user?.name,
+					". Here is an overview of the platform's current reimbursement workflow."
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				"data-uid": "src/pages/Dashboard.tsx:48:7",
+				"data-prohibitions": "[editContent]",
+				className: "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8",
+				children: stats.map((stat, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					"data-uid": "src/pages/Dashboard.tsx:50:11",
+					"data-prohibitions": "[editContent]",
+					className: "border-border shadow-sm hover:shadow-md transition-shadow",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
+						"data-uid": "src/pages/Dashboard.tsx:51:13",
+						"data-prohibitions": "[editContent]",
+						className: "flex flex-row items-center justify-between pb-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
+							"data-uid": "src/pages/Dashboard.tsx:52:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-sm font-medium text-muted-foreground whitespace-nowrap",
+							children: stat.title
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							"data-uid": "src/pages/Dashboard.tsx:55:15",
+							"data-prohibitions": "[editContent]",
+							className: `p-2 rounded-full bg-muted ${stat.color} bg-opacity-20`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(stat.icon, {
+								"data-uid": "src/pages/Dashboard.tsx:56:17",
+								"data-prohibitions": "[editContent]",
+								className: `w-5 h-5 ${stat.color}`
+							})
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
+						"data-uid": "src/pages/Dashboard.tsx:59:13",
+						"data-prohibitions": "[editContent]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							"data-uid": "src/pages/Dashboard.tsx:60:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-4xl font-bold text-foreground",
+							children: stat.value
+						})
+					})]
+				}, i))
+			})
+		]
+	});
+}
+//#endregion
+//#region src/pages/Profile.tsx
+function Profile() {
+	const { t } = useTranslation();
+	const { user, updateProfile } = useAuthStore();
+	const [formData, setFormData] = (0, import_react.useState)(user || {});
+	(0, import_react.useEffect)(() => {
+		if (user) setFormData(user);
+	}, [user]);
+	const handleChange = (e) => {
+		setFormData({
+			...formData,
+			[e.target.name]: e.target.value
+		});
+	};
+	const handleSave = () => {
+		if (user?.id) {
+			updateProfile(user.id, formData);
+			toast({ title: "Profile updated successfully" });
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"data-uid": "src/pages/Profile.tsx:34:5",
+		"data-prohibitions": "[editContent]",
+		className: "space-y-6 max-w-5xl mx-auto animate-fade-in-up pb-10",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			"data-uid": "src/pages/Profile.tsx:35:7",
+			"data-prohibitions": "[editContent]",
+			className: "flex justify-between items-center",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				"data-uid": "src/pages/Profile.tsx:36:9",
+				"data-prohibitions": "[]",
+				className: "text-3xl font-serif font-bold text-primary",
+				children: "Requesters Data"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+				"data-uid": "src/pages/Profile.tsx:37:9",
+				"data-prohibitions": "[editContent]",
+				onClick: handleSave,
+				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, {
+						"data-uid": "src/pages/Profile.tsx:38:11",
+						"data-prohibitions": "[editContent]",
+						className: "w-4 h-4 mr-2"
+					}),
+					" ",
+					t("save")
+				]
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+			"data-uid": "src/pages/Profile.tsx:42:7",
+			"data-prohibitions": "[editContent]",
+			className: "border-border shadow-sm overflow-hidden",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
+				"data-uid": "src/pages/Profile.tsx:43:9",
+				"data-prohibitions": "[]",
+				className: "bg-[#4a8ebf] text-white py-4",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
+					"data-uid": "src/pages/Profile.tsx:44:11",
+					"data-prohibitions": "[]",
+					className: "text-lg font-medium tracking-wide",
+					children: "Requesters Data"
+				})
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardContent, {
+				"data-uid": "src/pages/Profile.tsx:46:9",
+				"data-prohibitions": "[editContent]",
+				className: "p-8 space-y-10",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/pages/Profile.tsx:47:11",
+					"data-prohibitions": "[]",
+					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:48:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:49:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Id"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:50:15",
+								"data-prohibitions": "[editContent]",
+								disabled: true,
+								value: formData.id || "",
+								className: "bg-muted/50"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:52:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2 md:col-span-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:53:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Name"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:54:15",
+								"data-prohibitions": "[editContent]",
+								name: "name",
+								value: formData.name || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:56:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:57:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Email"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:58:15",
+								"data-prohibitions": "[editContent]",
+								name: "email",
+								value: formData.email || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:61:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2 md:col-span-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:62:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Address"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:63:15",
+								"data-prohibitions": "[editContent]",
+								name: "address",
+								value: formData.address || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:65:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:66:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "City"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:67:15",
+								"data-prohibitions": "[editContent]",
+								name: "city",
+								value: formData.city || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:69:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:70:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "State"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:71:15",
+								"data-prohibitions": "[editContent]",
+								name: "state",
+								value: formData.state || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:74:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:75:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Country"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:76:15",
+								"data-prohibitions": "[editContent]",
+								name: "country",
+								value: formData.country || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:78:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:79:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "ZIP Code"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:80:15",
+								"data-prohibitions": "[editContent]",
+								name: "zipCode",
+								value: formData.zipCode || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:82:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:83:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Phone"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:84:15",
+								"data-prohibitions": "[editContent]",
+								name: "phone",
+								value: formData.phone || "",
+								onChange: handleChange
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							"data-uid": "src/pages/Profile.tsx:86:13",
+							"data-prohibitions": "[]",
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+								"data-uid": "src/pages/Profile.tsx:87:15",
+								"data-prohibitions": "[]",
+								className: "text-muted-foreground text-xs uppercase",
+								children: "Organization"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								"data-uid": "src/pages/Profile.tsx:88:15",
+								"data-prohibitions": "[editContent]",
+								name: "organization",
+								value: formData.organization || "",
+								onChange: handleChange
+							})]
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/pages/Profile.tsx:96:11",
+					"data-prohibitions": "[editContent]",
+					className: "space-y-6 pt-8 border-t border-border",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						"data-uid": "src/pages/Profile.tsx:97:13",
+						"data-prohibitions": "[editContent]",
+						className: "font-serif font-bold text-xl text-primary",
+						children: t("bankInfo")
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/pages/Profile.tsx:98:13",
+						"data-prohibitions": "[]",
+						className: "grid grid-cols-1 md:grid-cols-4 gap-6",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:99:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2 md:col-span-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:100:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Account Holder"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:101:17",
+									"data-prohibitions": "[editContent]",
+									name: "bankHolder",
+									value: formData.bankHolder || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:107:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:108:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Bank Name"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:109:17",
+									"data-prohibitions": "[editContent]",
+									name: "bankName",
+									value: formData.bankName || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:111:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:112:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Bank Account Number"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:115:17",
+									"data-prohibitions": "[editContent]",
+									name: "bankAccount",
+									value: formData.bankAccount || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:122:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2 md:col-span-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:123:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "IBAN"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:124:17",
+									"data-prohibitions": "[editContent]",
+									name: "iban",
+									value: formData.iban || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:126:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:127:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "BIC"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:128:17",
+									"data-prohibitions": "[editContent]",
+									name: "bic",
+									value: formData.bic || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:130:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:131:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "SWIFT"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:132:17",
+									"data-prohibitions": "[editContent]",
+									name: "swift",
+									value: formData.swift || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:135:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:136:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Bank Code"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:137:17",
+									"data-prohibitions": "[editContent]",
+									name: "bankCode",
+									value: formData.bankCode || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:139:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2 md:col-span-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:140:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Bank Country"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:141:17",
+									"data-prohibitions": "[editContent]",
+									name: "bankCountry",
+									value: formData.bankCountry || "",
+									onChange: handleChange
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/pages/Profile.tsx:148:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2 md:col-span-4",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/pages/Profile.tsx:149:17",
+									"data-prohibitions": "[]",
+									className: "text-muted-foreground text-xs uppercase",
+									children: "Additional Bank Information"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/pages/Profile.tsx:152:17",
+									"data-prohibitions": "[editContent]",
+									name: "additionalBankInfo",
+									value: formData.additionalBankInfo || "",
+									onChange: handleChange
+								})]
+							})
+						]
+					})]
+				})]
+			})]
+		})]
+	});
+}
+//#endregion
+//#region src/components/ui/table.tsx
+var Table = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	"data-uid": "src/components/ui/table.tsx:8:5",
+	"data-prohibitions": "[editContent]",
+	className: "relative w-full overflow-auto",
+	children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("table", {
+		"data-uid": "src/components/ui/table.tsx:9:7",
+		"data-prohibitions": "[editContent]",
+		ref,
+		className: cn("w-full caption-bottom text-sm", className),
+		...props
+	})
+}));
+Table.displayName = "Table";
+var TableHeader = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
+	"data-uid": "src/components/ui/table.tsx:19:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("[&_tr]:border-b", className),
+	...props
+}));
+TableHeader.displayName = "TableHeader";
+var TableBody = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
+	"data-uid": "src/components/ui/table.tsx:27:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("[&_tr:last-child]:border-0", className),
+	...props
+}));
+TableBody.displayName = "TableBody";
+var TableFooter = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tfoot", {
+	"data-uid": "src/components/ui/table.tsx:35:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className),
+	...props
+}));
+TableFooter.displayName = "TableFooter";
+var TableRow = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
+	"data-uid": "src/components/ui/table.tsx:45:5",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className),
+	...props
+}));
+TableRow.displayName = "TableRow";
+var TableHead = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+	"data-uid": "src/components/ui/table.tsx:61:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0", className),
+	...props
+}));
+TableHead.displayName = "TableHead";
+var TableCell = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+	"data-uid": "src/components/ui/table.tsx:76:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className),
+	...props
+}));
+TableCell.displayName = "TableCell";
+var TableCaption = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("caption", {
+	"data-uid": "src/components/ui/table.tsx:88:3",
+	"data-prohibitions": "[editContent]",
+	ref,
+	className: cn("mt-4 text-sm text-muted-foreground", className),
+	...props
+}));
+TableCaption.displayName = "TableCaption";
+//#endregion
+//#region src/components/ui/badge.tsx
+var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
+	variants: { variant: {
+		default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+		secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+		destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+		outline: "text-foreground"
+	} },
+	defaultVariants: { variant: "default" }
+});
+function Badge({ className, variant, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		"data-uid": "src/components/ui/badge.tsx:30:10",
+		"data-prohibitions": "[editContent]",
+		className: cn(badgeVariants({ variant }), className),
+		...props
+	});
+}
+//#endregion
+//#region src/pages/RequestsList.tsx
+function RequestsList() {
+	const { t } = useTranslation();
+	const { requests } = useReimbursementStore();
+	const { user } = useAuthStore();
+	const filteredRequests = requests.filter((req) => {
+		if (!user) return false;
+		if (user.role === "admin") return true;
+		if (user.role === "requester") return req.requesterId === user.id;
+		if (user.role === "qc") return true;
+		if (user.role === "co") return req.status !== "Pending" && req.status !== "Rejected";
+		if (user.role === "finance") return req.status === "Approved" || req.status === "Paid";
+		return false;
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"data-uid": "src/pages/RequestsList.tsx:34:5",
+		"data-prohibitions": "[editContent]",
+		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			"data-uid": "src/pages/RequestsList.tsx:35:7",
+			"data-prohibitions": "[editContent]",
+			className: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				"data-uid": "src/pages/RequestsList.tsx:36:9",
+				"data-prohibitions": "[editContent]",
+				className: "text-3xl font-serif font-bold text-[#4a8ebf]",
+				children: t("requests")
+			}), user?.role === "requester" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				"data-uid": "src/pages/RequestsList.tsx:38:11",
+				"data-prohibitions": "[editContent]",
+				asChild: true,
+				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+					"data-uid": "src/pages/RequestsList.tsx:39:13",
+					"data-prohibitions": "[editContent]",
+					to: "/requests/new",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
+							"data-uid": "src/pages/RequestsList.tsx:40:15",
+							"data-prohibitions": "[editContent]",
+							className: "w-4 h-4 mr-2"
+						}),
+						" ",
+						t("newRequest")
+					]
+				})
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			"data-uid": "src/pages/RequestsList.tsx:46:7",
+			"data-prohibitions": "[editContent]",
+			className: "bg-card border border-border rounded-xl shadow-sm overflow-hidden mt-6",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
+				"data-uid": "src/pages/RequestsList.tsx:47:9",
+				"data-prohibitions": "[editContent]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
+					"data-uid": "src/pages/RequestsList.tsx:48:11",
+					"data-prohibitions": "[editContent]",
+					className: "bg-muted/50 border-b border-border",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+						"data-uid": "src/pages/RequestsList.tsx:49:13",
+						"data-prohibitions": "[editContent]",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:50:15",
+								"data-prohibitions": "[]",
+								children: "Request ID"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:51:15",
+								"data-prohibitions": "[editContent]",
+								children: t("date")
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:52:15",
+								"data-prohibitions": "[]",
+								children: "Requester"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:53:15",
+								"data-prohibitions": "[]",
+								children: "Total EUR"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:54:15",
+								"data-prohibitions": "[editContent]",
+								children: t("status")
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+								"data-uid": "src/pages/RequestsList.tsx:55:15",
+								"data-prohibitions": "[editContent]",
+								className: "text-right",
+								children: t("actions")
+							})
+						]
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableBody, {
+					"data-uid": "src/pages/RequestsList.tsx:58:11",
+					"data-prohibitions": "[editContent]",
+					className: "divide-y divide-border/50",
+					children: [filteredRequests.map((req) => {
+						const total = req.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0);
+						const needsAction = user?.role === "qc" && req.status === "Pending" || user?.role === "co" && req.status === "Checked" || user?.role === "finance" && req.status === "Approved" || user?.role === "requester" && req.status === "Rejected";
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+							"data-uid": "src/pages/RequestsList.tsx:70:17",
+							"data-prohibitions": "[editContent]",
+							className: "hover:bg-muted/30 transition-colors",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:71:19",
+									"data-prohibitions": "[editContent]",
+									className: "font-bold font-mono text-xs text-[#4a8ebf]",
+									children: req.id
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:74:19",
+									"data-prohibitions": "[editContent]",
+									children: new Date(req.date).toLocaleDateString()
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:75:19",
+									"data-prohibitions": "[editContent]",
+									children: req.requesterDetails?.name
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:76:19",
+									"data-prohibitions": "[editContent]",
+									className: "font-semibold",
+									children: ["€ ", total.toFixed(2)]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:77:19",
+									"data-prohibitions": "[editContent]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
+										"data-uid": "src/pages/RequestsList.tsx:78:21",
+										"data-prohibitions": "[editContent]",
+										variant: "outline",
+										className: `
+                      ${req.status === "Paid" ? "bg-success/10 text-success border-success/20 shadow-sm" : ""}
+                      ${req.status === "Rejected" ? "bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm" : ""}
+                      ${req.status === "Pending" ? "bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm" : ""}
+                      ${req.status === "Approved" || req.status === "Checked" ? "bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm" : ""}
+                    `,
+										children: t(req.status) || req.status
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/pages/RequestsList.tsx:90:19",
+									"data-prohibitions": "[editContent]",
+									className: "text-right",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+										"data-uid": "src/pages/RequestsList.tsx:91:21",
+										"data-prohibitions": "[editContent]",
+										variant: needsAction ? "default" : "outline",
+										size: "sm",
+										asChild: true,
+										className: needsAction ? "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 font-bold" : "text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
+											"data-uid": "src/pages/RequestsList.tsx:101:23",
+											"data-prohibitions": "[editContent]",
+											to: `/requests/${req.id}`,
+											children: needsAction ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["Review ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												"data-uid": "src/pages/RequestsList.tsx:104:36",
+												"data-prohibitions": "[]",
+												className: "sr-only",
+												children: "Request"
+											})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, {
+												"data-uid": "src/pages/RequestsList.tsx:108:29",
+												"data-prohibitions": "[editContent]",
+												className: "w-4 h-4 mr-2"
+											}), " View Details"] })
+										})
+									})
+								})
+							]
+						}, req.id);
+					}), filteredRequests.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableRow, {
+						"data-uid": "src/pages/RequestsList.tsx:118:15",
+						"data-prohibitions": "[]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+							"data-uid": "src/pages/RequestsList.tsx:119:17",
+							"data-prohibitions": "[]",
+							colSpan: 6,
+							className: "text-center py-16 text-muted-foreground text-lg",
+							children: "No requests found matching your criteria."
+						})
+					})]
+				})]
+			})
+		})]
+	});
+}
 //#endregion
 //#region ../../cache/modules/numismatica-digital-d92fc/node_modules/.pnpm/@radix-ui+number@1.1.1/node_modules/@radix-ui/number/dist/index.mjs
 function clamp(value, [min, max]) {
@@ -26859,1026 +28094,6 @@ var SelectSeparator = import_react.forwardRef(({ className, ...props }, ref) => 
 }));
 SelectSeparator.displayName = Separator.displayName;
 //#endregion
-//#region src/components/ui/card.tsx
-var Card = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:8:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("rounded-lg border bg-card text-card-foreground shadow-sm", className),
-	...props
-}));
-Card.displayName = "Card";
-var CardHeader = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:19:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("flex flex-col space-y-1.5 p-6", className),
-	...props
-}));
-CardHeader.displayName = "CardHeader";
-var CardTitle = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:26:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("text-2xl font-semibold leading-none tracking-tight", className),
-	...props
-}));
-CardTitle.displayName = "CardTitle";
-var CardDescription = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:37:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("text-sm text-muted-foreground", className),
-	...props
-}));
-CardDescription.displayName = "CardDescription";
-var CardContent = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:44:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("p-6 pt-0", className),
-	...props
-}));
-CardContent.displayName = "CardContent";
-var CardFooter = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/card.tsx:51:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("flex items-center p-6 pt-0", className),
-	...props
-}));
-CardFooter.displayName = "CardFooter";
-//#endregion
-//#region src/pages/Login.tsx
-function Login() {
-	const { login } = useAuthStore();
-	const navigate = useNavigate();
-	const [email, setEmail] = (0, import_react.useState)("dorna@example.com");
-	const [role, setRole] = (0, import_react.useState)("requester");
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		if (email) {
-			login(email, role);
-			navigate("/dashboard");
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		"data-uid": "src/pages/Login.tsx:32:5",
-		"data-prohibitions": "[]",
-		className: "min-h-screen flex items-center justify-center bg-muted/30 p-4",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-			"data-uid": "src/pages/Login.tsx:33:7",
-			"data-prohibitions": "[]",
-			className: "w-full max-w-md shadow-elegant border-border",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-				"data-uid": "src/pages/Login.tsx:34:9",
-				"data-prohibitions": "[]",
-				className: "text-center pb-2",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						"data-uid": "src/pages/Login.tsx:35:11",
-						"data-prohibitions": "[]",
-						className: "font-bold text-3xl text-[#4a8ebf] uppercase tracking-wider mb-2",
-						children: "KAICIID"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-						"data-uid": "src/pages/Login.tsx:38:11",
-						"data-prohibitions": "[]",
-						className: "text-xl font-serif text-foreground/80",
-						children: "Reimbursement Portal"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
-						"data-uid": "src/pages/Login.tsx:41:11",
-						"data-prohibitions": "[]",
-						className: "pt-2",
-						children: "Login to manage your requests"
-					})
-				]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-				"data-uid": "src/pages/Login.tsx:43:9",
-				"data-prohibitions": "[]",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-					"data-uid": "src/pages/Login.tsx:44:11",
-					"data-prohibitions": "[]",
-					onSubmit: handleSubmit,
-					className: "space-y-6",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Login.tsx:45:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Login.tsx:46:15",
-								"data-prohibitions": "[]",
-								children: "Email"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Login.tsx:47:15",
-								"data-prohibitions": "[editContent]",
-								required: true,
-								type: "email",
-								value: email,
-								onChange: (e) => setEmail(e.target.value),
-								placeholder: "user@example.com"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Login.tsx:55:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Login.tsx:56:15",
-								"data-prohibitions": "[]",
-								children: "Role (Demo purpose)"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-								"data-uid": "src/pages/Login.tsx:57:15",
-								"data-prohibitions": "[]",
-								value: role,
-								onValueChange: (v) => setRole(v),
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-									"data-uid": "src/pages/Login.tsx:58:17",
-									"data-prohibitions": "[]",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-										"data-uid": "src/pages/Login.tsx:59:19",
-										"data-prohibitions": "[editContent]"
-									})
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectContent, {
-									"data-uid": "src/pages/Login.tsx:61:17",
-									"data-prohibitions": "[]",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-											"data-uid": "src/pages/Login.tsx:62:19",
-											"data-prohibitions": "[]",
-											value: "requester",
-											children: "Requester"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-											"data-uid": "src/pages/Login.tsx:63:19",
-											"data-prohibitions": "[]",
-											value: "qc",
-											children: "Quality Control (QC)"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-											"data-uid": "src/pages/Login.tsx:64:19",
-											"data-prohibitions": "[]",
-											value: "co",
-											children: "Certifying Officer (CO)"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-											"data-uid": "src/pages/Login.tsx:65:19",
-											"data-prohibitions": "[]",
-											value: "finance",
-											children: "Finance"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-											"data-uid": "src/pages/Login.tsx:66:19",
-											"data-prohibitions": "[]",
-											value: "admin",
-											children: "Admin"
-										})
-									]
-								})]
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/pages/Login.tsx:70:13",
-							"data-prohibitions": "[]",
-							type: "submit",
-							className: "w-full h-12 text-md bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold",
-							children: "Sign In"
-						})
-					]
-				})
-			})]
-		})
-	});
-}
-//#endregion
-//#region src/stores/useReimbursementStore.tsx
-var ReimbursementContext = (0, import_react.createContext)(void 0);
-function ReimbursementProvider({ children }) {
-	const [requests, setRequests] = (0, import_react.useState)(() => {
-		try {
-			const saved = localStorage.getItem("reimbursement_requests_v2");
-			if (saved) return JSON.parse(saved);
-		} catch {}
-		return [];
-	});
-	(0, import_react.useEffect)(() => {
-		localStorage.setItem("reimbursement_requests_v2", JSON.stringify(requests));
-	}, [requests]);
-	const addRequest = (req) => {
-		setRequests((prev) => [req, ...prev]);
-	};
-	const updateRequest = (id, req) => {
-		setRequests((prev) => prev.map((r) => r.id === id ? {
-			...r,
-			...req
-		} : r));
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReimbursementContext.Provider, {
-		"data-uid": "src/stores/useReimbursementStore.tsx:36:5",
-		"data-prohibitions": "[editContent]",
-		value: {
-			requests,
-			addRequest,
-			updateRequest
-		},
-		children
-	});
-}
-function useReimbursementStore() {
-	const context = (0, import_react.useContext)(ReimbursementContext);
-	if (!context) throw new Error("useReimbursementStore must be used within ReimbursementProvider");
-	return context;
-}
-//#endregion
-//#region src/pages/Dashboard.tsx
-function Dashboard() {
-	const { t } = useTranslation();
-	const { requests } = useReimbursementStore();
-	const { user } = useAuthStore();
-	const userRequests = user?.role === "requester" ? requests.filter((r) => r.requesterId === user.id) : requests;
-	const total = userRequests.length;
-	const pending = userRequests.filter((r) => r.status === "Pending").length;
-	const approved = userRequests.filter((r) => r.status === "Approved" || r.status === "Checked").length;
-	const paid = userRequests.filter((r) => r.status === "Paid").length;
-	const rejected = userRequests.filter((r) => r.status === "Rejected").length;
-	const stats = [
-		{
-			title: "Total Requests",
-			value: total,
-			icon: FileText,
-			color: "text-[#4a8ebf]"
-		},
-		{
-			title: "Pending Approval",
-			value: pending,
-			icon: Clock,
-			color: "text-orange-500"
-		},
-		{
-			title: "In Progress (QC/CO)",
-			value: approved,
-			icon: CircleCheckBig,
-			color: "text-blue-500"
-		},
-		{
-			title: "Paid & Closed",
-			value: paid,
-			icon: DollarSign,
-			color: "text-success"
-		},
-		{
-			title: "Rejected",
-			value: rejected,
-			icon: CircleX,
-			color: "text-destructive"
-		}
-	];
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Dashboard.tsx:32:5",
-		"data-prohibitions": "[editContent]",
-		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-				"data-uid": "src/pages/Dashboard.tsx:33:7",
-				"data-prohibitions": "[editContent]",
-				className: "text-3xl font-serif font-bold text-[#4a8ebf]",
-				children: t("dashboard")
-			}),
-			user?.role === "requester" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-				"data-uid": "src/pages/Dashboard.tsx:36:9",
-				"data-prohibitions": "[editContent]",
-				className: "text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100",
-				children: [
-					"Welcome back, ",
-					user.name,
-					". You can view the real-time status of all your reimbursement requests below."
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/pages/Dashboard.tsx:42:7",
-				"data-prohibitions": "[editContent]",
-				className: "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8",
-				children: stats.map((stat, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-					"data-uid": "src/pages/Dashboard.tsx:44:11",
-					"data-prohibitions": "[editContent]",
-					className: "border-border shadow-sm hover:shadow-md transition-shadow",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-						"data-uid": "src/pages/Dashboard.tsx:45:13",
-						"data-prohibitions": "[editContent]",
-						className: "flex flex-row items-center justify-between pb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-							"data-uid": "src/pages/Dashboard.tsx:46:15",
-							"data-prohibitions": "[editContent]",
-							className: "text-sm font-medium text-muted-foreground whitespace-nowrap",
-							children: stat.title
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							"data-uid": "src/pages/Dashboard.tsx:49:15",
-							"data-prohibitions": "[editContent]",
-							className: `p-2 rounded-full bg-muted ${stat.color} bg-opacity-20`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(stat.icon, {
-								"data-uid": "src/pages/Dashboard.tsx:50:17",
-								"data-prohibitions": "[editContent]",
-								className: `w-5 h-5 ${stat.color}`
-							})
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-						"data-uid": "src/pages/Dashboard.tsx:53:13",
-						"data-prohibitions": "[editContent]",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							"data-uid": "src/pages/Dashboard.tsx:54:15",
-							"data-prohibitions": "[editContent]",
-							className: "text-4xl font-bold text-foreground",
-							children: stat.value
-						})
-					})]
-				}, i))
-			})
-		]
-	});
-}
-//#endregion
-//#region src/pages/Profile.tsx
-function Profile() {
-	const { t } = useTranslation();
-	const { user, updateUser } = useAuthStore();
-	const [formData, setFormData] = (0, import_react.useState)(user || {});
-	const handleChange = (e) => {
-		setFormData({
-			...formData,
-			[e.target.name]: e.target.value
-		});
-	};
-	const handleSave = () => {
-		updateUser(formData);
-		toast({ title: "Profile updated successfully" });
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Profile.tsx:26:5",
-		"data-prohibitions": "[editContent]",
-		className: "space-y-6 max-w-5xl mx-auto animate-fade-in-up pb-10",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/pages/Profile.tsx:27:7",
-			"data-prohibitions": "[editContent]",
-			className: "flex justify-between items-center",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-				"data-uid": "src/pages/Profile.tsx:28:9",
-				"data-prohibitions": "[]",
-				className: "text-3xl font-serif font-bold text-primary",
-				children: "Requesters Data"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				"data-uid": "src/pages/Profile.tsx:29:9",
-				"data-prohibitions": "[editContent]",
-				onClick: handleSave,
-				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, {
-						"data-uid": "src/pages/Profile.tsx:30:11",
-						"data-prohibitions": "[editContent]",
-						className: "w-4 h-4 mr-2"
-					}),
-					" ",
-					t("save")
-				]
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-			"data-uid": "src/pages/Profile.tsx:34:7",
-			"data-prohibitions": "[editContent]",
-			className: "border-border shadow-sm overflow-hidden",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
-				"data-uid": "src/pages/Profile.tsx:35:9",
-				"data-prohibitions": "[]",
-				className: "bg-[#4a8ebf] text-white py-4",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-					"data-uid": "src/pages/Profile.tsx:36:11",
-					"data-prohibitions": "[]",
-					className: "text-lg font-medium tracking-wide",
-					children: "Requesters Data"
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardContent, {
-				"data-uid": "src/pages/Profile.tsx:38:9",
-				"data-prohibitions": "[editContent]",
-				className: "p-8 space-y-10",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/Profile.tsx:39:11",
-					"data-prohibitions": "[]",
-					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:40:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:41:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Id"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:42:15",
-								"data-prohibitions": "[editContent]",
-								disabled: true,
-								value: formData.id || "",
-								className: "bg-muted/50"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:44:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:45:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Name"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:46:15",
-								"data-prohibitions": "[editContent]",
-								name: "name",
-								value: formData.name || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:48:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:49:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Email"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:50:15",
-								"data-prohibitions": "[editContent]",
-								name: "email",
-								value: formData.email || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:53:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2 md:col-span-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:54:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Address"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:55:15",
-								"data-prohibitions": "[editContent]",
-								name: "address",
-								value: formData.address || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:57:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:58:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "City"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:59:15",
-								"data-prohibitions": "[editContent]",
-								name: "city",
-								value: formData.city || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:61:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:62:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "State"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:63:15",
-								"data-prohibitions": "[editContent]",
-								name: "state",
-								value: formData.state || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:66:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:67:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Country"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:68:15",
-								"data-prohibitions": "[editContent]",
-								name: "country",
-								value: formData.country || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:70:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:71:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "ZIP Code"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:72:15",
-								"data-prohibitions": "[editContent]",
-								name: "zipCode",
-								value: formData.zipCode || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:74:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:75:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Phone"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:76:15",
-								"data-prohibitions": "[editContent]",
-								name: "phone",
-								value: formData.phone || "",
-								onChange: handleChange
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/Profile.tsx:78:13",
-							"data-prohibitions": "[]",
-							className: "space-y-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/pages/Profile.tsx:79:15",
-								"data-prohibitions": "[]",
-								className: "text-muted-foreground text-xs uppercase",
-								children: "Organization"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/pages/Profile.tsx:80:15",
-								"data-prohibitions": "[editContent]",
-								name: "organization",
-								value: formData.organization || "",
-								onChange: handleChange
-							})]
-						})
-					]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/Profile.tsx:88:11",
-					"data-prohibitions": "[editContent]",
-					className: "space-y-6 pt-8 border-t border-border",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						"data-uid": "src/pages/Profile.tsx:89:13",
-						"data-prohibitions": "[editContent]",
-						className: "font-serif font-bold text-xl text-primary",
-						children: t("bankInfo")
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/pages/Profile.tsx:90:13",
-						"data-prohibitions": "[]",
-						className: "grid grid-cols-1 md:grid-cols-4 gap-6",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:91:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:92:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Account Holder"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:93:17",
-									"data-prohibitions": "[editContent]",
-									name: "bankHolder",
-									value: formData.bankHolder || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:99:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:100:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Bank Name"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:101:17",
-									"data-prohibitions": "[editContent]",
-									name: "bankName",
-									value: formData.bankName || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:103:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:104:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Bank Account Number"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:107:17",
-									"data-prohibitions": "[editContent]",
-									name: "bankAccount",
-									value: formData.bankAccount || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:114:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:115:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "IBAN"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:116:17",
-									"data-prohibitions": "[editContent]",
-									name: "iban",
-									value: formData.iban || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:118:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:119:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "BIC"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:120:17",
-									"data-prohibitions": "[editContent]",
-									name: "bic",
-									value: formData.bic || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:122:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:123:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "SWIFT"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:124:17",
-									"data-prohibitions": "[editContent]",
-									name: "swift",
-									value: formData.swift || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:127:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:128:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Bank Code"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:129:17",
-									"data-prohibitions": "[editContent]",
-									name: "bankCode",
-									value: formData.bankCode || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:131:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2 md:col-span-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:132:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Bank Country"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:133:17",
-									"data-prohibitions": "[editContent]",
-									name: "bankCountry",
-									value: formData.bankCountry || "",
-									onChange: handleChange
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/Profile.tsx:140:15",
-								"data-prohibitions": "[]",
-								className: "space-y-2 md:col-span-4",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/Profile.tsx:141:17",
-									"data-prohibitions": "[]",
-									className: "text-muted-foreground text-xs uppercase",
-									children: "Additional Bank Information"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/Profile.tsx:144:17",
-									"data-prohibitions": "[editContent]",
-									name: "additionalBankInfo",
-									value: formData.additionalBankInfo || "",
-									onChange: handleChange
-								})]
-							})
-						]
-					})]
-				})]
-			})]
-		})]
-	});
-}
-//#endregion
-//#region src/components/ui/table.tsx
-var Table = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	"data-uid": "src/components/ui/table.tsx:8:5",
-	"data-prohibitions": "[editContent]",
-	className: "relative w-full overflow-auto",
-	children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("table", {
-		"data-uid": "src/components/ui/table.tsx:9:7",
-		"data-prohibitions": "[editContent]",
-		ref,
-		className: cn("w-full caption-bottom text-sm", className),
-		...props
-	})
-}));
-Table.displayName = "Table";
-var TableHeader = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
-	"data-uid": "src/components/ui/table.tsx:19:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("[&_tr]:border-b", className),
-	...props
-}));
-TableHeader.displayName = "TableHeader";
-var TableBody = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-	"data-uid": "src/components/ui/table.tsx:27:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("[&_tr:last-child]:border-0", className),
-	...props
-}));
-TableBody.displayName = "TableBody";
-var TableFooter = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tfoot", {
-	"data-uid": "src/components/ui/table.tsx:35:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className),
-	...props
-}));
-TableFooter.displayName = "TableFooter";
-var TableRow = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
-	"data-uid": "src/components/ui/table.tsx:45:5",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className),
-	...props
-}));
-TableRow.displayName = "TableRow";
-var TableHead = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-	"data-uid": "src/components/ui/table.tsx:61:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0", className),
-	...props
-}));
-TableHead.displayName = "TableHead";
-var TableCell = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-	"data-uid": "src/components/ui/table.tsx:76:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className),
-	...props
-}));
-TableCell.displayName = "TableCell";
-var TableCaption = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("caption", {
-	"data-uid": "src/components/ui/table.tsx:88:3",
-	"data-prohibitions": "[editContent]",
-	ref,
-	className: cn("mt-4 text-sm text-muted-foreground", className),
-	...props
-}));
-TableCaption.displayName = "TableCaption";
-//#endregion
-//#region src/components/ui/badge.tsx
-var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
-	variants: { variant: {
-		default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-		secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-		destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-		outline: "text-foreground"
-	} },
-	defaultVariants: { variant: "default" }
-});
-function Badge({ className, variant, ...props }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		"data-uid": "src/components/ui/badge.tsx:30:10",
-		"data-prohibitions": "[editContent]",
-		className: cn(badgeVariants({ variant }), className),
-		...props
-	});
-}
-//#endregion
-//#region src/pages/RequestsList.tsx
-function RequestsList() {
-	const { t } = useTranslation();
-	const { requests } = useReimbursementStore();
-	const { user } = useAuthStore();
-	const filteredRequests = user?.role === "requester" ? requests.filter((r) => r.requesterId === user.id) : requests;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/RequestsList.tsx:26:5",
-		"data-prohibitions": "[editContent]",
-		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/pages/RequestsList.tsx:27:7",
-			"data-prohibitions": "[editContent]",
-			className: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-				"data-uid": "src/pages/RequestsList.tsx:28:9",
-				"data-prohibitions": "[editContent]",
-				className: "text-3xl font-serif font-bold text-[#4a8ebf]",
-				children: t("requests")
-			}), user?.role === "requester" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-				"data-uid": "src/pages/RequestsList.tsx:30:11",
-				"data-prohibitions": "[editContent]",
-				asChild: true,
-				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-					"data-uid": "src/pages/RequestsList.tsx:31:13",
-					"data-prohibitions": "[editContent]",
-					to: "/requests/new",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-							"data-uid": "src/pages/RequestsList.tsx:32:15",
-							"data-prohibitions": "[editContent]",
-							className: "w-4 h-4 mr-2"
-						}),
-						" ",
-						t("newRequest")
-					]
-				})
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			"data-uid": "src/pages/RequestsList.tsx:38:7",
-			"data-prohibitions": "[editContent]",
-			className: "bg-card border border-border rounded-xl shadow-sm overflow-hidden mt-6",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
-				"data-uid": "src/pages/RequestsList.tsx:39:9",
-				"data-prohibitions": "[editContent]",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
-					"data-uid": "src/pages/RequestsList.tsx:40:11",
-					"data-prohibitions": "[editContent]",
-					className: "bg-muted/50 border-b border-border",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-						"data-uid": "src/pages/RequestsList.tsx:41:13",
-						"data-prohibitions": "[editContent]",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:42:15",
-								"data-prohibitions": "[]",
-								children: "Request ID"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:43:15",
-								"data-prohibitions": "[editContent]",
-								children: t("date")
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:44:15",
-								"data-prohibitions": "[]",
-								children: "Requester"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:45:15",
-								"data-prohibitions": "[]",
-								children: "Total EUR"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:46:15",
-								"data-prohibitions": "[editContent]",
-								children: t("status")
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-								"data-uid": "src/pages/RequestsList.tsx:47:15",
-								"data-prohibitions": "[editContent]",
-								className: "text-right",
-								children: t("actions")
-							})
-						]
-					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableBody, {
-					"data-uid": "src/pages/RequestsList.tsx:50:11",
-					"data-prohibitions": "[editContent]",
-					className: "divide-y divide-border/50",
-					children: [filteredRequests.map((req) => {
-						const total = req.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0);
-						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-							"data-uid": "src/pages/RequestsList.tsx:54:17",
-							"data-prohibitions": "[editContent]",
-							className: "hover:bg-muted/30 transition-colors",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:55:19",
-									"data-prohibitions": "[editContent]",
-									className: "font-bold font-mono text-xs text-[#4a8ebf]",
-									children: req.id
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:58:19",
-									"data-prohibitions": "[editContent]",
-									children: new Date(req.date).toLocaleDateString()
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:59:19",
-									"data-prohibitions": "[editContent]",
-									children: req.requesterDetails?.name
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:60:19",
-									"data-prohibitions": "[editContent]",
-									className: "font-semibold",
-									children: ["€ ", total.toFixed(2)]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:61:19",
-									"data-prohibitions": "[editContent]",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
-										"data-uid": "src/pages/RequestsList.tsx:62:21",
-										"data-prohibitions": "[editContent]",
-										variant: "outline",
-										className: `
-                      ${req.status === "Paid" ? "bg-success/10 text-success border-success/20 shadow-sm" : ""}
-                      ${req.status === "Rejected" ? "bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm" : ""}
-                      ${req.status === "Pending" ? "bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm" : ""}
-                      ${req.status === "Approved" || req.status === "Checked" ? "bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm" : ""}
-                    `,
-										children: t(req.status) || req.status
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/pages/RequestsList.tsx:74:19",
-									"data-prohibitions": "[]",
-									className: "text-right",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/pages/RequestsList.tsx:75:21",
-										"data-prohibitions": "[]",
-										variant: "outline",
-										size: "sm",
-										asChild: true,
-										className: "text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-											"data-uid": "src/pages/RequestsList.tsx:81:23",
-											"data-prohibitions": "[]",
-											to: `/requests/${req.id}`,
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, {
-												"data-uid": "src/pages/RequestsList.tsx:82:25",
-												"data-prohibitions": "[editContent]",
-												className: "w-4 h-4 mr-2"
-											}), " View Details"]
-										})
-									})
-								})
-							]
-						}, req.id);
-					}), filteredRequests.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableRow, {
-						"data-uid": "src/pages/RequestsList.tsx:90:15",
-						"data-prohibitions": "[]",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-							"data-uid": "src/pages/RequestsList.tsx:91:17",
-							"data-prohibitions": "[]",
-							colSpan: 6,
-							className: "text-center py-16 text-muted-foreground text-lg",
-							children: "No requests found matching your criteria."
-						})
-					})]
-				})]
-			})
-		})]
-	});
-}
-//#endregion
 //#region src/stores/useMasterDataStore.tsx
 var initialData = {
 	events: [{
@@ -27952,34 +28167,19 @@ var initialData = {
 		id: "w-1",
 		code: "P1134-12",
 		name: "Field Visit"
-	}],
-	requesters: [{
-		id: "req-1",
-		name: "Dorna Khan",
-		email: "dorna@example.com",
-		organization: "",
-		address: "Flat 71 Hope Quay, Rope Walk",
-		city: "Bristol",
-		zipCode: "BS1 6ZF",
-		phone: "+447946609450",
-		bankHolder: "Dorna Khan",
-		bankName: "HSBC UK",
-		iban: "20547565/GB25HBUK40166420547565",
-		swift: "HBUKGB4196Y",
-		bankCode: "40-16-64"
 	}]
 };
 var MasterDataContext = (0, import_react.createContext)(void 0);
 function MasterDataProvider({ children }) {
 	const [state, setState] = (0, import_react.useState)(() => {
 		try {
-			const saved = localStorage.getItem("master_data_v3");
+			const saved = localStorage.getItem("master_data_v4");
 			if (saved) return JSON.parse(saved);
 		} catch {}
 		return initialData;
 	});
 	(0, import_react.useEffect)(() => {
-		localStorage.setItem("master_data_v3", JSON.stringify(state));
+		localStorage.setItem("master_data_v4", JSON.stringify(state));
 	}, [state]);
 	const updateData = (key, data) => {
 		setState((prev) => ({
@@ -27988,7 +28188,7 @@ function MasterDataProvider({ children }) {
 		}));
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MasterDataContext.Provider, {
-		"data-uid": "src/stores/useMasterDataStore.tsx:125:5",
+		"data-uid": "src/stores/useMasterDataStore.tsx:106:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			...state,
@@ -28017,27 +28217,33 @@ function RequestHeader({ formData, onChange, readOnly }) {
 			workorder: event?.workorder || ""
 		});
 	};
+	const updateRequesterDetails = (field, value) => {
+		onChange({ requesterDetails: {
+			...reqUser,
+			[field]: value
+		} });
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/RequestHeader.tsx:36:5",
+		"data-uid": "src/components/requests/RequestHeader.tsx:45:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-8",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:37:7",
+				"data-uid": "src/components/requests/RequestHeader.tsx:46:7",
 				"data-prohibitions": "[editContent]",
 				className: "grid grid-cols-1 md:grid-cols-6 gap-6",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:38:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:47:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:39:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:48:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Id"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:40:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:49:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
 							value: formData.id || "",
@@ -28045,16 +28251,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:42:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:51:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:43:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:52:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Status"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:44:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:53:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
 							value: t(formData.status || ""),
@@ -28062,33 +28268,33 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:46:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:55:9",
 						"data-prohibitions": "[editContent]",
 						className: "space-y-2 md:col-span-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:47:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:56:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Event"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:48:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:57:11",
 							"data-prohibitions": "[editContent]",
 							disabled: readOnly,
 							value: formData.eventId,
 							onValueChange: handleEventChange,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:49:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:58:13",
 								"data-prohibitions": "[]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-									"data-uid": "src/components/requests/RequestHeader.tsx:50:15",
+									"data-uid": "src/components/requests/RequestHeader.tsx:59:15",
 									"data-prohibitions": "[editContent]",
 									placeholder: "Select Event"
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectContent, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:52:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:61:13",
 								"data-prohibitions": "[editContent]",
 								children: events.map((e) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-									"data-uid": "src/components/requests/RequestHeader.tsx:54:17",
+									"data-uid": "src/components/requests/RequestHeader.tsx:63:17",
 									"data-prohibitions": "[editContent]",
 									value: e.id,
 									children: e.name
@@ -28097,16 +28303,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:61:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:70:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:62:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:71:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Account"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:63:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:72:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
 							value: formData.account || "",
@@ -28114,16 +28320,16 @@ function RequestHeader({ formData, onChange, readOnly }) {
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/RequestHeader.tsx:69:9",
+						"data-uid": "src/components/requests/RequestHeader.tsx:78:9",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:70:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:79:11",
 							"data-prohibitions": "[]",
 							className: "text-muted-foreground text-xs uppercase",
 							children: "Workorder"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/RequestHeader.tsx:71:11",
+							"data-uid": "src/components/requests/RequestHeader.tsx:80:11",
 							"data-prohibitions": "[editContent]",
 							disabled: true,
 							value: formData.workorder || "",
@@ -28133,289 +28339,304 @@ function RequestHeader({ formData, onChange, readOnly }) {
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:79:7",
-				"data-prohibitions": "[]",
+				"data-uid": "src/components/requests/RequestHeader.tsx:88:7",
+				"data-prohibitions": "[editContent]",
 				className: "space-y-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:80:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:89:9",
 					"data-prohibitions": "[]",
 					className: "text-sm font-semibold border-b pb-2",
 					children: "Requester Info"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:81:9",
-					"data-prohibitions": "[]",
+					"data-uid": "src/components/requests/RequestHeader.tsx:90:9",
+					"data-prohibitions": "[editContent]",
 					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:82:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:91:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:83:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:92:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Requester"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:84:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:93:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.name || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("name", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:86:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:100:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:87:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:101:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Email"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:88:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:102:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.email || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("email", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:90:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:109:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:91:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:110:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Organization"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:92:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:111:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.organization || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("organization", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:95:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:119:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:96:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:120:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Address"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:97:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:121:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.address || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("address", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:99:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:128:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:100:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:129:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "City"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:101:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:130:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.city || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("city", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:103:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:137:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:104:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:138:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "State"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:105:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:139:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.state || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("state", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:108:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:147:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:109:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:148:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "ZIP Code"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:110:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:149:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.zipCode || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("zipCode", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:112:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:156:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:113:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:157:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Country"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:114:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:158:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.country || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("country", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:116:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:165:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:117:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:166:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Telephone"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:118:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:167:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.phone || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("phone", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						})
 					]
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/RequestHeader.tsx:123:7",
-				"data-prohibitions": "[]",
+				"data-uid": "src/components/requests/RequestHeader.tsx:177:7",
+				"data-prohibitions": "[editContent]",
 				className: "space-y-4 pt-6 border-t border-border",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:124:9",
+					"data-uid": "src/components/requests/RequestHeader.tsx:178:9",
 					"data-prohibitions": "[]",
 					className: "font-serif font-bold text-xl text-primary",
 					children: "Bank Information"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/RequestHeader.tsx:125:9",
-					"data-prohibitions": "[]",
+					"data-uid": "src/components/requests/RequestHeader.tsx:179:9",
+					"data-prohibitions": "[editContent]",
 					className: "grid grid-cols-1 md:grid-cols-4 gap-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:126:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:180:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:127:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:181:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Holder"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:128:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:182:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.bankHolder || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("bankHolder", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:130:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:189:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:131:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:190:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Bank Name"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:132:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:191:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.bankName || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("bankName", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:134:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:198:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:135:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:199:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "Account Number"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:136:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:200:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.bankAccount || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("bankAccount", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:139:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:208:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2 md:col-span-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:140:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:209:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "IBAN"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:141:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:210:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.iban || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("iban", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:143:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:217:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:144:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:218:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "SWIFT"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:145:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:219:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.swift || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("swift", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/RequestHeader.tsx:147:11",
-							"data-prohibitions": "[]",
+							"data-uid": "src/components/requests/RequestHeader.tsx:226:11",
+							"data-prohibitions": "[editContent]",
 							className: "space-y-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:148:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:227:13",
 								"data-prohibitions": "[]",
 								className: "text-muted-foreground text-xs uppercase",
 								children: "BIC"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/RequestHeader.tsx:149:13",
+								"data-uid": "src/components/requests/RequestHeader.tsx:228:13",
 								"data-prohibitions": "[editContent]",
-								disabled: true,
+								disabled: readOnly,
 								value: reqUser.bic || "",
-								className: "bg-muted/30"
+								onChange: (e) => updateRequesterDetails("bic", e.target.value),
+								className: readOnly ? "bg-muted/30" : ""
 							})]
 						})
 					]
@@ -28499,141 +28720,144 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 	]);
 	const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/requests/ExpenseDetails.tsx:106:5",
+		"data-uid": "src/components/requests/ExpenseDetails.tsx:103:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 pt-6 border-t border-border",
 		dir: lang === "ar" ? "rtl" : "ltr",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:107:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:104:7",
 				"data-prohibitions": "[]",
 				className: "font-serif font-bold text-xl text-[#4a8ebf]",
 				children: "Expense Details"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:108:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:105:7",
 				"data-prohibitions": "[editContent]",
 				className: "overflow-x-auto border border-border rounded-lg shadow-sm",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:109:9",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:106:9",
 					"data-prohibitions": "[editContent]",
 					className: "w-full text-sm",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:110:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:107:11",
 						"data-prohibitions": "[editContent]",
 						className: "bg-muted/50 border-b border-border",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:111:13",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:108:13",
 							"data-prohibitions": "[editContent]",
 							className: "text-start text-muted-foreground",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:112:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:109:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold min-w-[200px] text-start",
 									children: "Description"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:113:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:110:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-24 text-start",
 									children: "Amount"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:114:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:111:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-24 text-start",
 									children: "Currency"
 								}),
 								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:117:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:114:19",
 										"data-prohibitions": "[]",
 										className: "p-3 font-semibold w-24 text-start",
 										children: "Account"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:118:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:115:19",
 										"data-prohibitions": "[]",
 										className: "p-3 font-semibold w-32 text-start",
 										children: "Budget Line"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:119:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:116:19",
 										"data-prohibitions": "[]",
 										className: "p-3 font-semibold w-24 text-center",
 										children: "Exch. Rate"
 									})
 								] }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:122:15",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:119:15",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-32 text-right",
 									children: "Amt (EUR)"
 								}),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:123:29",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:120:29",
 									"data-prohibitions": "[]",
 									className: "p-3 font-semibold w-12 text-center"
 								})
 							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:126:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:123:11",
 						"data-prohibitions": "[editContent]",
 						className: "divide-y divide-border",
 						children: [expenses.map((exp, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:128:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:125:15",
 							"data-prohibitions": "[editContent]",
 							className: "hover:bg-muted/10 transition-colors",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:129:17",
-									"data-prohibitions": "[]",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:126:17",
+									"data-prohibitions": "[editContent]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:130:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:127:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.description,
-										onChange: (e) => updateExp(i, "description", e.target.value)
+										onChange: (e) => updateExp(i, "description", e.target.value),
+										className: readOnly ? "bg-transparent border-transparent px-1" : ""
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:136:17",
-									"data-prohibitions": "[]",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:134:17",
+									"data-prohibitions": "[editContent]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:137:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:135:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										type: "number",
 										value: exp.amount || "",
-										onChange: (e) => updateExp(i, "amount", e.target.value)
+										onChange: (e) => updateExp(i, "amount", e.target.value),
+										className: readOnly ? "bg-transparent border-transparent px-1" : ""
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:144:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:143:17",
 									"data-prohibitions": "[editContent]",
 									className: "p-2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:145:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:144:19",
 										"data-prohibitions": "[editContent]",
 										disabled: readOnly,
 										value: exp.currency,
 										onValueChange: (v) => updateExp(i, "currency", v),
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:150:21",
-											"data-prohibitions": "[]",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:149:21",
+											"data-prohibitions": "[editContent]",
+											className: readOnly ? "bg-transparent border-transparent" : "",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:151:23",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:150:23",
 												"data-prohibitions": "[editContent]"
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectContent, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:153:21",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:152:21",
 											"data-prohibitions": "[editContent]",
 											children: exchangeRates.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
-												"data-uid": "src/components/requests/ExpenseDetails.tsx:155:25",
+												"data-uid": "src/components/requests/ExpenseDetails.tsx:154:25",
 												"data-prohibitions": "[editContent]",
 												value: r.currency,
 												children: r.currency
@@ -28643,37 +28867,37 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 								}),
 								isInternal && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:164:21",
-										"data-prohibitions": "[]",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:163:21",
+										"data-prohibitions": "[editContent]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:165:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:164:23",
 											"data-prohibitions": "[editContent]",
-											disabled: readOnly,
+											disabled: readOnly && user.role !== "qc",
 											value: exp.account || "",
 											onChange: (e) => updateExp(i, "account", e.target.value),
-											className: "bg-white"
+											className: readOnly && user.role !== "qc" ? "bg-transparent border-transparent px-1" : "bg-white"
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:172:21",
-										"data-prohibitions": "[]",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:175:21",
+										"data-prohibitions": "[editContent]",
 										className: "p-2",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:173:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:176:23",
 											"data-prohibitions": "[editContent]",
-											disabled: readOnly,
+											disabled: readOnly && user.role !== "qc",
 											value: exp.workorder || "",
 											onChange: (e) => updateExp(i, "workorder", e.target.value),
-											className: "bg-white"
+											className: readOnly && user.role !== "qc" ? "bg-transparent border-transparent px-1" : "bg-white"
 										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:180:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:187:21",
 										"data-prohibitions": "[editContent]",
 										className: "p-2 text-center",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:181:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:188:23",
 											"data-prohibitions": "[editContent]",
 											className: "text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded",
 											children: exp.exchangeRate?.toFixed(2) || "1.00"
@@ -28681,29 +28905,29 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 									})
 								] }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:187:17",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:194:17",
 									"data-prohibitions": "[editContent]",
 									className: "p-2 text-right",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:188:19",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:195:19",
 										"data-prohibitions": "[editContent]",
 										className: "font-semibold text-[#4a8ebf] pr-2",
 										children: exp.amountEuros?.toFixed(2) || "0.00"
 									})
 								}),
 								!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									"data-uid": "src/components/requests/ExpenseDetails.tsx:193:19",
+									"data-uid": "src/components/requests/ExpenseDetails.tsx:200:19",
 									"data-prohibitions": "[]",
 									className: "p-2 text-center",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/components/requests/ExpenseDetails.tsx:194:21",
+										"data-uid": "src/components/requests/ExpenseDetails.tsx:201:21",
 										"data-prohibitions": "[]",
 										variant: "ghost",
 										size: "icon",
 										onClick: () => removeExp(i),
 										className: "text-destructive hover:bg-destructive/10 h-8 w-8",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-											"data-uid": "src/components/requests/ExpenseDetails.tsx:200:23",
+											"data-uid": "src/components/requests/ExpenseDetails.tsx:207:23",
 											"data-prohibitions": "[editContent]",
 											className: "w-4 h-4"
 										})
@@ -28711,10 +28935,10 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 								})
 							]
 						}, exp.id)), expenses.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
-							"data-uid": "src/components/requests/ExpenseDetails.tsx:207:15",
+							"data-uid": "src/components/requests/ExpenseDetails.tsx:214:15",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								"data-uid": "src/components/requests/ExpenseDetails.tsx:208:17",
+								"data-uid": "src/components/requests/ExpenseDetails.tsx:215:17",
 								"data-prohibitions": "[]",
 								colSpan: isInternal ? 8 : 5,
 								className: "text-center p-8 text-muted-foreground bg-muted/20",
@@ -28725,11 +28949,11 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/ExpenseDetails.tsx:220:7",
+				"data-uid": "src/components/requests/ExpenseDetails.tsx:227:7",
 				"data-prohibitions": "[editContent]",
 				className: "flex justify-between items-center mt-4",
 				children: [!readOnly ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:222:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:229:11",
 					"data-prohibitions": "[]",
 					type: "button",
 					variant: "outline",
@@ -28737,24 +28961,24 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 					onClick: addExpense,
 					className: "text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:229:13",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:236:13",
 						"data-prohibitions": "[editContent]",
 						className: "w-4 h-4 mr-2"
 					}), " Add Expense"]
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:232:11",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:239:11",
 					"data-prohibitions": "[editContent]"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/requests/ExpenseDetails.tsx:235:9",
+					"data-uid": "src/components/requests/ExpenseDetails.tsx:242:9",
 					"data-prohibitions": "[editContent]",
 					className: "flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:236:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:243:11",
 						"data-prohibitions": "[]",
 						className: "text-muted-foreground uppercase text-xs font-bold tracking-wider",
 						children: "Total Amount in Euros"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ExpenseDetails.tsx:239:11",
+						"data-uid": "src/components/requests/ExpenseDetails.tsx:246:11",
 						"data-prohibitions": "[editContent]",
 						className: "text-2xl font-bold text-[#4a8ebf] min-w-[120px] text-right",
 						children: ["€ ", totalEuros.toFixed(2)]
@@ -28900,7 +29124,7 @@ function ApprovalSection({ formData, onAction }) {
 	const { user } = useAuthStore();
 	const [comments, setComments] = (0, import_react.useState)("");
 	const [receiptName, setReceiptName] = (0, import_react.useState)("");
-	if (!user || user.role === "requester") return null;
+	if (!user || user.role === "requester" || user.role === "admin") return null;
 	const canApprove = user.role === "qc" && formData.status === "Pending" || user.role === "co" && formData.status === "Checked" || user.role === "finance" && formData.status === "Approved";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		"data-uid": "src/components/requests/ApprovalSection.tsx:27:5",
@@ -28918,105 +29142,111 @@ function ApprovalSection({ formData, onAction }) {
 				"data-prohibitions": "[editContent]",
 				className: "grid grid-cols-1 md:grid-cols-3 gap-4 mb-6",
 				children: [
-					formData.qcSignature && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:32:11",
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:31:9",
 						"data-prohibitions": "[editContent]",
-						className: "bg-white p-4 rounded-lg border border-border shadow-sm",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:33:13",
-								"data-prohibitions": "[]",
-								className: "text-xs uppercase text-muted-foreground font-bold mb-1",
-								children: "Quality Control"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:36:13",
-								"data-prohibitions": "[editContent]",
-								className: "font-medium text-sm",
-								children: formData.qcSignature.name
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:37:13",
-								"data-prohibitions": "[editContent]",
-								className: "text-xs text-muted-foreground",
-								children: new Date(formData.qcSignature.date).toLocaleString()
-							})
-						]
+						className: `p-4 rounded-lg border shadow-sm ${formData.qcSignature ? "bg-white border-border" : "bg-muted/50 border-dashed border-border"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:34:11",
+							"data-prohibitions": "[]",
+							className: "text-xs uppercase text-muted-foreground font-bold mb-1",
+							children: "Quality Control"
+						}), formData.qcSignature ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:39:15",
+							"data-prohibitions": "[editContent]",
+							className: "font-medium text-sm",
+							children: formData.qcSignature.name
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:40:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-xs text-muted-foreground",
+							children: new Date(formData.qcSignature.date).toLocaleString()
+						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:45:13",
+							"data-prohibitions": "[]",
+							className: "text-xs text-muted-foreground italic",
+							children: "Pending Review"
+						})]
 					}),
-					formData.coSignature && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:43:11",
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:49:9",
 						"data-prohibitions": "[editContent]",
-						className: "bg-white p-4 rounded-lg border border-border shadow-sm",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:44:13",
-								"data-prohibitions": "[]",
-								className: "text-xs uppercase text-muted-foreground font-bold mb-1",
-								children: "Certifying Officer"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:47:13",
-								"data-prohibitions": "[editContent]",
-								className: "font-medium text-sm",
-								children: formData.coSignature.name
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:48:13",
-								"data-prohibitions": "[editContent]",
-								className: "text-xs text-muted-foreground",
-								children: new Date(formData.coSignature.date).toLocaleString()
-							})
-						]
+						className: `p-4 rounded-lg border shadow-sm ${formData.coSignature ? "bg-white border-border" : "bg-muted/50 border-dashed border-border"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:52:11",
+							"data-prohibitions": "[]",
+							className: "text-xs uppercase text-muted-foreground font-bold mb-1",
+							children: "Certifying Officer"
+						}), formData.coSignature ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:57:15",
+							"data-prohibitions": "[editContent]",
+							className: "font-medium text-sm",
+							children: formData.coSignature.name
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:58:15",
+							"data-prohibitions": "[editContent]",
+							className: "text-xs text-muted-foreground",
+							children: new Date(formData.coSignature.date).toLocaleString()
+						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:63:13",
+							"data-prohibitions": "[]",
+							className: "text-xs text-muted-foreground italic",
+							children: "Pending Approval"
+						})]
 					}),
-					formData.financeSignature && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:54:11",
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/requests/ApprovalSection.tsx:67:9",
 						"data-prohibitions": "[editContent]",
-						className: "bg-white p-4 rounded-lg border border-border shadow-sm",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:55:13",
-								"data-prohibitions": "[]",
-								className: "text-xs uppercase text-muted-foreground font-bold mb-1",
-								children: "Finance Paid"
-							}),
+						className: `p-4 rounded-lg border shadow-sm ${formData.financeSignature ? "bg-white border-border" : "bg-muted/50 border-dashed border-border"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:70:11",
+							"data-prohibitions": "[]",
+							className: "text-xs uppercase text-muted-foreground font-bold mb-1",
+							children: "Finance Paid"
+						}), formData.financeSignature ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:56:13",
+								"data-uid": "src/components/requests/ApprovalSection.tsx:73:15",
 								"data-prohibitions": "[editContent]",
 								className: "font-medium text-sm",
 								children: formData.financeSignature.name
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:57:13",
+								"data-uid": "src/components/requests/ApprovalSection.tsx:74:15",
 								"data-prohibitions": "[editContent]",
 								className: "text-xs text-muted-foreground",
 								children: new Date(formData.financeSignature.date).toLocaleString()
 							}),
 							formData.paymentReceipt && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:61:15",
+								"data-uid": "src/components/requests/ApprovalSection.tsx:78:17",
 								"data-prohibitions": "[editContent]",
 								className: "text-xs text-success mt-1 font-semibold",
 								children: ["Receipt: ", formData.paymentReceipt]
 							})
-						]
+						] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:84:13",
+							"data-prohibitions": "[]",
+							className: "text-xs text-muted-foreground italic",
+							children: "Pending Payment"
+						})]
 					})
 				]
 			}),
 			canApprove && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/requests/ApprovalSection.tsx:70:9",
+				"data-uid": "src/components/requests/ApprovalSection.tsx:90:9",
 				"data-prohibitions": "[editContent]",
 				className: "space-y-4",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:71:11",
+						"data-uid": "src/components/requests/ApprovalSection.tsx:91:11",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:72:13",
+							"data-uid": "src/components/requests/ApprovalSection.tsx:92:13",
 							"data-prohibitions": "[]",
 							className: "text-sm font-semibold",
 							children: "Comments / Rejection Reason"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:73:13",
+							"data-uid": "src/components/requests/ApprovalSection.tsx:93:13",
 							"data-prohibitions": "[editContent]",
 							value: comments,
 							onChange: (e) => setComments(e.target.value),
@@ -29025,20 +29255,20 @@ function ApprovalSection({ formData, onAction }) {
 						})]
 					}),
 					user.role === "finance" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:86:13",
+						"data-uid": "src/components/requests/ApprovalSection.tsx:106:13",
 						"data-prohibitions": "[]",
 						className: "space-y-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:87:15",
+							"data-uid": "src/components/requests/ApprovalSection.tsx:107:15",
 							"data-prohibitions": "[]",
 							className: "text-sm font-semibold",
 							children: "Upload Payment Receipt"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:88:15",
+							"data-uid": "src/components/requests/ApprovalSection.tsx:108:15",
 							"data-prohibitions": "[]",
 							className: "flex items-center gap-4",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:89:17",
+								"data-uid": "src/components/requests/ApprovalSection.tsx:109:17",
 								"data-prohibitions": "[editContent]",
 								type: "file",
 								onChange: (e) => setReceiptName(e.target.files?.[0]?.name || ""),
@@ -29047,30 +29277,34 @@ function ApprovalSection({ formData, onAction }) {
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/requests/ApprovalSection.tsx:98:11",
+						"data-uid": "src/components/requests/ApprovalSection.tsx:118:11",
 						"data-prohibitions": "[editContent]",
 						className: "flex flex-wrap gap-4 pt-4 border-t border-[#4a8ebf]/10",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:99:13",
+							"data-uid": "src/components/requests/ApprovalSection.tsx:119:13",
 							"data-prohibitions": "[editContent]",
-							onClick: () => onAction(user.role === "qc" ? "Checked" : user.role === "co" ? "Approved" : "Paid", comments, receiptName),
+							onClick: () => onAction("approve", comments, receiptName),
 							className: "bg-success hover:bg-success/90 h-12 px-8 text-md font-bold text-white shadow-sm",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:109:15",
+								"data-uid": "src/components/requests/ApprovalSection.tsx:123:15",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5 mr-2"
 							}), user.role === "finance" ? "Process Payment" : "Approve Request"]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							"data-uid": "src/components/requests/ApprovalSection.tsx:112:13",
-							"data-prohibitions": "[]",
-							onClick: () => onAction("Rejected", comments),
+						}), user.role !== "finance" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							"data-uid": "src/components/requests/ApprovalSection.tsx:127:15",
+							"data-prohibitions": "[editContent]",
+							onClick: () => onAction("reject", comments),
 							variant: "destructive",
 							className: "h-12 px-8 text-md font-bold shadow-sm",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, {
-								"data-uid": "src/components/requests/ApprovalSection.tsx:117:15",
+							children: [user.role === "co" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, {
+								"data-uid": "src/components/requests/ApprovalSection.tsx:133:19",
 								"data-prohibitions": "[editContent]",
 								className: "w-5 h-5 mr-2"
-							}), "Reject Request"]
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, {
+								"data-uid": "src/components/requests/ApprovalSection.tsx:135:19",
+								"data-prohibitions": "[editContent]",
+								className: "w-5 h-5 mr-2"
+							}), user.role === "co" ? "Return to QC" : "Reject to Requester"]
 						})]
 					})
 				]
@@ -29723,33 +29957,12 @@ function PrintTemplate({ formData }) {
 	});
 }
 //#endregion
-//#region src/lib/smtp.ts
-var sendEmail = async ({ to, subject, body }) => {
-	const smtpConfig = {
-		host: "smtp-relay.brevo.com",
-		port: 587,
-		user: "support@kaiciid.org",
-		auth: true
-	};
-	console.log("--- SMTP EMAIL SENT ---");
-	console.log(`Host: ${smtpConfig.host}:${smtpConfig.port}`);
-	console.log(`From: ${smtpConfig.user}`);
-	console.log(`To: ${to}`);
-	console.log(`Subject: ${subject}`);
-	console.log(`Body: ${body}`);
-	console.log("-----------------------");
-	toast({
-		title: "Email Notification Sent",
-		description: `To: ${to} | Subject: ${subject}`
-	});
-};
-//#endregion
 //#region src/pages/RequestForm.tsx
 function RequestForm() {
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const { requests, addRequest, updateRequest } = useReimbursementStore();
-	const { user } = useAuthStore();
+	const { user, updateProfile } = useAuthStore();
 	const isNew = id === "new";
 	const existing = requests.find((r) => r.id === id);
 	const [formData, setFormData] = (0, import_react.useState)({});
@@ -29777,24 +29990,39 @@ function RequestForm() {
 		user
 	]);
 	if (!formData.id) return null;
-	const readOnly = !(isNew || user?.role === "qc" && formData.status === "Pending");
+	const readOnly = !(user?.role === "requester" && (isNew || formData.status === "Rejected"));
 	const handleSave = async () => {
+		const isResubmission = !isNew && formData.status === "Rejected";
 		if (isNew) {
 			addRequest(formData);
+			if (user?.role === "requester") updateProfile(user.id, formData.requesterDetails);
 			await sendEmail({
 				to: "qc@kaiciid.org",
 				subject: `New Reimbursement Request Submitted - ${formData.id}`,
 				body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`
 			});
 			toast({ title: "Request Submitted Successfully" });
+		} else if (isResubmission) {
+			updateRequest(formData.id, {
+				...formData,
+				status: "Pending",
+				qcSignature: null,
+				history: [...formData.history || [], {
+					id: `h-${Date.now()}`,
+					date: (/* @__PURE__ */ new Date()).toISOString(),
+					action: "Resubmitted",
+					userId: user?.name || ""
+				}]
+			});
+			toast({ title: "Request Resubmitted for Review" });
 		} else {
 			updateRequest(formData.id, formData);
 			toast({ title: "Request Updated" });
 		}
 		navigate("/requests");
 	};
-	const handleAction = async (status, comments, receipt) => {
-		if (status === "Rejected" && !comments) {
+	const handleAction = async (action, comments, receipt) => {
+		if (action === "reject" && !comments && user?.role !== "finance") {
 			toast({
 				title: "Rejection reason is required",
 				variant: "destructive"
@@ -29806,106 +30034,130 @@ function RequestForm() {
 			date: (/* @__PURE__ */ new Date()).toISOString(),
 			role: user?.role || ""
 		};
-		const updates = {
-			status,
-			history: [...formData.history || [], {
-				id: `h-${Date.now()}`,
-				date: (/* @__PURE__ */ new Date()).toISOString(),
-				action: status,
-				userId: user?.name || "",
-				comments
-			}]
-		};
-		if (status === "Checked" && user?.role === "qc") updates.qcSignature = signature;
-		if (status === "Approved" && user?.role === "co") updates.coSignature = signature;
-		if (status === "Paid" && user?.role === "finance") {
+		const updates = { history: [...formData.history || [], {
+			id: `h-${Date.now()}`,
+			date: (/* @__PURE__ */ new Date()).toISOString(),
+			action: action === "approve" ? "Approved" : "Rejected",
+			userId: user?.name || "",
+			comments
+		}] };
+		let newStatus = formData.status;
+		let notifyEmail = formData.requesterDetails?.email || "requester@example.com";
+		let notifySubject = "";
+		let notifyBody = "";
+		if (user?.role === "qc") if (action === "approve") {
+			newStatus = "Checked";
+			updates.qcSignature = signature;
+		} else {
+			newStatus = "Rejected";
+			updates.qcSignature = null;
+			notifySubject = `Reimbursement Request Rejected: ${formData.id}`;
+			notifyBody = `Your reimbursement request ${formData.id} was returned for adjustments. Reason: ${comments}`;
+		}
+		else if (user?.role === "co") if (action === "approve") {
+			newStatus = "Approved";
+			updates.coSignature = signature;
+		} else {
+			newStatus = "Pending";
+			updates.qcSignature = null;
+			updates.coSignature = null;
+			notifyEmail = "qc@kaiciid.org";
+			notifySubject = `Request returned to QC: ${formData.id}`;
+			notifyBody = `Request ${formData.id} was returned by Certifying Officer. Reason: ${comments}`;
+		}
+		else if (user?.role === "finance") if (action === "approve") {
+			newStatus = "Paid";
 			updates.financeSignature = signature;
 			updates.paymentReceipt = receipt;
+			notifySubject = `Reimbursement Request Paid: ${formData.id}`;
+			notifyBody = `Your reimbursement request ${formData.id} has been processed and paid. Payment Reference: ${receipt || "N/A"}`;
+		} else {
+			newStatus = "Checked";
+			updates.coSignature = null;
 		}
+		updates.status = newStatus;
 		updateRequest(formData.id, updates);
-		toast({ title: `Request ${status}` });
-		const reqEmail = formData.requesterDetails?.email || "requester@example.com";
-		if (status === "Rejected") await sendEmail({
-			to: reqEmail,
-			subject: `Reimbursement Request Rejected: ${formData.id}`,
-			body: `Your reimbursement request ${formData.id} was rejected by ${user?.role}. Reason: ${comments}`
-		});
-		else if (status === "Paid") await sendEmail({
-			to: reqEmail,
-			subject: `Reimbursement Request Paid: ${formData.id}`,
-			body: `Your reimbursement request ${formData.id} has been processed and paid. Payment Reference: ${receipt || "N/A"}`
+		toast({ title: `Request ${newStatus}` });
+		if (notifySubject) await sendEmail({
+			to: notifyEmail,
+			subject: notifySubject,
+			body: notifyBody
 		});
 		navigate("/requests");
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/RequestForm.tsx:134:7",
+		"data-uid": "src/pages/RequestForm.tsx:185:7",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 max-w-6xl mx-auto pb-20 animate-fade-in-up print:hidden",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/pages/RequestForm.tsx:135:9",
+				"data-uid": "src/pages/RequestForm.tsx:186:9",
 				"data-prohibitions": "[editContent]",
 				className: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					"data-uid": "src/pages/RequestForm.tsx:136:11",
+					"data-uid": "src/pages/RequestForm.tsx:187:11",
 					"data-prohibitions": "[]",
 					variant: "outline",
 					onClick: () => navigate(-1),
 					className: "bg-background",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, {
-						"data-uid": "src/pages/RequestForm.tsx:137:13",
+						"data-uid": "src/pages/RequestForm.tsx:188:13",
 						"data-prohibitions": "[editContent]",
 						className: "w-4 h-4 mr-2"
 					}), " Back to List"]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/pages/RequestForm.tsx:139:11",
+					"data-uid": "src/pages/RequestForm.tsx:190:11",
 					"data-prohibitions": "[editContent]",
 					className: "flex gap-3 w-full sm:w-auto",
 					children: [!isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						"data-uid": "src/pages/RequestForm.tsx:141:15",
+						"data-uid": "src/pages/RequestForm.tsx:192:15",
 						"data-prohibitions": "[]",
 						variant: "outline",
 						onClick: () => window.print(),
 						className: "flex-1 sm:flex-none bg-background text-[#4a8ebf] border-[#4a8ebf]",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Printer, {
-							"data-uid": "src/pages/RequestForm.tsx:146:17",
+							"data-uid": "src/pages/RequestForm.tsx:197:17",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
 						}), " Print PDF"]
-					}), !readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						"data-uid": "src/pages/RequestForm.tsx:150:15",
+					}), !readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						"data-uid": "src/pages/RequestForm.tsx:201:15",
 						"data-prohibitions": "[editContent]",
 						onClick: handleSave,
 						className: "flex-1 sm:flex-none bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold px-6",
-						children: [isNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, {
-							"data-uid": "src/pages/RequestForm.tsx:154:26",
+						children: isNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, {
+							"data-uid": "src/pages/RequestForm.tsx:207:21",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, {
-							"data-uid": "src/pages/RequestForm.tsx:154:62",
+						}), " Submit Request"] }) : formData.status === "Rejected" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, {
+							"data-uid": "src/pages/RequestForm.tsx:211:21",
 							"data-prohibitions": "[editContent]",
 							className: "w-4 h-4 mr-2"
-						}), isNew ? "Submit Request" : "Save Changes"]
+						}), " Resubmit Request"] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, {
+							"data-uid": "src/pages/RequestForm.tsx:215:21",
+							"data-prohibitions": "[editContent]",
+							className: "w-4 h-4 mr-2"
+						}), " Save Changes"] })
 					})]
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-				"data-uid": "src/pages/RequestForm.tsx:161:9",
+				"data-uid": "src/pages/RequestForm.tsx:223:9",
 				"data-prohibitions": "[editContent]",
 				className: "border-border shadow-sm overflow-hidden",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
-					"data-uid": "src/pages/RequestForm.tsx:162:11",
+					"data-uid": "src/pages/RequestForm.tsx:224:11",
 					"data-prohibitions": "[editContent]",
 					className: `text-white py-4 ${formData.status === "Rejected" ? "bg-destructive" : "bg-[#4a8ebf]"}`,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardTitle, {
-						"data-uid": "src/pages/RequestForm.tsx:165:13",
+						"data-uid": "src/pages/RequestForm.tsx:227:13",
 						"data-prohibitions": "[editContent]",
 						className: "text-xl tracking-wide flex items-center gap-3",
 						children: [
 							"Reimbursement Request Form",
 							" ",
 							formData.status === "Rejected" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								"data-uid": "src/pages/RequestForm.tsx:168:17",
+								"data-uid": "src/pages/RequestForm.tsx:230:17",
 								"data-prohibitions": "[]",
 								className: "text-sm bg-white/20 px-2 py-0.5 rounded ml-auto",
 								children: "REJECTED"
@@ -29913,12 +30165,12 @@ function RequestForm() {
 						]
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardContent, {
-					"data-uid": "src/pages/RequestForm.tsx:172:11",
+					"data-uid": "src/pages/RequestForm.tsx:234:11",
 					"data-prohibitions": "[]",
 					className: "p-6 md:p-10 space-y-8 bg-card",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestHeader, {
-							"data-uid": "src/pages/RequestForm.tsx:173:13",
+							"data-uid": "src/pages/RequestForm.tsx:235:13",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -29928,7 +30180,7 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExpenseDetails, {
-							"data-uid": "src/pages/RequestForm.tsx:179:13",
+							"data-uid": "src/pages/RequestForm.tsx:241:13",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -29938,20 +30190,20 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/RequestForm.tsx:185:13",
+							"data-uid": "src/pages/RequestForm.tsx:247:13",
 							"data-prohibitions": "[]",
 							className: "grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/RequestForm.tsx:186:15",
+								"data-uid": "src/pages/RequestForm.tsx:248:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/RequestForm.tsx:187:17",
+									"data-uid": "src/pages/RequestForm.tsx:249:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
 									children: "Requester Signature"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/RequestForm.tsx:190:17",
+									"data-uid": "src/pages/RequestForm.tsx:252:17",
 									"data-prohibitions": "[editContent]",
 									disabled: readOnly,
 									value: formData.signature || "",
@@ -29963,16 +30215,16 @@ function RequestForm() {
 									placeholder: "Type your full name as signature"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/pages/RequestForm.tsx:198:15",
+								"data-uid": "src/pages/RequestForm.tsx:260:15",
 								"data-prohibitions": "[]",
 								className: "space-y-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-									"data-uid": "src/pages/RequestForm.tsx:199:17",
+									"data-uid": "src/pages/RequestForm.tsx:261:17",
 									"data-prohibitions": "[]",
 									className: "text-muted-foreground text-xs uppercase",
 									children: "Date"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/pages/RequestForm.tsx:200:17",
+									"data-uid": "src/pages/RequestForm.tsx:262:17",
 									"data-prohibitions": "[editContent]",
 									disabled: true,
 									type: "date",
@@ -29982,7 +30234,7 @@ function RequestForm() {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Attachments, {
-							"data-uid": "src/pages/RequestForm.tsx:209:13",
+							"data-uid": "src/pages/RequestForm.tsx:271:13",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onChange: (data) => setFormData({
@@ -29992,7 +30244,7 @@ function RequestForm() {
 							readOnly
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ApprovalSection, {
-							"data-uid": "src/pages/RequestForm.tsx:215:13",
+							"data-uid": "src/pages/RequestForm.tsx:277:13",
 							"data-prohibitions": "[editContent]",
 							formData,
 							onAction: handleAction
@@ -30001,57 +30253,57 @@ function RequestForm() {
 				})]
 			}),
 			!isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-				"data-uid": "src/pages/RequestForm.tsx:220:11",
+				"data-uid": "src/pages/RequestForm.tsx:282:11",
 				"data-prohibitions": "[editContent]",
 				className: "border-border shadow-sm mt-10",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardHeader, {
-					"data-uid": "src/pages/RequestForm.tsx:221:13",
+					"data-uid": "src/pages/RequestForm.tsx:283:13",
 					"data-prohibitions": "[]",
 					className: "bg-muted/30 border-b border-border",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-						"data-uid": "src/pages/RequestForm.tsx:222:15",
+						"data-uid": "src/pages/RequestForm.tsx:284:15",
 						"data-prohibitions": "[]",
 						className: "text-lg text-[#4a8ebf]",
 						children: "Audit History"
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-					"data-uid": "src/pages/RequestForm.tsx:224:13",
+					"data-uid": "src/pages/RequestForm.tsx:286:13",
 					"data-prohibitions": "[editContent]",
 					className: "p-0",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/pages/RequestForm.tsx:225:15",
+						"data-uid": "src/pages/RequestForm.tsx:287:15",
 						"data-prohibitions": "[editContent]",
 						className: "divide-y divide-border",
 						children: formData.history?.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/pages/RequestForm.tsx:227:19",
+							"data-uid": "src/pages/RequestForm.tsx:289:19",
 							"data-prohibitions": "[editContent]",
 							className: "flex flex-col sm:flex-row gap-2 sm:gap-6 p-4 text-sm hover:bg-muted/20 transition-colors",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:231:21",
+									"data-uid": "src/pages/RequestForm.tsx:293:21",
 									"data-prohibitions": "[editContent]",
 									className: "w-48 text-muted-foreground font-mono text-xs",
 									children: new Date(h.date).toLocaleString()
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:234:21",
+									"data-uid": "src/pages/RequestForm.tsx:296:21",
 									"data-prohibitions": "[editContent]",
 									className: "w-40 font-bold",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/pages/RequestForm.tsx:235:23",
+										"data-uid": "src/pages/RequestForm.tsx:297:23",
 										"data-prohibitions": "[editContent]",
 										className: `px-2 py-1 rounded-md ${h.action === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-[#4a8ebf]/10 text-[#4a8ebf]"}`,
 										children: h.action
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:241:21",
+									"data-uid": "src/pages/RequestForm.tsx:303:21",
 									"data-prohibitions": "[editContent]",
 									className: "w-40 text-muted-foreground truncate",
 									children: h.userId
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/pages/RequestForm.tsx:242:21",
+									"data-uid": "src/pages/RequestForm.tsx:304:21",
 									"data-prohibitions": "[editContent]",
 									className: "flex-1 text-muted-foreground",
 									children: h.comments || "System update"
@@ -30063,7 +30315,7 @@ function RequestForm() {
 			})
 		]
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PrintTemplate, {
-		"data-uid": "src/pages/RequestForm.tsx:254:7",
+		"data-uid": "src/pages/RequestForm.tsx:316:7",
 		"data-prohibitions": "[editContent]",
 		formData
 	})] });
@@ -30599,61 +30851,63 @@ var DialogDescription = import_react.forwardRef(({ className, ...props }, ref) =
 DialogDescription.displayName = Description.displayName;
 //#endregion
 //#region src/components/master-data/RequesterManager.tsx
-function RequesterManager({ data, onChange }) {
+function RequesterManager() {
+	const { users, updateProfile, adminAddUser, adminDeleteUser } = useAuthStore();
+	const requesters = users.filter((u) => u.role === "requester");
 	const [editing, setEditing] = (0, import_react.useState)(null);
 	const [isNew, setIsNew] = (0, import_react.useState)(false);
 	const handleSave = (e) => {
 		e.preventDefault();
-		if (isNew && editing) onChange([...data, {
+		if (isNew && editing) adminAddUser({
 			...editing,
-			id: `req-${Date.now()}`
-		}]);
-		else if (editing) onChange(data.map((r) => r.id === editing.id ? editing : r));
+			role: "requester"
+		});
+		else if (editing && editing.id) updateProfile(editing.id, editing);
 		setEditing(null);
 		setIsNew(false);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/components/master-data/RequesterManager.tsx:38:5",
+		"data-uid": "src/components/master-data/RequesterManager.tsx:37:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-4",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/master-data/RequesterManager.tsx:39:7",
+				"data-uid": "src/components/master-data/RequesterManager.tsx:38:7",
 				"data-prohibitions": "[editContent]",
 				className: "border border-border rounded-lg overflow-hidden",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
-					"data-uid": "src/components/master-data/RequesterManager.tsx:40:9",
+					"data-uid": "src/components/master-data/RequesterManager.tsx:39:9",
 					"data-prohibitions": "[editContent]",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
-						"data-uid": "src/components/master-data/RequesterManager.tsx:41:11",
+						"data-uid": "src/components/master-data/RequesterManager.tsx:40:11",
 						"data-prohibitions": "[]",
 						className: "bg-muted/50",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-							"data-uid": "src/components/master-data/RequesterManager.tsx:42:13",
+							"data-uid": "src/components/master-data/RequesterManager.tsx:41:13",
 							"data-prohibitions": "[]",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:43:15",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:42:15",
 									"data-prohibitions": "[]",
 									children: "Name"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:44:15",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:43:15",
 									"data-prohibitions": "[]",
 									children: "Email"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:45:15",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:44:15",
 									"data-prohibitions": "[]",
 									children: "City"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:46:15",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:45:15",
 									"data-prohibitions": "[]",
 									children: "Bank"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:47:15",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:46:15",
 									"data-prohibitions": "[]",
 									className: "w-24 text-right",
 									children: "Actions"
@@ -30661,43 +30915,43 @@ function RequesterManager({ data, onChange }) {
 							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableBody, {
-						"data-uid": "src/components/master-data/RequesterManager.tsx:50:11",
+						"data-uid": "src/components/master-data/RequesterManager.tsx:49:11",
 						"data-prohibitions": "[editContent]",
-						children: [data.map((req) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
-							"data-uid": "src/components/master-data/RequesterManager.tsx:52:15",
+						children: [requesters.map((req) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+							"data-uid": "src/components/master-data/RequesterManager.tsx:51:15",
 							"data-prohibitions": "[editContent]",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:53:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:52:17",
 									"data-prohibitions": "[editContent]",
 									className: "font-medium",
 									children: req.name
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:54:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:53:17",
 									"data-prohibitions": "[editContent]",
 									children: req.email
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:55:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:54:17",
 									"data-prohibitions": "[editContent]",
 									children: req.city
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:56:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:55:17",
 									"data-prohibitions": "[editContent]",
 									children: req.bankName
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:57:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:56:17",
 									"data-prohibitions": "[]",
 									className: "text-right",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:58:19",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:57:19",
 										"data-prohibitions": "[]",
 										className: "flex justify-end gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:59:21",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:58:21",
 											"data-prohibitions": "[]",
 											variant: "ghost",
 											size: "icon",
@@ -30707,19 +30961,19 @@ function RequesterManager({ data, onChange }) {
 											},
 											className: "h-8 w-8 text-[#4a8ebf]",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SquarePen, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:68:23",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:67:23",
 												"data-prohibitions": "[editContent]",
 												className: "w-4 h-4"
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:70:21",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:69:21",
 											"data-prohibitions": "[]",
 											variant: "ghost",
 											size: "icon",
-											onClick: () => onChange(data.filter((r) => r.id !== req.id)),
+											onClick: () => adminDeleteUser(req.id),
 											className: "h-8 w-8 text-destructive",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:76:23",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:75:23",
 												"data-prohibitions": "[editContent]",
 												className: "w-4 h-4"
 											})
@@ -30727,11 +30981,11 @@ function RequesterManager({ data, onChange }) {
 									})
 								})
 							]
-						}, req.id)), data.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableRow, {
-							"data-uid": "src/components/master-data/RequesterManager.tsx:83:15",
+						}, req.id)), requesters.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableRow, {
+							"data-uid": "src/components/master-data/RequesterManager.tsx:82:15",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
-								"data-uid": "src/components/master-data/RequesterManager.tsx:84:17",
+								"data-uid": "src/components/master-data/RequesterManager.tsx:83:17",
 								"data-prohibitions": "[]",
 								colSpan: 5,
 								className: "text-center py-6 text-muted-foreground",
@@ -30742,7 +30996,7 @@ function RequesterManager({ data, onChange }) {
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				"data-uid": "src/components/master-data/RequesterManager.tsx:92:7",
+				"data-uid": "src/components/master-data/RequesterManager.tsx:91:7",
 				"data-prohibitions": "[]",
 				onClick: () => {
 					setEditing({ role: "requester" });
@@ -30750,49 +31004,49 @@ function RequesterManager({ data, onChange }) {
 				},
 				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-					"data-uid": "src/components/master-data/RequesterManager.tsx:99:9",
+					"data-uid": "src/components/master-data/RequesterManager.tsx:98:9",
 					"data-prohibitions": "[editContent]",
 					className: "w-4 h-4 mr-2"
 				}), " Add Requester"]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
-				"data-uid": "src/components/master-data/RequesterManager.tsx:102:7",
+				"data-uid": "src/components/master-data/RequesterManager.tsx:101:7",
 				"data-prohibitions": "[editContent]",
 				open: !!editing,
 				onOpenChange: (open) => !open && setEditing(null),
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
-					"data-uid": "src/components/master-data/RequesterManager.tsx:103:9",
+					"data-uid": "src/components/master-data/RequesterManager.tsx:102:9",
 					"data-prohibitions": "[editContent]",
 					className: "max-w-2xl max-h-[90vh] overflow-y-auto",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogHeader, {
-						"data-uid": "src/components/master-data/RequesterManager.tsx:104:11",
+						"data-uid": "src/components/master-data/RequesterManager.tsx:103:11",
 						"data-prohibitions": "[editContent]",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, {
-							"data-uid": "src/components/master-data/RequesterManager.tsx:105:13",
+							"data-uid": "src/components/master-data/RequesterManager.tsx:104:13",
 							"data-prohibitions": "[editContent]",
 							children: isNew ? "Add Requester" : "Edit Requester Profile"
 						})
 					}), editing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-						"data-uid": "src/components/master-data/RequesterManager.tsx:108:13",
-						"data-prohibitions": "[]",
+						"data-uid": "src/components/master-data/RequesterManager.tsx:107:13",
+						"data-prohibitions": "[editContent]",
 						onSubmit: handleSave,
 						className: "space-y-6 pt-4",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/components/master-data/RequesterManager.tsx:109:15",
-								"data-prohibitions": "[]",
+								"data-uid": "src/components/master-data/RequesterManager.tsx:108:15",
+								"data-prohibitions": "[editContent]",
 								className: "grid grid-cols-2 gap-4",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:110:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:109:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:111:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:110:19",
 											"data-prohibitions": "[]",
 											children: "Name"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:112:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:111:19",
 											"data-prohibitions": "[editContent]",
 											required: true,
 											value: editing.name || "",
@@ -30803,15 +31057,15 @@ function RequesterManager({ data, onChange }) {
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:118:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:117:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:119:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:118:19",
 											"data-prohibitions": "[]",
 											children: "Email"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:120:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:119:19",
 											"data-prohibitions": "[editContent]",
 											required: true,
 											type: "email",
@@ -30822,16 +31076,35 @@ function RequesterManager({ data, onChange }) {
 											})
 										})]
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:127:17",
+									isNew && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										"data-uid": "src/components/master-data/RequesterManager.tsx:127:19",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:128:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:128:21",
+											"data-prohibitions": "[]",
+											children: "Password"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+											"data-uid": "src/components/master-data/RequesterManager.tsx:129:21",
+											"data-prohibitions": "[editContent]",
+											type: "password",
+											value: editing.password || "",
+											onChange: (e) => setEditing({
+												...editing,
+												password: e.target.value
+											})
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										"data-uid": "src/components/master-data/RequesterManager.tsx:136:17",
+										"data-prohibitions": "[]",
+										className: "space-y-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+											"data-uid": "src/components/master-data/RequesterManager.tsx:137:19",
 											"data-prohibitions": "[]",
 											children: "Phone"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:129:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:138:19",
 											"data-prohibitions": "[editContent]",
 											value: editing.phone || "",
 											onChange: (e) => setEditing({
@@ -30841,15 +31114,15 @@ function RequesterManager({ data, onChange }) {
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:134:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:143:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:135:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:144:19",
 											"data-prohibitions": "[]",
 											children: "Organization"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:136:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:145:19",
 											"data-prohibitions": "[editContent]",
 											value: editing.organization || "",
 											onChange: (e) => setEditing({
@@ -30859,15 +31132,15 @@ function RequesterManager({ data, onChange }) {
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:141:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:150:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2 col-span-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:142:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:151:19",
 											"data-prohibitions": "[]",
 											children: "Address"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:143:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:152:19",
 											"data-prohibitions": "[editContent]",
 											value: editing.address || "",
 											onChange: (e) => setEditing({
@@ -30877,15 +31150,15 @@ function RequesterManager({ data, onChange }) {
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:148:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:157:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:149:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:158:19",
 											"data-prohibitions": "[]",
 											children: "City"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:150:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:159:19",
 											"data-prohibitions": "[editContent]",
 											value: editing.city || "",
 											onChange: (e) => setEditing({
@@ -30895,15 +31168,15 @@ function RequesterManager({ data, onChange }) {
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										"data-uid": "src/components/master-data/RequesterManager.tsx:155:17",
+										"data-uid": "src/components/master-data/RequesterManager.tsx:164:17",
 										"data-prohibitions": "[]",
 										className: "space-y-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:156:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:165:19",
 											"data-prohibitions": "[]",
 											children: "ZIP Code"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:157:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:166:19",
 											"data-prohibitions": "[editContent]",
 											value: editing.zipCode || "",
 											onChange: (e) => setEditing({
@@ -30915,29 +31188,29 @@ function RequesterManager({ data, onChange }) {
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/components/master-data/RequesterManager.tsx:164:15",
+								"data-uid": "src/components/master-data/RequesterManager.tsx:173:15",
 								"data-prohibitions": "[]",
 								className: "border-t pt-4",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:165:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:174:17",
 									"data-prohibitions": "[]",
 									className: "font-semibold mb-4 text-[#4a8ebf]",
 									children: "Bank Information"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:166:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:175:17",
 									"data-prohibitions": "[]",
 									className: "grid grid-cols-2 gap-4",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:167:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:176:19",
 											"data-prohibitions": "[]",
 											className: "space-y-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:168:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:177:21",
 												"data-prohibitions": "[]",
 												children: "Account Holder"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:169:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:178:21",
 												"data-prohibitions": "[editContent]",
 												value: editing.bankHolder || "",
 												onChange: (e) => setEditing({
@@ -30947,15 +31220,15 @@ function RequesterManager({ data, onChange }) {
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:174:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:183:19",
 											"data-prohibitions": "[]",
 											className: "space-y-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:175:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:184:21",
 												"data-prohibitions": "[]",
 												children: "Bank Name"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:176:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:185:21",
 												"data-prohibitions": "[editContent]",
 												value: editing.bankName || "",
 												onChange: (e) => setEditing({
@@ -30965,15 +31238,15 @@ function RequesterManager({ data, onChange }) {
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:181:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:190:19",
 											"data-prohibitions": "[]",
 											className: "space-y-2 col-span-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:182:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:191:21",
 												"data-prohibitions": "[]",
 												children: "Account Number / IBAN"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:183:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:192:21",
 												"data-prohibitions": "[editContent]",
 												value: editing.iban || "",
 												onChange: (e) => setEditing({
@@ -30983,15 +31256,15 @@ function RequesterManager({ data, onChange }) {
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:188:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:197:19",
 											"data-prohibitions": "[]",
 											className: "space-y-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:189:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:198:21",
 												"data-prohibitions": "[]",
 												children: "SWIFT / BIC"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:190:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:199:21",
 												"data-prohibitions": "[editContent]",
 												value: editing.swift || "",
 												onChange: (e) => setEditing({
@@ -31001,15 +31274,15 @@ function RequesterManager({ data, onChange }) {
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/master-data/RequesterManager.tsx:195:19",
+											"data-uid": "src/components/master-data/RequesterManager.tsx:204:19",
 											"data-prohibitions": "[]",
 											className: "space-y-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:196:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:205:21",
 												"data-prohibitions": "[]",
 												children: "Bank Code"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-												"data-uid": "src/components/master-data/RequesterManager.tsx:197:21",
+												"data-uid": "src/components/master-data/RequesterManager.tsx:206:21",
 												"data-prohibitions": "[editContent]",
 												value: editing.bankCode || "",
 												onChange: (e) => setEditing({
@@ -31022,18 +31295,330 @@ function RequesterManager({ data, onChange }) {
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/components/master-data/RequesterManager.tsx:205:15",
+								"data-uid": "src/components/master-data/RequesterManager.tsx:214:15",
 								"data-prohibitions": "[]",
 								className: "flex justify-end gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:206:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:215:17",
 									"data-prohibitions": "[]",
 									type: "button",
 									variant: "outline",
 									onClick: () => setEditing(null),
 									children: "Cancel"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/master-data/RequesterManager.tsx:209:17",
+									"data-uid": "src/components/master-data/RequesterManager.tsx:218:17",
+									"data-prohibitions": "[]",
+									type: "submit",
+									className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white",
+									children: "Save Changes"
+								})]
+							})
+						]
+					})]
+				})
+			})
+		]
+	});
+}
+//#endregion
+//#region src/components/master-data/SystemUsersManager.tsx
+function SystemUsersManager() {
+	const { users, updateProfile, adminAddUser, adminDeleteUser } = useAuthStore();
+	const systemUsers = users.filter((u) => u.role !== "requester");
+	const [editing, setEditing] = (0, import_react.useState)(null);
+	const [isNew, setIsNew] = (0, import_react.useState)(false);
+	const handleSave = (e) => {
+		e.preventDefault();
+		if (isNew && editing) adminAddUser({
+			...editing,
+			role: editing.role || "qc"
+		});
+		else if (editing && editing.id) updateProfile(editing.id, editing);
+		setEditing(null);
+		setIsNew(false);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"data-uid": "src/components/master-data/SystemUsersManager.tsx:45:5",
+		"data-prohibitions": "[editContent]",
+		className: "space-y-4",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				"data-uid": "src/components/master-data/SystemUsersManager.tsx:46:7",
+				"data-prohibitions": "[editContent]",
+				className: "border border-border rounded-lg overflow-hidden",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
+					"data-uid": "src/components/master-data/SystemUsersManager.tsx:47:9",
+					"data-prohibitions": "[editContent]",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHeader, {
+						"data-uid": "src/components/master-data/SystemUsersManager.tsx:48:11",
+						"data-prohibitions": "[]",
+						className: "bg-muted/50",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+							"data-uid": "src/components/master-data/SystemUsersManager.tsx:49:13",
+							"data-prohibitions": "[]",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:50:15",
+									"data-prohibitions": "[]",
+									children: "Name"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:51:15",
+									"data-prohibitions": "[]",
+									children: "Email"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:52:15",
+									"data-prohibitions": "[]",
+									children: "Role"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableHead, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:53:15",
+									"data-prohibitions": "[]",
+									className: "w-24 text-right",
+									children: "Actions"
+								})
+							]
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableBody, {
+						"data-uid": "src/components/master-data/SystemUsersManager.tsx:56:11",
+						"data-prohibitions": "[editContent]",
+						children: systemUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TableRow, {
+							"data-uid": "src/components/master-data/SystemUsersManager.tsx:58:15",
+							"data-prohibitions": "[editContent]",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:59:17",
+									"data-prohibitions": "[editContent]",
+									className: "font-medium",
+									children: u.name
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:60:17",
+									"data-prohibitions": "[editContent]",
+									children: u.email
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:61:17",
+									"data-prohibitions": "[editContent]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
+										"data-uid": "src/components/master-data/SystemUsersManager.tsx:62:19",
+										"data-prohibitions": "[editContent]",
+										variant: "outline",
+										className: "uppercase text-[10px]",
+										children: u.role
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableCell, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:66:17",
+									"data-prohibitions": "[]",
+									className: "text-right",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										"data-uid": "src/components/master-data/SystemUsersManager.tsx:67:19",
+										"data-prohibitions": "[]",
+										className: "flex justify-end gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+											"data-uid": "src/components/master-data/SystemUsersManager.tsx:68:21",
+											"data-prohibitions": "[]",
+											variant: "ghost",
+											size: "icon",
+											onClick: () => {
+												setEditing(u);
+												setIsNew(false);
+											},
+											className: "h-8 w-8 text-[#4a8ebf]",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SquarePen, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:77:23",
+												"data-prohibitions": "[editContent]",
+												className: "w-4 h-4"
+											})
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+											"data-uid": "src/components/master-data/SystemUsersManager.tsx:79:21",
+											"data-prohibitions": "[]",
+											variant: "ghost",
+											size: "icon",
+											onClick: () => adminDeleteUser(u.id),
+											className: "h-8 w-8 text-destructive",
+											disabled: u.role === "admin",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:86:23",
+												"data-prohibitions": "[editContent]",
+												className: "w-4 h-4"
+											})
+										})]
+									})
+								})
+							]
+						}, u.id))
+					})]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+				"data-uid": "src/components/master-data/SystemUsersManager.tsx:95:7",
+				"data-prohibitions": "[]",
+				onClick: () => {
+					setEditing({ role: "qc" });
+					setIsNew(true);
+				},
+				className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
+					"data-uid": "src/components/master-data/SystemUsersManager.tsx:102:9",
+					"data-prohibitions": "[editContent]",
+					className: "w-4 h-4 mr-2"
+				}), " Add System User"]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+				"data-uid": "src/components/master-data/SystemUsersManager.tsx:105:7",
+				"data-prohibitions": "[editContent]",
+				open: !!editing,
+				onOpenChange: (open) => !open && setEditing(null),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+					"data-uid": "src/components/master-data/SystemUsersManager.tsx:106:9",
+					"data-prohibitions": "[editContent]",
+					className: "max-w-md",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogHeader, {
+						"data-uid": "src/components/master-data/SystemUsersManager.tsx:107:11",
+						"data-prohibitions": "[editContent]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, {
+							"data-uid": "src/components/master-data/SystemUsersManager.tsx:108:13",
+							"data-prohibitions": "[editContent]",
+							children: isNew ? "Add System User" : "Edit System User"
+						})
+					}), editing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						"data-uid": "src/components/master-data/SystemUsersManager.tsx:111:13",
+						"data-prohibitions": "[]",
+						onSubmit: handleSave,
+						className: "space-y-4 pt-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/master-data/SystemUsersManager.tsx:112:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:113:17",
+									"data-prohibitions": "[]",
+									children: "Name"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:114:17",
+									"data-prohibitions": "[editContent]",
+									required: true,
+									value: editing.name || "",
+									onChange: (e) => setEditing({
+										...editing,
+										name: e.target.value
+									})
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/master-data/SystemUsersManager.tsx:120:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:121:17",
+									"data-prohibitions": "[]",
+									children: "Email"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:122:17",
+									"data-prohibitions": "[editContent]",
+									required: true,
+									type: "email",
+									value: editing.email || "",
+									onChange: (e) => setEditing({
+										...editing,
+										email: e.target.value
+									})
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/master-data/SystemUsersManager.tsx:129:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:130:17",
+									"data-prohibitions": "[]",
+									children: "Password"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:131:17",
+									"data-prohibitions": "[editContent]",
+									type: "password",
+									placeholder: isNew ? "Required" : "Leave empty to keep current",
+									value: editing.password || "",
+									onChange: (e) => setEditing({
+										...editing,
+										password: e.target.value
+									}),
+									required: isNew
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/master-data/SystemUsersManager.tsx:139:15",
+								"data-prohibitions": "[]",
+								className: "space-y-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:140:17",
+									"data-prohibitions": "[]",
+									children: "System Role"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Select, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:141:17",
+									"data-prohibitions": "[]",
+									value: editing.role,
+									onValueChange: (v) => setEditing({
+										...editing,
+										role: v
+									}),
+									disabled: editing.role === "admin" && !isNew,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectTrigger, {
+										"data-uid": "src/components/master-data/SystemUsersManager.tsx:146:19",
+										"data-prohibitions": "[]",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectValue, {
+											"data-uid": "src/components/master-data/SystemUsersManager.tsx:147:21",
+											"data-prohibitions": "[editContent]"
+										})
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectContent, {
+										"data-uid": "src/components/master-data/SystemUsersManager.tsx:149:19",
+										"data-prohibitions": "[]",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:150:21",
+												"data-prohibitions": "[]",
+												value: "qc",
+												children: "Quality Control (QC)"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:151:21",
+												"data-prohibitions": "[]",
+												value: "co",
+												children: "Certifying Officer (CO)"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:152:21",
+												"data-prohibitions": "[]",
+												value: "finance",
+												children: "Finance"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectItem, {
+												"data-uid": "src/components/master-data/SystemUsersManager.tsx:153:21",
+												"data-prohibitions": "[]",
+												value: "admin",
+												children: "Admin"
+											})
+										]
+									})]
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/master-data/SystemUsersManager.tsx:158:15",
+								"data-prohibitions": "[]",
+								className: "flex justify-end gap-2 pt-4",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:159:17",
+									"data-prohibitions": "[]",
+									type: "button",
+									variant: "outline",
+									onClick: () => setEditing(null),
+									children: "Cancel"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									"data-uid": "src/components/master-data/SystemUsersManager.tsx:162:17",
 									"data-prohibitions": "[]",
 									type: "submit",
 									className: "bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white",
@@ -31856,87 +32441,89 @@ function MasterData() {
 		}
 	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/MasterData.tsx:76:5",
+		"data-uid": "src/pages/MasterData.tsx:77:5",
 		"data-prohibitions": "[editContent]",
 		className: "space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-			"data-uid": "src/pages/MasterData.tsx:77:7",
+			"data-uid": "src/pages/MasterData.tsx:78:7",
 			"data-prohibitions": "[editContent]",
 			className: "text-3xl font-serif font-bold text-[#4a8ebf]",
 			children: t("masterData")
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Tabs, {
-			"data-uid": "src/pages/MasterData.tsx:79:7",
+			"data-uid": "src/pages/MasterData.tsx:80:7",
 			"data-prohibitions": "[editContent]",
-			defaultValue: "exchangeRates",
+			defaultValue: "systemUsers",
 			className: "w-full mt-8",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ScrollArea, {
-					"data-uid": "src/pages/MasterData.tsx:80:9",
+					"data-uid": "src/pages/MasterData.tsx:81:9",
 					"data-prohibitions": "[editContent]",
 					className: "w-full whitespace-nowrap pb-4",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(TabsList, {
-						"data-uid": "src/pages/MasterData.tsx:81:11",
+						"data-uid": "src/pages/MasterData.tsx:82:11",
 						"data-prohibitions": "[editContent]",
 						className: "h-12 justify-start bg-muted/50 p-1",
-						children: [tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
-							"data-uid": "src/pages/MasterData.tsx:83:15",
-							"data-prohibitions": "[editContent]",
-							value: tab.key,
-							className: "px-6 h-full data-[state=active]:bg-background",
-							children: tab.label
-						}, tab.key)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
-							"data-uid": "src/pages/MasterData.tsx:91:13",
-							"data-prohibitions": "[]",
-							value: "requesters",
-							className: "px-6 h-full data-[state=active]:bg-background",
-							children: "Requesters"
-						})]
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
+								"data-uid": "src/pages/MasterData.tsx:83:13",
+								"data-prohibitions": "[]",
+								value: "systemUsers",
+								className: "px-6 h-full data-[state=active]:bg-background",
+								children: "System Users"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
+								"data-uid": "src/pages/MasterData.tsx:89:13",
+								"data-prohibitions": "[]",
+								value: "requesters",
+								className: "px-6 h-full data-[state=active]:bg-background",
+								children: "Requesters"
+							}),
+							tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsTrigger, {
+								"data-uid": "src/pages/MasterData.tsx:96:15",
+								"data-prohibitions": "[editContent]",
+								value: tab.key,
+								className: "px-6 h-full data-[state=active]:bg-background",
+								children: tab.label
+							}, tab.key))
+						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ScrollBar, {
-						"data-uid": "src/pages/MasterData.tsx:98:11",
+						"data-uid": "src/pages/MasterData.tsx:105:11",
 						"data-prohibitions": "[editContent]",
 						orientation: "horizontal"
 					})]
 				}),
-				tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
-					"data-uid": "src/pages/MasterData.tsx:102:11",
-					"data-prohibitions": "[editContent]",
-					value: tab.key,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
+					"data-uid": "src/pages/MasterData.tsx:108:9",
+					"data-prohibitions": "[]",
+					value: "systemUsers",
 					className: "mt-2",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-						"data-uid": "src/pages/MasterData.tsx:103:13",
-						"data-prohibitions": "[editContent]",
+						"data-uid": "src/pages/MasterData.tsx:109:11",
+						"data-prohibitions": "[]",
 						className: "border-border shadow-sm",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-							"data-uid": "src/pages/MasterData.tsx:104:15",
-							"data-prohibitions": "[editContent]",
+							"data-uid": "src/pages/MasterData.tsx:110:13",
+							"data-prohibitions": "[]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-								"data-uid": "src/pages/MasterData.tsx:105:17",
-								"data-prohibitions": "[editContent]",
+								"data-uid": "src/pages/MasterData.tsx:111:15",
+								"data-prohibitions": "[]",
 								className: "text-xl font-serif text-[#4a8ebf]",
-								children: tab.label
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardDescription, {
-								"data-uid": "src/pages/MasterData.tsx:106:17",
-								"data-prohibitions": "[editContent]",
-								children: [
-									"Manage your ",
-									tab.label.toLowerCase(),
-									" records in the system."
-								]
+								children: "System Users"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
+								"data-uid": "src/pages/MasterData.tsx:112:15",
+								"data-prohibitions": "[]",
+								children: "Manage Quality Control, Certifying Officers, and Finance team members."
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-							"data-uid": "src/pages/MasterData.tsx:110:15",
+							"data-uid": "src/pages/MasterData.tsx:116:13",
 							"data-prohibitions": "[]",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CrudTable, {
-								"data-uid": "src/pages/MasterData.tsx:111:17",
-								"data-prohibitions": "[editContent]",
-								columns: tab.cols,
-								data: tab.data,
-								onChange: (newData) => store.updateData(tab.key, newData),
-								newItemTemplate: tab.tpl
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SystemUsersManager, {
+								"data-uid": "src/pages/MasterData.tsx:117:15",
+								"data-prohibitions": "[editContent]"
 							})
 						})]
 					})
-				}, tab.key)),
+				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
 					"data-uid": "src/pages/MasterData.tsx:122:9",
 					"data-prohibitions": "[]",
@@ -31957,20 +32544,58 @@ function MasterData() {
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
 								"data-uid": "src/pages/MasterData.tsx:126:15",
 								"data-prohibitions": "[]",
-								children: "Manage full requester profiles and bank information."
+								children: "View and manage requester profiles and financial information."
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
 							"data-uid": "src/pages/MasterData.tsx:130:13",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequesterManager, {
 								"data-uid": "src/pages/MasterData.tsx:131:15",
-								"data-prohibitions": "[editContent]",
-								data: store.requesters,
-								onChange: (data) => store.updateData("requesters", data)
+								"data-prohibitions": "[editContent]"
 							})
 						})]
 					})
-				})
+				}),
+				tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TabsContent, {
+					"data-uid": "src/pages/MasterData.tsx:137:11",
+					"data-prohibitions": "[editContent]",
+					value: tab.key,
+					className: "mt-2",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+						"data-uid": "src/pages/MasterData.tsx:138:13",
+						"data-prohibitions": "[editContent]",
+						className: "border-border shadow-sm",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
+							"data-uid": "src/pages/MasterData.tsx:139:15",
+							"data-prohibitions": "[editContent]",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
+								"data-uid": "src/pages/MasterData.tsx:140:17",
+								"data-prohibitions": "[editContent]",
+								className: "text-xl font-serif text-[#4a8ebf]",
+								children: tab.label
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardDescription, {
+								"data-uid": "src/pages/MasterData.tsx:141:17",
+								"data-prohibitions": "[editContent]",
+								children: [
+									"Manage your ",
+									tab.label.toLowerCase(),
+									" records in the system."
+								]
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
+							"data-uid": "src/pages/MasterData.tsx:145:15",
+							"data-prohibitions": "[]",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CrudTable, {
+								"data-uid": "src/pages/MasterData.tsx:146:17",
+								"data-prohibitions": "[editContent]",
+								columns: tab.cols,
+								data: tab.data,
+								onChange: (newData) => store.updateData(tab.key, newData),
+								newItemTemplate: tab.tpl
+							})
+						})]
+					})
+				}, tab.key))
 			]
 		})]
 	});
@@ -32474,4 +33099,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-AXut5o3b.js.map
+//# sourceMappingURL=index-DfREKz-1.js.map

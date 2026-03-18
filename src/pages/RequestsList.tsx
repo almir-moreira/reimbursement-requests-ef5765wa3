@@ -19,8 +19,16 @@ export default function RequestsList() {
   const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
 
-  const filteredRequests =
-    user?.role === 'requester' ? requests.filter((r) => r.requesterId === user.id) : requests
+  // RBAC Filtering Logic
+  const filteredRequests = requests.filter((req) => {
+    if (!user) return false
+    if (user.role === 'admin') return true
+    if (user.role === 'requester') return req.requesterId === user.id
+    if (user.role === 'qc') return true // QC needs to see history too, but acts on Pending
+    if (user.role === 'co') return req.status !== 'Pending' && req.status !== 'Rejected' // Cleared by QC
+    if (user.role === 'finance') return req.status === 'Approved' || req.status === 'Paid' // Approved by CO
+    return false
+  })
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up">
@@ -50,6 +58,14 @@ export default function RequestsList() {
           <TableBody className="divide-y divide-border/50">
             {filteredRequests.map((req) => {
               const total = req.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
+
+              // Determine if action is required by current user
+              const needsAction =
+                (user?.role === 'qc' && req.status === 'Pending') ||
+                (user?.role === 'co' && req.status === 'Checked') ||
+                (user?.role === 'finance' && req.status === 'Approved') ||
+                (user?.role === 'requester' && req.status === 'Rejected')
+
               return (
                 <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-bold font-mono text-xs text-[#4a8ebf]">
@@ -73,13 +89,25 @@ export default function RequestsList() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant="outline"
+                      variant={needsAction ? 'default' : 'outline'}
                       size="sm"
                       asChild
-                      className="text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20"
+                      className={
+                        needsAction
+                          ? 'bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 font-bold'
+                          : 'text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20'
+                      }
                     >
                       <Link to={`/requests/${req.id}`}>
-                        <Eye className="w-4 h-4 mr-2" /> View Details
+                        {needsAction ? (
+                          <>
+                            Review <span className="sr-only">Request</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-4 h-4 mr-2" /> View Details
+                          </>
+                        )}
                       </Link>
                     </Button>
                   </TableCell>

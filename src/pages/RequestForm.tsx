@@ -14,13 +14,13 @@ import { ApprovalSection } from '@/components/requests/ApprovalSection'
 import { PrintTemplate } from '@/components/requests/PrintTemplate'
 import { toast } from '@/hooks/use-toast'
 import { sendEmail } from '@/lib/smtp'
-import { Save, Printer, ArrowLeft, Send } from 'lucide-react'
+import { Save, Printer, ArrowLeft, Send, RotateCcw } from 'lucide-react'
 
 export default function RequestForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { requests, addRequest, updateRequest } = useReimbursementStore()
-  const { user } = useAuthStore()
+  const { user, updateProfile } = useAuthStore()
 
   const isNew = id === 'new'
   const existing = requests.find((r) => r.id === id)
@@ -54,19 +54,43 @@ export default function RequestForm() {
 
   if (!formData.id) return null
 
-  // Editing is allowed only when new or for QC when pending
-  const isEditingAllowed = isNew || (user?.role === 'qc' && formData.status === 'Pending')
+  // Editing logic based on Role and Status
+  const isEditingAllowed = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
   const readOnly = !isEditingAllowed
 
   const handleSave = async () => {
+    const isResubmission = !isNew && formData.status === 'Rejected'
+
     if (isNew) {
       addRequest(formData as ReimbursementRequest)
+      // Auto-populate profile on first request if data was added
+      if (user?.role === 'requester') {
+        updateProfile(user.id, formData.requesterDetails!)
+      }
+
       await sendEmail({
         to: 'qc@kaiciid.org',
         subject: `New Reimbursement Request Submitted - ${formData.id}`,
         body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
       })
       toast({ title: 'Request Submitted Successfully' })
+    } else if (isResubmission) {
+      // Resubmitting a rejected request
+      updateRequest(formData.id!, {
+        ...formData,
+        status: 'Pending',
+        qcSignature: null,
+        history: [
+          ...(formData.history || []),
+          {
+            id: `h-${Date.now()}`,
+            date: new Date().toISOString(),
+            action: 'Resubmitted',
+            userId: user?.name || '',
+          },
+        ],
+      })
+      toast({ title: 'Request Resubmitted for Review' })
     } else {
       updateRequest(formData.id!, formData)
       toast({ title: 'Request Updated' })
@@ -74,8 +98,8 @@ export default function RequestForm() {
     navigate('/requests')
   }
 
-  const handleAction = async (status: string, comments: string, receipt?: string) => {
-    if (status === 'Rejected' && !comments) {
+  const handleAction = async (action: 'approve' | 'reject', comments: string, receipt?: string) => {
+    if (action === 'reject' && !comments && user?.role !== 'finance') {
       toast({ title: 'Rejection reason is required', variant: 'destructive' })
       return
     }
@@ -87,42 +111,69 @@ export default function RequestForm() {
     }
 
     const updates: Partial<ReimbursementRequest> = {
-      status: status as any,
       history: [
         ...(formData.history || []),
         {
           id: `h-${Date.now()}`,
           date: new Date().toISOString(),
-          action: status,
+          action: action === 'approve' ? 'Approved' : 'Rejected',
           userId: user?.name || '',
           comments,
         },
       ],
     }
 
-    if (status === 'Checked' && user?.role === 'qc') updates.qcSignature = signature
-    if (status === 'Approved' && user?.role === 'co') updates.coSignature = signature
-    if (status === 'Paid' && user?.role === 'finance') {
-      updates.financeSignature = signature
-      updates.paymentReceipt = receipt
+    let newStatus = formData.status
+    let notifyEmail = formData.requesterDetails?.email || 'requester@example.com'
+    let notifySubject = ''
+    let notifyBody = ''
+
+    if (user?.role === 'qc') {
+      if (action === 'approve') {
+        newStatus = 'Checked'
+        updates.qcSignature = signature
+      } else {
+        newStatus = 'Rejected'
+        updates.qcSignature = null
+        notifySubject = `Reimbursement Request Rejected: ${formData.id}`
+        notifyBody = `Your reimbursement request ${formData.id} was returned for adjustments. Reason: ${comments}`
+      }
+    } else if (user?.role === 'co') {
+      if (action === 'approve') {
+        newStatus = 'Approved'
+        updates.coSignature = signature
+      } else {
+        newStatus = 'Pending' // Return to QC stage
+        updates.qcSignature = null // Clear QC signature for re-review
+        updates.coSignature = null
+        notifyEmail = 'qc@kaiciid.org'
+        notifySubject = `Request returned to QC: ${formData.id}`
+        notifyBody = `Request ${formData.id} was returned by Certifying Officer. Reason: ${comments}`
+      }
+    } else if (user?.role === 'finance') {
+      if (action === 'approve') {
+        newStatus = 'Paid'
+        updates.financeSignature = signature
+        updates.paymentReceipt = receipt
+        notifySubject = `Reimbursement Request Paid: ${formData.id}`
+        notifyBody = `Your reimbursement request ${formData.id} has been processed and paid. Payment Reference: ${receipt || 'N/A'}`
+      } else {
+        // Edge case if finance rejects, send back to CO
+        newStatus = 'Checked'
+        updates.coSignature = null
+      }
     }
 
+    updates.status = newStatus as any
     updateRequest(formData.id!, updates)
-    toast({ title: `Request ${status}` })
+    toast({ title: `Request ${newStatus}` })
 
-    // SMTP Triggers based on status
-    const reqEmail = formData.requesterDetails?.email || 'requester@example.com'
-    if (status === 'Rejected') {
+    // Send notification if applicable
+    if (notifySubject) {
       await sendEmail({
-        to: reqEmail,
-        subject: `Reimbursement Request Rejected: ${formData.id}`,
-        body: `Your reimbursement request ${formData.id} was rejected by ${user?.role}. Reason: ${comments}`,
-      })
-    } else if (status === 'Paid') {
-      await sendEmail({
-        to: reqEmail,
-        subject: `Reimbursement Request Paid: ${formData.id}`,
-        body: `Your reimbursement request ${formData.id} has been processed and paid. Payment Reference: ${receipt || 'N/A'}`,
+        to: notifyEmail,
+        subject: notifySubject,
+        body: notifyBody,
       })
     }
 
@@ -151,8 +202,19 @@ export default function RequestForm() {
                 onClick={handleSave}
                 className="flex-1 sm:flex-none bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold px-6"
               >
-                {isNew ? <Send className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                {isNew ? 'Submit Request' : 'Save Changes'}
+                {isNew ? (
+                  <>
+                    <Send className="w-4 h-4 mr-2" /> Submit Request
+                  </>
+                ) : formData.status === 'Rejected' ? (
+                  <>
+                    <RotateCcw className="w-4 h-4 mr-2" /> Resubmit Request
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" /> Save Changes
+                  </>
+                )}
               </Button>
             )}
           </div>

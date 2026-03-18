@@ -5,6 +5,7 @@ export interface User {
   id: string
   name: string
   email: string
+  password?: string
   role: Role
   address?: string
   city?: string
@@ -70,8 +71,8 @@ export interface ReimbursementRequest {
   date: string
   attachments: Attachment[]
   history: HistoryLog[]
-  qcSignature?: Signature
-  coSignature?: Signature
-  financeSignature?: Signature
+  qcSignature?: Signature | null
+  coSignature?: Signature | null
+  financeSignature?: Signature | null
   paymentReceipt?: string
 }

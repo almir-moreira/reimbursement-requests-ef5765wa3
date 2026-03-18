@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useMasterDataStore from '@/stores/useMasterDataStore'
 import { CrudTable } from '@/components/master-data/CrudTable'
 import { RequesterManager } from '@/components/master-data/RequesterManager'
+import { SystemUsersManager } from '@/components/master-data/SystemUsersManager'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 export default function MasterData() {
@@ -76,9 +77,21 @@ export default function MasterData() {
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20">
       <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('masterData')}</h1>
 
-      <Tabs defaultValue="exchangeRates" className="w-full mt-8">
+      <Tabs defaultValue="systemUsers" className="w-full mt-8">
         <ScrollArea className="w-full whitespace-nowrap pb-4">
           <TabsList className="h-12 justify-start bg-muted/50 p-1">
+            <TabsTrigger
+              value="systemUsers"
+              className="px-6 h-full data-[state=active]:bg-background"
+            >
+              System Users
+            </TabsTrigger>
+            <TabsTrigger
+              value="requesters"
+              className="px-6 h-full data-[state=active]:bg-background"
+            >
+              Requesters
+            </TabsTrigger>
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.key}
@@ -88,15 +101,37 @@ export default function MasterData() {
                 {tab.label}
               </TabsTrigger>
             ))}
-            <TabsTrigger
-              value="requesters"
-              className="px-6 h-full data-[state=active]:bg-background"
-            >
-              Requesters
-            </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+
+        <TabsContent value="systemUsers" className="mt-2">
+          <Card className="border-border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-serif text-[#4a8ebf]">System Users</CardTitle>
+              <CardDescription>
+                Manage Quality Control, Certifying Officers, and Finance team members.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SystemUsersManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="requesters" className="mt-2">
+          <Card className="border-border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-serif text-[#4a8ebf]">Requesters</CardTitle>
+              <CardDescription>
+                View and manage requester profiles and financial information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RequesterManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {tabs.map((tab) => (
           <TabsContent key={tab.key} value={tab.key} className="mt-2">
@@ -118,23 +153,6 @@ export default function MasterData() {
             </Card>
           </TabsContent>
         ))}
-
-        <TabsContent value="requesters" className="mt-2">
-          <Card className="border-border shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl font-serif text-[#4a8ebf]">Requesters</CardTitle>
-              <CardDescription>
-                Manage full requester profiles and bank information.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RequesterManager
-                data={store.requesters}
-                onChange={(data) => store.updateData('requesters', data)}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   )

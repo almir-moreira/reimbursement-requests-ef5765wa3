@@ -1,21 +1,68 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, Role } from '@/types'
+import { sendEmail } from '@/lib/smtp'
 
 interface AuthContextData {
   user: User | null
   lang: 'en' | 'ar'
   setLang: (lang: 'en' | 'ar') => void
-  login: (email: string, role: Role) => void
+  users: User[]
+  login: (email: string, password?: string) => boolean
+  register: (email: string, name: string, password?: string) => void
   logout: () => void
-  updateUser: (data: Partial<User>) => void
+  updateProfile: (id: string, data: Partial<User>) => void
+  adminAddUser: (data: Partial<User>) => void
+  adminDeleteUser: (id: string) => void
 }
+
+const initialUsers: User[] = [
+  {
+    id: 'u-1',
+    name: 'Admin User',
+    email: 'admin@kaiciid.org',
+    password: 'password',
+    role: 'admin',
+  },
+  { id: 'u-2', name: 'Quality Control', email: 'qc@kaiciid.org', password: 'password', role: 'qc' },
+  {
+    id: 'u-3',
+    name: 'Certifying Officer',
+    email: 'co@kaiciid.org',
+    password: 'password',
+    role: 'co',
+  },
+  {
+    id: 'u-4',
+    name: 'Finance Dept',
+    email: 'finance@kaiciid.org',
+    password: 'password',
+    role: 'finance',
+  },
+  {
+    id: 'u-5',
+    name: 'Dorna Khan',
+    email: 'dorna@example.com',
+    password: 'password',
+    role: 'requester',
+    city: 'Bristol',
+    bankName: 'HSBC UK',
+    country: 'UK',
+    address: 'Flat 71 Hope Quay, Rope Walk',
+    zipCode: 'BS1 6ZF',
+    phone: '+447946609450',
+    bankHolder: 'Dorna Khan',
+    iban: '20547565/GB25HBUK40166420547565',
+    swift: 'HBUKGB4196Y',
+    bankCode: '40-16-64',
+  },
+]
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      const saved = localStorage.getItem('auth_user_v2')
+      const saved = localStorage.getItem('auth_user_v3')
       if (saved) return JSON.parse(saved)
     } catch {
       // ignore
@@ -23,48 +70,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null
   })
 
+  const [users, setUsers] = useState<User[]>(() => {
+    try {
+      const saved = localStorage.getItem('auth_users_list_v3')
+      if (saved) return JSON.parse(saved)
+    } catch {
+      // ignore
+    }
+    return initialUsers
+  })
+
   const [lang, setLang] = useState<'en' | 'ar'>('en')
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('auth_user_v2', JSON.stringify(user))
-    } else {
-      localStorage.removeItem('auth_user_v2')
-    }
+    if (user) localStorage.setItem('auth_user_v3', JSON.stringify(user))
+    else localStorage.removeItem('auth_user_v3')
   }, [user])
 
-  const login = (email: string, role: Role) => {
-    setUser({
+  useEffect(() => {
+    localStorage.setItem('auth_users_list_v3', JSON.stringify(users))
+    // Sync current user if modified in users list
+    if (user) {
+      const updatedUser = users.find((u) => u.id === user.id)
+      if (updatedUser && JSON.stringify(updatedUser) !== JSON.stringify(user)) {
+        setUser(updatedUser)
+      }
+    }
+  }, [users])
+
+  const login = (email: string, password?: string) => {
+    const found = users.find(
+      (u) =>
+        u.email.toLowerCase() === email.toLowerCase() && (!password || u.password === password),
+    )
+    if (found) {
+      setUser(found)
+      return true
+    }
+    return false
+  }
+
+  const register = async (email: string, name: string, password?: string) => {
+    const newUser: User = {
       id: `usr-${Date.now()}`,
-      name: email.split('@')[0] || 'John Doe',
       email,
-      role,
-      country: 'Kenya',
-      city: 'Nairobi',
-      state: 'Central',
-      zipCode: '11111',
-      phone: '212444555888',
-      organization: 'African Union',
-      address: 'Martin Luther King Av 1000',
-      bankHolder: 'John Doe',
-      bankName: 'Citybank',
-      bankAccount: '929-0029-0989',
-      iban: 'KN999000888777666',
-      swift: 'KN1234556',
-      bic: '999888777',
-      bankCode: '99910',
-      bankCountry: 'Portugal',
+      name,
+      password,
+      role: 'requester',
+    }
+    setUsers((prev) => [...prev, newUser])
+    await sendEmail({
+      to: email,
+      subject: 'Welcome to KAICIID Reimbursement Portal',
+      body: `Hi ${name},\n\nPlease confirm your email address to access the portal. You can now login with your credentials.`,
     })
   }
 
   const logout = () => setUser(null)
 
-  const updateUser = (data: Partial<User>) => {
-    if (user) setUser({ ...user, ...data })
+  const updateProfile = (id: string, data: Partial<User>) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)))
+  }
+
+  const adminAddUser = (data: Partial<User>) => {
+    setUsers((prev) => [...prev, { ...data, id: `usr-${Date.now()}` } as User])
+  }
+
+  const adminDeleteUser = (id: string) => {
+    setUsers((prev) => prev.filter((u) => u.id !== id))
   }
 
   return (
-    <AuthContext.Provider value={{ user, lang, setLang, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        lang,
+        setLang,
+        users,
+        login,
+        register,
+        logout,
+        updateProfile,
+        adminAddUser,
+        adminDeleteUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

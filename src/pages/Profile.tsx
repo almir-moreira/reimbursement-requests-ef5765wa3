@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import useAuthStore from '@/stores/useAuthStore'
 import { Button } from '@/components/ui/button'
@@ -10,23 +10,31 @@ import { Save } from 'lucide-react'
 
 export default function Profile() {
   const { t } = useTranslation()
-  const { user, updateUser } = useAuthStore()
+  const { user, updateProfile } = useAuthStore()
   const [formData, setFormData] = useState(user || {})
+
+  useEffect(() => {
+    if (user) {
+      setFormData(user)
+    }
+  }, [user])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSave = () => {
-    updateUser(formData)
-    toast({ title: 'Profile updated successfully' })
+    if (user?.id) {
+      updateProfile(user.id, formData)
+      toast({ title: 'Profile updated successfully' })
+    }
   }
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in-up pb-10">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-serif font-bold text-primary">Requesters Data</h1>
-        <Button onClick={handleSave} className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90">
+        <Button onClick={handleSave} className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white">
           <Save className="w-4 h-4 mr-2" /> {t('save')}
         </Button>
       </div>

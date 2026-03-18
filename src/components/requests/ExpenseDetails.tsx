@@ -26,7 +26,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
   const expenses = formData.expenses || []
   const isInternal = user?.role !== 'requester'
 
-  // Inherit default Account and Workorder from selected event
   const defaultEvent = events.find((e) => e.id === formData.eventId)
   const defaultAccount = defaultEvent?.account || formData.account || ''
   const defaultWorkorder = defaultEvent?.workorder || formData.workorder || ''
@@ -74,7 +73,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
     onChange({ expenses: expenses.filter((_, i) => i !== index) })
   }
 
-  // Effect to recompute if event changes and fields are empty
   useEffect(() => {
     let changed = false
     const newExps = expenses.map((exp) => {
@@ -87,7 +85,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
         e.workorder = defaultWorkorder
         changed = true
       }
-      // Recalculate exchange rates if they are missing
       if (e.amountEuros === undefined) {
         const { usdRate, effectiveRate } = getRates(e.currency)
         e.amountUsd = e.amount * usdRate
@@ -131,6 +128,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     disabled={readOnly}
                     value={exp.description}
                     onChange={(e) => updateExp(i, 'description', e.target.value)}
+                    className={readOnly ? 'bg-transparent border-transparent px-1' : ''}
                   />
                 </td>
                 <td className="p-2">
@@ -139,6 +137,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     type="number"
                     value={exp.amount || ''}
                     onChange={(e) => updateExp(i, 'amount', e.target.value)}
+                    className={readOnly ? 'bg-transparent border-transparent px-1' : ''}
                   />
                 </td>
                 <td className="p-2">
@@ -147,7 +146,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     value={exp.currency}
                     onValueChange={(v) => updateExp(i, 'currency', v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={readOnly ? 'bg-transparent border-transparent' : ''}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -163,18 +162,26 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                   <>
                     <td className="p-2">
                       <Input
-                        disabled={readOnly}
+                        disabled={readOnly && user.role !== 'qc'}
                         value={exp.account || ''}
                         onChange={(e) => updateExp(i, 'account', e.target.value)}
-                        className="bg-white"
+                        className={
+                          readOnly && user.role !== 'qc'
+                            ? 'bg-transparent border-transparent px-1'
+                            : 'bg-white'
+                        }
                       />
                     </td>
                     <td className="p-2">
                       <Input
-                        disabled={readOnly}
+                        disabled={readOnly && user.role !== 'qc'}
                         value={exp.workorder || ''}
                         onChange={(e) => updateExp(i, 'workorder', e.target.value)}
-                        className="bg-white"
+                        className={
+                          readOnly && user.role !== 'qc'
+                            ? 'bg-transparent border-transparent px-1'
+                            : 'bg-white'
+                        }
                       />
                     </td>
                     <td className="p-2 text-center">

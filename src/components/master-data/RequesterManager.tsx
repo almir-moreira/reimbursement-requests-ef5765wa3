@@ -13,22 +13,21 @@ import {
 } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Edit, Plus, Trash2 } from 'lucide-react'
+import useAuthStore from '@/stores/useAuthStore'
 
-interface Props {
-  data: Partial<User>[]
-  onChange: (data: Partial<User>[]) => void
-}
+export function RequesterManager() {
+  const { users, updateProfile, adminAddUser, adminDeleteUser } = useAuthStore()
+  const requesters = users.filter((u) => u.role === 'requester')
 
-export function RequesterManager({ data, onChange }: Props) {
   const [editing, setEditing] = useState<Partial<User> | null>(null)
   const [isNew, setIsNew] = useState(false)
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
     if (isNew && editing) {
-      onChange([...data, { ...editing, id: `req-${Date.now()}` }])
-    } else if (editing) {
-      onChange(data.map((r) => (r.id === editing.id ? editing : r)))
+      adminAddUser({ ...editing, role: 'requester' })
+    } else if (editing && editing.id) {
+      updateProfile(editing.id, editing)
     }
     setEditing(null)
     setIsNew(false)
@@ -48,7 +47,7 @@ export function RequesterManager({ data, onChange }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((req) => (
+            {requesters.map((req) => (
               <TableRow key={req.id}>
                 <TableCell className="font-medium">{req.name}</TableCell>
                 <TableCell>{req.email}</TableCell>
@@ -70,7 +69,7 @@ export function RequesterManager({ data, onChange }: Props) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onChange(data.filter((r) => r.id !== req.id))}
+                      onClick={() => adminDeleteUser(req.id!)}
                       className="h-8 w-8 text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -79,7 +78,7 @@ export function RequesterManager({ data, onChange }: Props) {
                 </TableCell>
               </TableRow>
             ))}
-            {data.length === 0 && (
+            {requesters.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
                   No requesters found.
@@ -124,6 +123,16 @@ export function RequesterManager({ data, onChange }: Props) {
                     onChange={(e) => setEditing({ ...editing, email: e.target.value })}
                   />
                 </div>
+                {isNew && (
+                  <div className="space-y-2">
+                    <Label>Password</Label>
+                    <Input
+                      type="password"
+                      value={editing.password || ''}
+                      onChange={(e) => setEditing({ ...editing, password: e.target.value })}
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Phone</Label>
                   <Input
