@@ -1,5 +1,5 @@
 export type Role = 'requester' | 'qc' | 'co' | 'finance' | 'admin'
-export type RequestStatus = 'Pending' | 'Checked' | 'Approved' | 'Paid' | 'Rejected'
+export type RequestStatus = 'Pending' | 'Checked' | 'Approved' | 'Processed' | 'Rejected'
 
 export interface User {
   id: string

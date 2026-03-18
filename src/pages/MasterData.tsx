@@ -2,6 +2,7 @@ import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useMasterDataStore from '@/stores/useMasterDataStore'
+import useAuthStore from '@/stores/useAuthStore'
 import { CrudTable } from '@/components/master-data/CrudTable'
 import { RequesterManager } from '@/components/master-data/RequesterManager'
 import { SystemUsersManager } from '@/components/master-data/SystemUsersManager'
@@ -10,11 +11,25 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 export default function MasterData() {
   const { t } = useTranslation()
   const store = useMasterDataStore()
+  const { user } = useAuthStore()
 
-  const tabs = [
+  const tabsConfig = [
+    { id: 'systemUsers', label: 'System Users', roles: ['admin'] },
+    { id: 'requesters', label: 'Requesters', roles: ['admin', 'finance'] },
+    { id: 'exchangeRates', label: 'Exchange Rates', roles: ['admin', 'finance'] },
+    { id: 'events', label: 'Events Matrix', roles: ['admin', 'qc'] },
+    { id: 'countries', label: 'Countries', roles: ['admin'] },
+    { id: 'costCenters', label: 'Cost Centers', roles: ['admin'] },
+    { id: 'accounts', label: 'Accounts', roles: ['admin'] },
+    { id: 'workorders', label: 'Workorders', roles: ['admin'] },
+  ]
+
+  const visibleTabs = tabsConfig.filter((t) => t.roles.includes(user?.role || ''))
+  const defaultTab = visibleTabs[0]?.id || ''
+
+  const dynamicTabsData = [
     {
       key: 'exchangeRates',
-      label: 'Exchange Rates',
       data: store.exchangeRates,
       cols: [
         { key: 'currency', label: 'Currency' },
@@ -24,36 +39,36 @@ export default function MasterData() {
     },
     {
       key: 'events',
-      label: 'Events Matrix',
       data: store.events,
       cols: [
         { key: 'name', label: 'Name' },
         { key: 'costCenter', label: 'Cost Center' },
         { key: 'account', label: 'Account' },
         { key: 'workorder', label: 'Workorder' },
+        { key: 'qcName', label: 'QC Name' },
+        { key: 'qcEmail', label: 'QC Email' },
       ],
-      tpl: { name: '', costCenter: '', account: '', workorder: '' },
+      tpl: { name: '', costCenter: '', account: '', workorder: '', qcName: '', qcEmail: '' },
     },
     {
       key: 'countries',
-      label: 'Countries',
       data: store.countries,
       cols: [{ key: 'name', label: 'Country Name' }],
       tpl: { name: '' },
     },
     {
       key: 'costCenters',
-      label: 'Cost Centers',
       data: store.costCenters,
       cols: [
         { key: 'code', label: 'Code' },
         { key: 'name', label: 'Name' },
+        { key: 'coName', label: 'CO Name' },
+        { key: 'coEmail', label: 'CO Email' },
       ],
-      tpl: { code: '', name: '' },
+      tpl: { code: '', name: '', coName: '', coEmail: '' },
     },
     {
       key: 'accounts',
-      label: 'Accounts',
       data: store.accounts,
       cols: [
         { key: 'code', label: 'Code' },
@@ -63,7 +78,6 @@ export default function MasterData() {
     },
     {
       key: 'workorders',
-      label: 'Workorders',
       data: store.workorders,
       cols: [
         { key: 'code', label: 'Code' },
@@ -73,29 +87,25 @@ export default function MasterData() {
     },
   ]
 
+  if (!defaultTab) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        You do not have permission to view Master Data.
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20">
       <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('masterData')}</h1>
 
-      <Tabs defaultValue="systemUsers" className="w-full mt-8">
+      <Tabs defaultValue={defaultTab} className="w-full mt-8">
         <ScrollArea className="w-full whitespace-nowrap pb-4">
           <TabsList className="h-12 justify-start bg-muted/50 p-1">
-            <TabsTrigger
-              value="systemUsers"
-              className="px-6 h-full data-[state=active]:bg-background"
-            >
-              System Users
-            </TabsTrigger>
-            <TabsTrigger
-              value="requesters"
-              className="px-6 h-full data-[state=active]:bg-background"
-            >
-              Requesters
-            </TabsTrigger>
-            {tabs.map((tab) => (
+            {visibleTabs.map((tab) => (
               <TabsTrigger
-                key={tab.key}
-                value={tab.key}
+                key={tab.id}
+                value={tab.id}
                 className="px-6 h-full data-[state=active]:bg-background"
               >
                 {tab.label}
@@ -105,54 +115,65 @@ export default function MasterData() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        <TabsContent value="systemUsers" className="mt-2">
-          <Card className="border-border shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl font-serif text-[#4a8ebf]">System Users</CardTitle>
-              <CardDescription>
-                Manage Quality Control, Certifying Officers, and Finance team members.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SystemUsersManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="requesters" className="mt-2">
-          <Card className="border-border shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl font-serif text-[#4a8ebf]">Requesters</CardTitle>
-              <CardDescription>
-                View and manage requester profiles and financial information.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RequesterManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {tabs.map((tab) => (
-          <TabsContent key={tab.key} value={tab.key} className="mt-2">
+        {visibleTabs.find((t) => t.id === 'systemUsers') && (
+          <TabsContent value="systemUsers" className="mt-2">
             <Card className="border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-serif text-[#4a8ebf]">{tab.label}</CardTitle>
+                <CardTitle className="text-xl font-serif text-[#4a8ebf]">System Users</CardTitle>
                 <CardDescription>
-                  Manage your {tab.label.toLowerCase()} records in the system.
+                  Manage Quality Control, Certifying Officers, and Finance team members.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CrudTable
-                  columns={tab.cols as any}
-                  data={tab.data}
-                  onChange={(newData) => store.updateData(tab.key as any, newData)}
-                  newItemTemplate={tab.tpl}
-                />
+                <SystemUsersManager />
               </CardContent>
             </Card>
           </TabsContent>
-        ))}
+        )}
+
+        {visibleTabs.find((t) => t.id === 'requesters') && (
+          <TabsContent value="requesters" className="mt-2">
+            <Card className="border-border shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl font-serif text-[#4a8ebf]">Requesters</CardTitle>
+                <CardDescription>
+                  View and manage requester profiles and financial information.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RequesterManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {dynamicTabsData.map((dynTab) => {
+          const tabConfig = visibleTabs.find((t) => t.id === dynTab.key)
+          if (!tabConfig) return null
+
+          return (
+            <TabsContent key={dynTab.key} value={dynTab.key} className="mt-2">
+              <Card className="border-border shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl font-serif text-[#4a8ebf]">
+                    {tabConfig.label}
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your {tabConfig.label.toLowerCase()} records in the system.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CrudTable
+                    columns={dynTab.cols as any}
+                    data={dynTab.data}
+                    onChange={(newData) => store.updateData(dynTab.key as any, newData)}
+                    newItemTemplate={dynTab.tpl}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )
+        })}
       </Tabs>
     </div>
   )

@@ -6,6 +6,8 @@ export interface EventDetail {
   costCenter: string
   account: string
   workorder: string
+  qcName: string
+  qcEmail: string
 }
 
 export interface ExchangeRate {
@@ -23,6 +25,8 @@ export interface CostCenter {
   id: string
   code: string
   name: string
+  coName: string
+  coEmail: string
 }
 
 export interface Account {
@@ -52,13 +56,23 @@ interface MasterDataContextData extends MasterDataState {
 
 const initialData: MasterDataState = {
   events: [
-    { id: 'ev-1', name: 'Workshop', costCenter: 'CC-01', account: '62000', workorder: 'P1134-12' },
+    {
+      id: 'ev-1',
+      name: 'Workshop',
+      costCenter: 'CC-01',
+      account: '62000',
+      workorder: 'P1134-12',
+      qcName: 'Quality Control',
+      qcEmail: 'qc@kaiciid.org',
+    },
     {
       id: 'ev-2',
       name: 'Conference',
       costCenter: 'CC-02',
       account: '62001',
       workorder: 'P1135-12',
+      qcName: 'Jane Smith',
+      qcEmail: 'jane.smith@kaiciid.org',
     },
   ],
   exchangeRates: [
@@ -73,7 +87,15 @@ const initialData: MasterDataState = {
     { id: 'c-3', name: 'USA' },
     { id: 'c-4', name: 'UK' },
   ],
-  costCenters: [{ id: 'cc-1', code: 'CC-01', name: 'Operations' }],
+  costCenters: [
+    {
+      id: 'cc-1',
+      code: 'CC-01',
+      name: 'Operations',
+      coName: 'Certifying Officer',
+      coEmail: 'co@kaiciid.org',
+    },
+  ],
   accounts: [
     { id: 'a-1', code: '62000', name: 'Travel' },
     { id: 'a-2', code: '62001', name: 'Meals' },
@@ -86,7 +108,7 @@ const MasterDataContext = createContext<MasterDataContextData | undefined>(undef
 export function MasterDataProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MasterDataState>(() => {
     try {
-      const saved = localStorage.getItem('master_data_v4')
+      const saved = localStorage.getItem('master_data_v5')
       if (saved) return JSON.parse(saved)
     } catch {
       // ignore
@@ -95,7 +117,7 @@ export function MasterDataProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
-    localStorage.setItem('master_data_v4', JSON.stringify(state))
+    localStorage.setItem('master_data_v5', JSON.stringify(state))
   }, [state])
 
   const updateData = (key: keyof MasterDataState, data: any) => {

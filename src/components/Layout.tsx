@@ -50,7 +50,7 @@ export default function Layout() {
   if (user.role === 'admin' || user.role === 'finance') {
     navItems.push({ name: t('reporting'), path: '/reporting', icon: BarChart })
   }
-  if (user.role === 'admin') {
+  if (user.role === 'admin' || user.role === 'finance' || user.role === 'qc') {
     navItems.push({ name: t('masterData'), path: '/master-data', icon: Database })
   }
 
@@ -94,7 +94,7 @@ export default function Layout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:hidden" />
               <div className="flex flex-col md:hidden">
-                <span className="font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none">
+                <span className="font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none mb-1">
                   KAICIID
                 </span>
                 <span className="font-serif text-sm text-foreground/80 leading-tight">
@@ -102,7 +102,7 @@ export default function Layout() {
                 </span>
               </div>
               <div className="hidden md:flex flex-col ml-2">
-                <span className="font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none">
+                <span className="font-bold text-lg text-[#4a8ebf] uppercase tracking-wider leading-none mb-1">
                   KAICIID
                 </span>
                 <span className="font-serif text-sm text-foreground/80 leading-tight">

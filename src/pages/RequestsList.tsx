@@ -24,9 +24,9 @@ export default function RequestsList() {
     if (!user) return false
     if (user.role === 'admin') return true
     if (user.role === 'requester') return req.requesterId === user.id
-    if (user.role === 'qc') return true // QC needs to see history too, but acts on Pending
-    if (user.role === 'co') return req.status !== 'Pending' && req.status !== 'Rejected' // Cleared by QC
-    if (user.role === 'finance') return req.status === 'Approved' || req.status === 'Paid' // Approved by CO
+    if (user.role === 'qc') return true
+    if (user.role === 'co') return req.status !== 'Pending' && req.status !== 'Rejected'
+    if (user.role === 'finance') return req.status === 'Approved' || req.status === 'Processed'
     return false
   })
 
@@ -64,7 +64,8 @@ export default function RequestsList() {
                 (user?.role === 'qc' && req.status === 'Pending') ||
                 (user?.role === 'co' && req.status === 'Checked') ||
                 (user?.role === 'finance' && req.status === 'Approved') ||
-                (user?.role === 'requester' && req.status === 'Rejected')
+                (user?.role === 'requester' && req.status === 'Rejected') ||
+                (user?.role === 'finance' && req.status === 'Processed' && !req.paymentReceipt)
 
               return (
                 <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
@@ -78,7 +79,7 @@ export default function RequestsList() {
                     <Badge
                       variant="outline"
                       className={`
-                      ${req.status === 'Paid' ? 'bg-success/10 text-success border-success/20 shadow-sm' : ''}
+                      ${req.status === 'Processed' ? 'bg-success/10 text-success border-success/20 shadow-sm' : ''}
                       ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm' : ''}
                       ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm' : ''}
                       ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm' : ''}

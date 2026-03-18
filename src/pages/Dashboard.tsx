@@ -17,14 +17,14 @@ export default function Dashboard() {
   const approved = userRequests.filter(
     (r) => r.status === 'Approved' || r.status === 'Checked',
   ).length
-  const paid = userRequests.filter((r) => r.status === 'Paid').length
+  const processed = userRequests.filter((r) => r.status === 'Processed').length
   const rejected = userRequests.filter((r) => r.status === 'Rejected').length
 
   const stats = [
     { title: 'Total Requests', value: total, icon: FileText, color: 'text-[#4a8ebf]' },
     { title: 'Pending Approval', value: pending, icon: Clock, color: 'text-orange-500' },
     { title: 'In Progress (QC/CO)', value: approved, icon: CheckCircle, color: 'text-blue-500' },
-    { title: 'Paid & Closed', value: paid, icon: DollarSign, color: 'text-success' },
+    { title: 'Processed & Closed', value: processed, icon: DollarSign, color: 'text-success' },
     { title: 'Rejected', value: rejected, icon: XCircle, color: 'text-destructive' },
   ]
 

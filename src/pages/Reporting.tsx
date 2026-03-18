@@ -37,7 +37,6 @@ export default function Reporting() {
     let match = true
     if (statusFilter !== 'All' && req.status !== statusFilter) match = false
 
-    // Cost center matching: look up event cost center or request cost center
     const reqCc = req.costCenter || events.find((e) => e.id === req.eventId)?.costCenter
     if (ccFilter !== 'All' && reqCc !== ccFilter) match = false
 
@@ -98,7 +97,7 @@ export default function Reporting() {
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Checked">Checked</SelectItem>
                   <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
+                  <SelectItem value="Processed">Processed</SelectItem>
                   <SelectItem value="Rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
@@ -166,7 +165,7 @@ export default function Reporting() {
                     <Badge
                       variant="outline"
                       className={`
-                      ${req.status === 'Paid' ? 'bg-success/10 text-success border-success/20' : ''}
+                      ${req.status === 'Processed' ? 'bg-success/10 text-success border-success/20' : ''}
                       ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold' : ''}
                       ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : ''}
                       ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}

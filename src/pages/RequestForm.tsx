@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import useReimbursementStore from '@/stores/useReimbursementStore'
+import useMasterDataStore from '@/stores/useMasterDataStore'
 import useAuthStore from '@/stores/useAuthStore'
 import { ReimbursementRequest, Signature } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,6 +21,7 @@ export default function RequestForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { requests, addRequest, updateRequest } = useReimbursementStore()
+  const { costCenters, events } = useMasterDataStore()
   const { user, updateProfile } = useAuthStore()
 
   const isNew = id === 'new'
@@ -54,7 +56,6 @@ export default function RequestForm() {
 
   if (!formData.id) return null
 
-  // Editing logic based on Role and Status
   const isEditingAllowed = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
   const readOnly = !isEditingAllowed
 
@@ -63,7 +64,6 @@ export default function RequestForm() {
 
     if (isNew) {
       addRequest(formData as ReimbursementRequest)
-      // Auto-populate profile on first request if data was added
       if (user?.role === 'requester') {
         updateProfile(user.id, formData.requesterDetails!)
       }
@@ -75,7 +75,6 @@ export default function RequestForm() {
       })
       toast({ title: 'Request Submitted Successfully' })
     } else if (isResubmission) {
-      // Resubmitting a rejected request
       updateRequest(formData.id!, {
         ...formData,
         status: 'Pending',
@@ -98,8 +97,31 @@ export default function RequestForm() {
     navigate('/requests')
   }
 
-  const handleAction = async (action: 'approve' | 'reject', comments: string, receipt?: string) => {
-    if (action === 'reject' && !comments && user?.role !== 'finance') {
+  const handleAction = async (
+    action: 'approve' | 'reject' | 'upload_receipt',
+    comments: string,
+    receipt?: string,
+  ) => {
+    if (action === 'upload_receipt') {
+      updateRequest(formData.id!, {
+        paymentReceipt: receipt,
+        history: [
+          ...(formData.history || []),
+          {
+            id: `h-${Date.now()}`,
+            date: new Date().toISOString(),
+            action: 'Receipt Uploaded',
+            userId: user?.name || 'Finance',
+            comments: 'Additional payment proof attached.',
+          },
+        ],
+      })
+      toast({ title: 'Payment Receipt Uploaded' })
+      navigate('/requests')
+      return
+    }
+
+    if (action === 'reject' && !comments) {
       toast({ title: 'Rejection reason is required', variant: 'destructive' })
       return
     }
@@ -143,8 +165,8 @@ export default function RequestForm() {
         newStatus = 'Approved'
         updates.coSignature = signature
       } else {
-        newStatus = 'Pending' // Return to QC stage
-        updates.qcSignature = null // Clear QC signature for re-review
+        newStatus = 'Pending'
+        updates.qcSignature = null
         updates.coSignature = null
         notifyEmail = 'qc@kaiciid.org'
         notifySubject = `Request returned to QC: ${formData.id}`
@@ -152,15 +174,21 @@ export default function RequestForm() {
       }
     } else if (user?.role === 'finance') {
       if (action === 'approve') {
-        newStatus = 'Paid'
+        newStatus = 'Processed'
         updates.financeSignature = signature
-        updates.paymentReceipt = receipt
-        notifySubject = `Reimbursement Request Paid: ${formData.id}`
-        notifyBody = `Your reimbursement request ${formData.id} has been processed and paid. Payment Reference: ${receipt || 'N/A'}`
+        if (receipt) updates.paymentReceipt = receipt
+        notifySubject = `Reimbursement Request Processed: ${formData.id}`
+        notifyBody = `Your reimbursement request ${formData.id} has been processed. Payment Reference: ${receipt || 'N/A'}`
       } else {
-        // Edge case if finance rejects, send back to CO
         newStatus = 'Checked'
         updates.coSignature = null
+        updates.financeSignature = null
+        const reqCc =
+          formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+        const ccData = costCenters.find((c) => c.code === reqCc)
+        notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
+        notifySubject = `Request returned to Certifying Officer: ${formData.id}`
+        notifyBody = `Request ${formData.id} was returned by Finance. Reason: ${comments}`
       }
     }
 
@@ -168,7 +196,6 @@ export default function RequestForm() {
     updateRequest(formData.id!, updates)
     toast({ title: `Request ${newStatus}` })
 
-    // Send notification if applicable
     if (notifySubject) {
       await sendEmail({
         to: notifyEmail,
@@ -312,7 +339,6 @@ export default function RequestForm() {
         )}
       </div>
 
-      {/* Hidden layout for PDF printing */}
       <PrintTemplate formData={formData} />
     </>
   )

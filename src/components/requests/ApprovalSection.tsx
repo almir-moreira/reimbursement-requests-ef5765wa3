@@ -4,11 +4,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import useAuthStore from '@/stores/useAuthStore'
-import { Check, X, RotateCcw } from 'lucide-react'
+import { Check, X, RotateCcw, Paperclip } from 'lucide-react'
 
 interface Props {
   formData: Partial<ReimbursementRequest>
-  onAction: (action: 'approve' | 'reject', comments: string, paymentReceipt?: string) => void
+  onAction: (
+    action: 'approve' | 'reject' | 'upload_receipt',
+    comments: string,
+    paymentReceipt?: string,
+  ) => void
 }
 
 export function ApprovalSection({ formData, onAction }: Props) {
@@ -22,6 +26,8 @@ export function ApprovalSection({ formData, onAction }: Props) {
     (user.role === 'qc' && formData.status === 'Pending') ||
     (user.role === 'co' && formData.status === 'Checked') ||
     (user.role === 'finance' && formData.status === 'Approved')
+
+  const canUploadReceipt = user.role === 'finance' && formData.status === 'Processed'
 
   return (
     <div className="space-y-6 pt-6 border-t border-border mt-10 bg-[#4a8ebf]/5 p-6 rounded-xl border border-[#4a8ebf]/20">
@@ -67,7 +73,9 @@ export function ApprovalSection({ formData, onAction }: Props) {
         <div
           className={`p-4 rounded-lg border shadow-sm ${formData.financeSignature ? 'bg-white border-border' : 'bg-muted/50 border-dashed border-border'}`}
         >
-          <h4 className="text-xs uppercase text-muted-foreground font-bold mb-1">Finance Paid</h4>
+          <h4 className="text-xs uppercase text-muted-foreground font-bold mb-1">
+            Finance Processed
+          </h4>
           {formData.financeSignature ? (
             <>
               <p className="font-medium text-sm">{formData.financeSignature.name}</p>
@@ -93,18 +101,14 @@ export function ApprovalSection({ formData, onAction }: Props) {
             <Input
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              placeholder={
-                user.role === 'finance'
-                  ? 'Payment Reference (optional)'
-                  : 'Required if rejecting...'
-              }
+              placeholder="Required if rejecting..."
               className="bg-white max-w-xl"
             />
           </div>
 
           {user.role === 'finance' && (
             <div className="space-y-2">
-              <Label className="text-sm font-semibold">Upload Payment Receipt</Label>
+              <Label className="text-sm font-semibold">Upload Payment Receipt (Optional)</Label>
               <div className="flex items-center gap-4">
                 <Input
                   type="file"
@@ -123,21 +127,43 @@ export function ApprovalSection({ formData, onAction }: Props) {
               <Check className="w-5 h-5 mr-2" />
               {user.role === 'finance' ? 'Process Payment' : 'Approve Request'}
             </Button>
-            {user.role !== 'finance' && (
-              <Button
-                onClick={() => onAction('reject', comments)}
-                variant="destructive"
-                className="h-12 px-8 text-md font-bold shadow-sm"
-              >
-                {user.role === 'co' ? (
-                  <RotateCcw className="w-5 h-5 mr-2" />
-                ) : (
-                  <X className="w-5 h-5 mr-2" />
-                )}
-                {user.role === 'co' ? 'Return to QC' : 'Reject to Requester'}
-              </Button>
-            )}
+            <Button
+              onClick={() => onAction('reject', comments)}
+              variant="destructive"
+              className="h-12 px-8 text-md font-bold shadow-sm"
+            >
+              {user.role === 'co' || user.role === 'finance' ? (
+                <RotateCcw className="w-5 h-5 mr-2" />
+              ) : (
+                <X className="w-5 h-5 mr-2" />
+              )}
+              {user.role === 'co'
+                ? 'Return to QC'
+                : user.role === 'finance'
+                  ? 'Return to CO'
+                  : 'Reject to Requester'}
+            </Button>
           </div>
+        </div>
+      )}
+
+      {canUploadReceipt && (
+        <div className="space-y-4 pt-4 border-t border-[#4a8ebf]/10">
+          <Label className="text-sm font-semibold">Upload Additional Payment Proof</Label>
+          <div className="flex items-center gap-4">
+            <Input
+              type="file"
+              onChange={(e) => setReceiptName(e.target.files?.[0]?.name || '')}
+              className="bg-white max-w-md file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#4a8ebf]/10 file:text-[#4a8ebf] hover:file:bg-[#4a8ebf]/20 cursor-pointer"
+            />
+          </div>
+          <Button
+            onClick={() => onAction('upload_receipt', '', receiptName)}
+            className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold"
+            disabled={!receiptName}
+          >
+            <Paperclip className="w-4 h-4 mr-2" /> Save Receipt
+          </Button>
         </div>
       )}
     </div>
