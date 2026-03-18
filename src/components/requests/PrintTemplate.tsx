@@ -116,7 +116,7 @@ export function PrintTemplate({ formData }: { formData: Partial<ReimbursementReq
                 {exp.workorder || formData.workorder}
               </td>
               <td className="border border-black p-1 bg-gray-100">
-                {exp.exchangeRate?.toFixed(2)}
+                {exp.exchangeRate?.toFixed(4)}
               </td>
               <td className="border border-black p-1 bg-gray-100">{exp.amountEuros?.toFixed(2)}</td>
             </tr>

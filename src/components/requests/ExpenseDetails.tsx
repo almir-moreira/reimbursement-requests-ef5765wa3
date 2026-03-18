@@ -186,7 +186,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     </td>
                     <td className="p-2 text-center">
                       <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                        {exp.exchangeRate?.toFixed(2) || '1.00'}
+                        {exp.exchangeRate?.toFixed(4) || '1.0000'}
                       </span>
                     </td>
                   </>

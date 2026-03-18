@@ -26145,11 +26145,33 @@ function Login() {
 //#endregion
 //#region src/stores/useReimbursementStore.tsx
 var ReimbursementContext = (0, import_react.createContext)(void 0);
+var getUsers = () => {
+	try {
+		const saved = localStorage.getItem("auth_users_list_v3");
+		if (saved) return JSON.parse(saved);
+	} catch {}
+	return [];
+};
 function ReimbursementProvider({ children }) {
 	const [requests, setRequests] = (0, import_react.useState)(() => {
 		try {
 			const saved = localStorage.getItem("reimbursement_requests_v2");
-			if (saved) return JSON.parse(saved);
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				const users = getUsers();
+				return parsed.map((req) => {
+					if (req.history) req.history = req.history.map((h) => {
+						if (h.action === "Approved") {
+							if (users.find((user) => user.id === h.userId)?.role === "finance" || h.userId === "u-4") return {
+								...h,
+								action: "Processed"
+							};
+						}
+						return h;
+					});
+					return req;
+				});
+			}
 		} catch {}
 		return [];
 	});
@@ -26160,13 +26182,31 @@ function ReimbursementProvider({ children }) {
 		setRequests((prev) => [req, ...prev]);
 	};
 	const updateRequest = (id, req) => {
-		setRequests((prev) => prev.map((r) => r.id === id ? {
-			...r,
-			...req
-		} : r));
+		setRequests((prev) => prev.map((r) => {
+			if (r.id === id) {
+				const updated = {
+					...r,
+					...req
+				};
+				if (updated.history) {
+					const users = getUsers();
+					updated.history = updated.history.map((h) => {
+						if (h.action === "Approved") {
+							if (users.find((user) => user.id === h.userId)?.role === "finance" || h.userId === "u-4") return {
+								...h,
+								action: "Processed"
+							};
+						}
+						return h;
+					});
+				}
+				return updated;
+			}
+			return r;
+		}));
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReimbursementContext.Provider, {
-		"data-uid": "src/stores/useReimbursementStore.tsx:36:5",
+		"data-uid": "src/stores/useReimbursementStore.tsx:84:5",
 		"data-prohibitions": "[editContent]",
 		value: {
 			requests,
@@ -28906,7 +28946,7 @@ function ExpenseDetails({ formData, onChange, readOnly }) {
 											"data-uid": "src/components/requests/ExpenseDetails.tsx:188:23",
 											"data-prohibitions": "[editContent]",
 											className: "text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded",
-											children: exp.exchangeRate?.toFixed(2) || "1.00"
+											children: exp.exchangeRate?.toFixed(4) || "1.0000"
 										})
 									})
 								] }),
@@ -29024,7 +29064,7 @@ function Attachments({ formData, onChange, readOnly }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 				"data-uid": "src/components/requests/Attachments.tsx:34:7",
 				"data-prohibitions": "[]",
-				className: "font-serif font-bold text-xl text-primary",
+				className: "font-serif font-bold text-xl text-[#4a8ebf]",
 				children: "Attachments"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -29034,12 +29074,12 @@ function Attachments({ formData, onChange, readOnly }) {
 				children: [attachments.map((att, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					"data-uid": "src/components/requests/Attachments.tsx:37:11",
 					"data-prohibitions": "[editContent]",
-					className: "flex items-end gap-4 bg-muted/20 p-4 rounded-lg border border-border",
+					className: "flex flex-col sm:flex-row items-start sm:items-end gap-4 bg-muted/20 p-4 rounded-lg border border-border",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							"data-uid": "src/components/requests/Attachments.tsx:41:13",
-							"data-prohibitions": "[]",
-							className: "flex-1 space-y-2",
+							"data-prohibitions": "[editContent]",
+							className: "flex-1 space-y-2 w-full",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
 								"data-uid": "src/components/requests/Attachments.tsx:42:15",
 								"data-prohibitions": "[]",
@@ -29051,35 +29091,66 @@ function Attachments({ formData, onChange, readOnly }) {
 								disabled: readOnly,
 								value: att.description,
 								onChange: (e) => updateAtt(i, "description", e.target.value),
-								placeholder: "Receipt description"
+								placeholder: "Receipt description",
+								className: readOnly ? "bg-white cursor-default text-foreground" : ""
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/requests/Attachments.tsx:50:13",
+							"data-uid": "src/components/requests/Attachments.tsx:51:13",
 							"data-prohibitions": "[editContent]",
-							className: "flex-1 space-y-2",
+							className: "flex-1 space-y-2 w-full",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label$1, {
-								"data-uid": "src/components/requests/Attachments.tsx:51:15",
+								"data-uid": "src/components/requests/Attachments.tsx:52:15",
 								"data-prohibitions": "[]",
 								className: "text-xs uppercase text-muted-foreground",
 								children: "File"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/components/requests/Attachments.tsx:52:15",
+							}), readOnly ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/requests/Attachments.tsx:54:17",
+								"data-prohibitions": "[editContent]",
+								className: "flex items-center p-2.5 h-10 bg-white rounded-md border border-input shadow-sm hover:border-[#4a8ebf] transition-colors",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Paperclip, {
+										"data-uid": "src/components/requests/Attachments.tsx:55:19",
+										"data-prohibitions": "[editContent]",
+										className: "w-4 h-4 mr-2 text-muted-foreground shrink-0"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+										"data-uid": "src/components/requests/Attachments.tsx:56:19",
+										"data-prohibitions": "[editContent]",
+										href: `#download-${att.id}`,
+										onClick: (e) => {
+											e.preventDefault();
+											const link = document.createElement("a");
+											link.href = "data:text/plain;charset=utf-8,Mock%20File%20Content";
+											link.download = att.fileName || "attachment.txt";
+											link.click();
+										},
+										className: "text-sm font-semibold text-[#4a8ebf] hover:underline flex-1 truncate",
+										title: "Click to download file",
+										children: att.fileName || "Unnamed Attachment"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, {
+										"data-uid": "src/components/requests/Attachments.tsx:70:19",
+										"data-prohibitions": "[editContent]",
+										className: "w-4 h-4 text-muted-foreground ml-2 shrink-0"
+									})
+								]
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/requests/Attachments.tsx:73:17",
 								"data-prohibitions": "[editContent]",
 								className: "flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									"data-uid": "src/components/requests/Attachments.tsx:53:17",
+									"data-uid": "src/components/requests/Attachments.tsx:74:19",
 									"data-prohibitions": "[editContent]",
-									disabled: readOnly,
 									type: "file",
 									onChange: (e) => updateAtt(i, "fileName", e.target.files?.[0]?.name || ""),
-									className: "file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+									className: "file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#4a8ebf]/10 file:text-[#4a8ebf] hover:file:bg-[#4a8ebf]/20 cursor-pointer"
 								}), att.fileName && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									"data-uid": "src/components/requests/Attachments.tsx:60:19",
+									"data-uid": "src/components/requests/Attachments.tsx:80:21",
 									"data-prohibitions": "[editContent]",
-									className: "text-sm font-medium",
+									className: "text-sm font-medium truncate max-w-[150px]",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Paperclip, {
-										"data-uid": "src/components/requests/Attachments.tsx:61:21",
+										"data-uid": "src/components/requests/Attachments.tsx:81:23",
 										"data-prohibitions": "[editContent]",
 										className: "w-4 h-4 inline mr-1"
 									}), att.fileName]
@@ -29087,28 +29158,28 @@ function Attachments({ formData, onChange, readOnly }) {
 							})]
 						}),
 						!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/requests/Attachments.tsx:68:15",
+							"data-uid": "src/components/requests/Attachments.tsx:89:15",
 							"data-prohibitions": "[]",
 							variant: "ghost",
 							size: "icon",
 							onClick: () => removeAtt(i),
-							className: "text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0",
+							className: "text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 mt-2 sm:mt-0",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-								"data-uid": "src/components/requests/Attachments.tsx:74:17",
+								"data-uid": "src/components/requests/Attachments.tsx:95:17",
 								"data-prohibitions": "[editContent]",
 								className: "w-4 h-4"
 							})
 						})
 					]
 				}, att.id)), attachments.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					"data-uid": "src/components/requests/Attachments.tsx:80:11",
+					"data-uid": "src/components/requests/Attachments.tsx:101:11",
 					"data-prohibitions": "[]",
 					className: "text-sm text-muted-foreground italic",
 					children: "No attachments added."
 				})]
 			}),
 			!readOnly && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				"data-uid": "src/components/requests/Attachments.tsx:84:9",
+				"data-uid": "src/components/requests/Attachments.tsx:105:9",
 				"data-prohibitions": "[]",
 				type: "button",
 				variant: "outline",
@@ -29116,7 +29187,7 @@ function Attachments({ formData, onChange, readOnly }) {
 				onClick: addAttachment,
 				className: "text-success border-success hover:bg-success/10",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, {
-					"data-uid": "src/components/requests/Attachments.tsx:91:11",
+					"data-uid": "src/components/requests/Attachments.tsx:112:11",
 					"data-prohibitions": "[editContent]",
 					className: "w-4 h-4 mr-2"
 				}), " Add Attachment"]
@@ -29660,7 +29731,7 @@ function PrintTemplate({ formData }) {
 									"data-uid": "src/components/requests/PrintTemplate.tsx:118:15",
 									"data-prohibitions": "[editContent]",
 									className: "border border-black p-1 bg-gray-100",
-									children: exp.exchangeRate?.toFixed(2)
+									children: exp.exchangeRate?.toFixed(4)
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 									"data-uid": "src/components/requests/PrintTemplate.tsx:121:15",
@@ -33219,4 +33290,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppProviders, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-D3ddZx8r.js.map
+//# sourceMappingURL=index-DM3u34lk.js.map
