@@ -8,6 +8,7 @@ import {
   LogOut,
   Globe,
   BarChart,
+  Settings,
 } from 'lucide-react'
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
@@ -52,6 +53,9 @@ export default function Layout() {
   }
   if (user.role === 'admin' || user.role === 'finance' || user.role === 'qc') {
     navItems.push({ name: t('masterData'), path: '/master-data', icon: Database })
+  }
+  if (user.role === 'admin') {
+    navItems.push({ name: t('smtpSettings'), path: '/settings/smtp', icon: Settings })
   }
 
   return (

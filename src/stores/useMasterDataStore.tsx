@@ -41,6 +41,15 @@ export interface Workorder {
   name: string
 }
 
+export interface SmtpSettings {
+  host: string
+  port: string
+  user: string
+  password?: string
+  fromEmail: string
+  encryption: 'SSL' | 'TLS' | 'None'
+}
+
 interface MasterDataState {
   events: EventDetail[]
   exchangeRates: ExchangeRate[]
@@ -48,6 +57,7 @@ interface MasterDataState {
   costCenters: CostCenter[]
   accounts: Account[]
   workorders: Workorder[]
+  smtpSettings: SmtpSettings
 }
 
 interface MasterDataContextData extends MasterDataState {
@@ -101,6 +111,14 @@ const initialData: MasterDataState = {
     { id: 'a-2', code: '62001', name: 'Meals' },
   ],
   workorders: [{ id: 'w-1', code: 'P1134-12', name: 'Field Visit' }],
+  smtpSettings: {
+    host: 'smtp.gmail.com',
+    port: '587',
+    user: 'admin@kaiciid.org',
+    password: '',
+    fromEmail: 'noreply@kaiciid.org',
+    encryption: 'TLS',
+  },
 }
 
 const MasterDataContext = createContext<MasterDataContextData | undefined>(undefined)
@@ -108,8 +126,15 @@ const MasterDataContext = createContext<MasterDataContextData | undefined>(undef
 export function MasterDataProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MasterDataState>(() => {
     try {
-      const saved = localStorage.getItem('master_data_v5')
-      if (saved) return JSON.parse(saved)
+      const saved = localStorage.getItem('master_data_v6')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return {
+          ...initialData,
+          ...parsed,
+          smtpSettings: parsed.smtpSettings || initialData.smtpSettings,
+        }
+      }
     } catch {
       // ignore
     }
@@ -117,7 +142,7 @@ export function MasterDataProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
-    localStorage.setItem('master_data_v5', JSON.stringify(state))
+    localStorage.setItem('master_data_v6', JSON.stringify(state))
   }, [state])
 
   const updateData = (key: keyof MasterDataState, data: any) => {

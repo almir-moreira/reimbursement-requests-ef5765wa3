@@ -9,6 +9,7 @@ import RequestsList from './pages/RequestsList'
 import RequestForm from './pages/RequestForm'
 import MasterData from './pages/MasterData'
 import Reporting from './pages/Reporting'
+import SmtpSettings from './pages/SmtpSettings'
 import { AppProviders } from './stores/main'
 
 const App = () => (
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/requests/:id" element={<RequestForm />} />
             <Route path="/master-data" element={<MasterData />} />
             <Route path="/reporting" element={<Reporting />} />
+            <Route path="/settings/smtp" element={<SmtpSettings />} />
           </Route>
         </Routes>
       </TooltipProvider>
