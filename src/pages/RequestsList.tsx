@@ -33,7 +33,9 @@ export default function RequestsList() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('requests')}</h1>
+        <h1 className="text-3xl font-serif text-foreground/80">
+          <span className="font-bold text-[#4a8ebf]">KAICIID</span> | {t('requests')}
+        </h1>
         {user?.role === 'requester' && (
           <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold">
             <Link to="/requests/new">
@@ -69,7 +71,7 @@ export default function RequestsList() {
 
               return (
                 <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-bold font-mono text-xs text-[#4a8ebf]">
+                  <TableCell className="font-bold font-mono text-sm text-[#4a8ebf]">
                     {req.id}
                   </TableCell>
                   <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>

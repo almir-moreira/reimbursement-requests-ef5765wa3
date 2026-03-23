@@ -31,8 +31,21 @@ export default function RequestForm() {
 
   useEffect(() => {
     if (isNew && user) {
+      // Generate standardized YYYY-NNNN Request ID
+      const currentYear = new Date().getFullYear().toString()
+      const yearRequests = requests.filter((r) => r.id.startsWith(`${currentYear}-`))
+      const lastNum = yearRequests.reduce((max, r) => {
+        const parts = r.id.split('-')
+        if (parts.length === 2) {
+          const num = parseInt(parts[1], 10)
+          return !isNaN(num) && num > max ? num : max
+        }
+        return max
+      }, 0)
+      const newId = `${currentYear}-${(lastNum + 1).toString().padStart(4, '0')}`
+
       setFormData({
-        id: `REQ-${Math.floor(Math.random() * 10000)}`,
+        id: newId,
         status: 'Pending',
         requesterId: user.id,
         requesterDetails: user,
@@ -52,7 +65,7 @@ export default function RequestForm() {
     } else if (existing) {
       setFormData(existing)
     }
-  }, [isNew, existing, user])
+  }, [isNew, existing, user, requests])
 
   if (!formData.id) return null
 
@@ -210,6 +223,15 @@ export default function RequestForm() {
   return (
     <>
       <div className="space-y-6 max-w-6xl mx-auto pb-20 animate-fade-in-up print:hidden">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-3xl font-serif">
+            <span className="font-bold text-[#4a8ebf]">KAICIID</span>
+            <span className="text-muted-foreground ml-3 text-2xl font-sans font-medium">
+              Reimbursement Request {formData.id ? `| ${formData.id}` : ''}
+            </span>
+          </h1>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <Button variant="outline" onClick={() => navigate(-1)} className="bg-background">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to List
@@ -252,7 +274,7 @@ export default function RequestForm() {
             className={`text-white py-4 ${formData.status === 'Rejected' ? 'bg-destructive' : 'bg-[#4a8ebf]'}`}
           >
             <CardTitle className="text-xl tracking-wide flex items-center gap-3">
-              Reimbursement Request Form{' '}
+              Request Details
               {formData.status === 'Rejected' && (
                 <span className="text-sm bg-white/20 px-2 py-0.5 rounded ml-auto">REJECTED</span>
               )}

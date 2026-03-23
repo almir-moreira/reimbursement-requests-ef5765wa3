@@ -41,6 +41,8 @@ export interface Attachment {
   id: string
   description: string
   fileName: string
+  fileData?: string
+  fileType?: string
 }
 
 export interface HistoryLog {

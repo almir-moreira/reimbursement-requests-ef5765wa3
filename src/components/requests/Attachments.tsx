@@ -29,6 +29,22 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
     onChange({ attachments: newAtts })
   }
 
+  const handleFileSelected = (index: number, file: File | undefined) => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const newAtts = [...attachments]
+      newAtts[index] = {
+        ...newAtts[index],
+        fileName: file.name,
+        fileData: e.target?.result as string,
+        fileType: file.type,
+      }
+      onChange({ attachments: newAtts })
+    }
+    reader.readAsDataURL(file)
+  }
+
   const removeAtt = (index: number) => {
     onChange({ attachments: attachments.filter((_, i) => i !== index) })
   }
@@ -40,16 +56,19 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
 
   const handleDownload = (att: Attachment) => {
     const link = document.createElement('a')
-    link.href = 'data:text/plain;charset=utf-8,Mock%20File%20Content'
+    link.href = att.fileData || 'data:text/plain;charset=utf-8,Mock%20File%20Content'
     link.download = att.fileName || 'attachment.txt'
     link.click()
   }
 
   const renderPreview = (att: Attachment | null) => {
     if (!att) return null
-    const ext = att.fileName?.split('.').pop()?.toLowerCase()
+    const ext = att.fileName?.split('.').pop()?.toLowerCase() || ''
+    const isImage =
+      ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext) || att.fileType?.startsWith('image/')
+    const isPdf = ext === 'pdf' || att.fileType === 'application/pdf'
 
-    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext || '')) {
+    if (isImage) {
       return (
         <>
           <div className="absolute bottom-4 right-4 flex gap-1 z-10 bg-background/90 backdrop-blur p-1 rounded-md border shadow-sm">
@@ -88,7 +107,7 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
           <div className="w-full h-full overflow-auto flex p-4 bg-muted/30">
             <div className="m-auto flex items-center justify-center">
               <img
-                src={`https://img.usecurling.com/p/1200/1200?q=document`}
+                src={att.fileData || `https://img.usecurling.com/p/1200/1200?q=document`}
                 alt={att.fileName}
                 style={{
                   width: zoom === 1 ? 'auto' : `${zoom * 100}%`,
@@ -103,12 +122,12 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
       )
     }
 
-    if (ext === 'pdf') {
-      const pdfDataUri =
+    if (isPdf) {
+      const defaultPdfUri =
         'data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nDPQM1Qo5ypUMFAwALJMLU31jBQsTAz1LBSK0osSQTz9xJLMYoW8/NTEvBIFQwMDBUMLA1MDCxMjozhDI0NTA0NzSwuQjB5QpZqBqYmBqYGFiamZhYWhibmlhbGFmbmZpYmFmYmFmaWpmaWZhZmliYWlmYWZhZkllAIASf4ZzwplbmRzdHJlYW0KZW5kb2JqCjMgMCBvYmoKMTIyCmVuZG9iago0IDAgb2JqCjw8L1R5cGUvUGFnZS9NZWRpYUJveFswIDAgNTk1LjI3NiA4NDEuODldL1Jlc291cmNlczw8L0ZvbnQ8PC9GMSA1IDAgUj4+Pj4vQ29udGVudHMgMiAwIFIvUGFyZW50IDYgMCBSPj4KZW5kb2JqCjUgMCBvYmoKPDwvVHlwZS9Gb250L1N1YnR5cGUvVHlwZTEvQmFzZUZvbnQvSGVsdmV0aWNhPj4KZW5kb2JqCjYgMCBvYmoKPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbNCAwIFJdPj4KZW5kb2JqCjcgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDYgMCBSPj4KZW5kb2JqCjEgMCBvYmoKPDwvUHJvZHVjZXIoQ2FudmEpL0NyZWF0aW9uRGF0ZShEOjIwMjQwMzE3MTAwMDAwWik+PgplbmRvYmoKeHJlZgowIDgKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwNDcyIDAwMDAwIG4gCjAwMDAwMDAwMTkgMDAwMDAgbiAKMDAwMDAwMDIxMyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzNTMgMDAwMDAgbiAKMDAwMDAwMDQ0MSAwMDAwMCBuIAowMDAwMDAwMTAwIDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA4L1Jvb3QgNyAwIFIvSW5mbyAxIDAgUj4+CnN0YXJ0eHJlZgo1NDQKJSVFT0YK'
       return (
         <iframe
-          src={pdfDataUri}
+          src={att.fileData || defaultPdfUri}
           className="w-full h-full border-0 bg-muted/10"
           title={att.fileName}
         />
@@ -179,7 +198,8 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
                 <div className="flex items-center gap-2">
                   <Input
                     type="file"
-                    onChange={(e) => updateAtt(i, 'fileName', e.target.files?.[0]?.name || '')}
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => handleFileSelected(i, e.target.files?.[0])}
                     className="file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#4a8ebf]/10 file:text-[#4a8ebf] hover:file:bg-[#4a8ebf]/20 cursor-pointer"
                   />
                   {att.fileName && (
