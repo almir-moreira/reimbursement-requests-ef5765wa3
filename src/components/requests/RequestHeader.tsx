@@ -43,16 +43,16 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6">
+        <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Id</Label>
           <Input disabled value={formData.id || ''} className="bg-muted/50 font-mono text-xs" />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Status</Label>
           <Input disabled value={t(formData.status || '')} className="bg-muted/50 font-semibold" />
         </div>
-        <div className="space-y-2 md:col-span-2">
+        <div className="space-y-2 lg:col-span-2">
           <Label className="text-muted-foreground text-xs uppercase">Event</Label>
           <Select disabled={readOnly} value={formData.eventId} onValueChange={handleEventChange}>
             <SelectTrigger>
@@ -67,7 +67,17 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 lg:col-span-1">
+          <Label className="text-muted-foreground text-xs uppercase">Cost Centre</Label>
+          <Input
+            disabled={readOnly}
+            value={formData.costCenter || ''}
+            onChange={(e) => onChange({ costCenter: e.target.value })}
+            className={readOnly ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs'}
+            placeholder="e.g. CC-01"
+          />
+        </div>
+        <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Account</Label>
           <Input
             disabled
@@ -75,7 +85,7 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
             className="bg-muted/50 font-mono text-xs"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Workorder</Label>
           <Input
             disabled

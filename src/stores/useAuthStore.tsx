@@ -13,6 +13,7 @@ interface AuthContextData {
   updateProfile: (id: string, data: Partial<User>) => void
   adminAddUser: (data: Partial<User>) => void
   adminDeleteUser: (id: string) => void
+  updatePassword: (email: string, newPassword: string) => boolean
 }
 
 const initialUsers: User[] = [
@@ -140,6 +141,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsers((prev) => prev.filter((u) => u.id !== id))
   }
 
+  const updatePassword = (email: string, newPassword: string) => {
+    let updated = false
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.email.toLowerCase() === email.toLowerCase()) {
+          updated = true
+          return { ...u, password: newPassword }
+        }
+        return u
+      }),
+    )
+    return updated
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -153,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile,
         adminAddUser,
         adminDeleteUser,
+        updatePassword,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -80,7 +80,18 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Password</Label>
+              <div className="flex items-center justify-between">
+                <Label>Password</Label>
+                {!isRegistering && (
+                  <Button
+                    variant="link"
+                    asChild
+                    className="p-0 h-auto text-xs text-[#4a8ebf] font-normal"
+                  >
+                    <Link to="/forgot-password">Forgotten your Password?</Link>
+                  </Button>
+                )}
+              </div>
               <Input
                 required
                 type="password"
