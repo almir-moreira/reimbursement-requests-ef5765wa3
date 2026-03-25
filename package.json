@@ -2,7 +2,7 @@
   "name": "reimbursement-requests",
   "description": "Reimbursement Requests Application for KAICIID",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.23",
   "type": "module",
   "scripts": {
     "start": "vite dev",
