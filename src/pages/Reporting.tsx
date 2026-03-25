@@ -48,7 +48,7 @@ export default function Reporting() {
 
   const exportCsv = () => {
     const csvRows = [
-      ['Request ID', 'Date', 'Requester', 'Cost Center', 'Status', 'Total EUR'].join(','),
+      ['Request ID', 'Date', 'Requester', 'Cost Centre', 'Status', 'Total EUR'].join(','),
     ]
     filtered.forEach((r) => {
       const totalEur = r.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0).toFixed(2)
@@ -111,7 +111,7 @@ export default function Reporting() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="All">All Cost Centers</SelectItem>
+                  <SelectItem value="All">All Cost Centres</SelectItem>
                   {costCenters.map((cc) => (
                     <SelectItem key={cc.code} value={cc.code}>
                       {cc.code} - {cc.name}
@@ -143,7 +143,7 @@ export default function Reporting() {
               <TableHead>ID</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Requester</TableHead>
-              <TableHead>Cost Center</TableHead>
+              <TableHead>Cost Centre</TableHead>
               <TableHead className="text-right">Total EUR</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>

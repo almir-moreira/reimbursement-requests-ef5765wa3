@@ -28,7 +28,7 @@ const translations: Record<string, Record<string, string>> = {
     Approved: 'Approved',
     Processed: 'Processed',
     Rejected: 'Rejected',
-    costCenter: 'Cost Center',
+    costCenter: 'Cost Centre',
     dateRange: 'Date Range',
     export: 'Export',
   },

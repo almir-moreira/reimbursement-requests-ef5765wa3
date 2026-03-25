@@ -19,7 +19,7 @@ export default function MasterData() {
     { id: 'exchangeRates', label: 'Exchange Rates', roles: ['admin', 'finance'] },
     { id: 'events', label: 'Events Matrix', roles: ['admin', 'qc'] },
     { id: 'countries', label: 'Countries', roles: ['admin'] },
-    { id: 'costCenters', label: 'Cost Centers', roles: ['admin'] },
+    { id: 'costCenters', label: 'Cost Centres', roles: ['admin'] },
     { id: 'accounts', label: 'Accounts', roles: ['admin'] },
     { id: 'workorders', label: 'Workorders', roles: ['admin'] },
   ]
@@ -42,7 +42,7 @@ export default function MasterData() {
       data: store.events,
       cols: [
         { key: 'name', label: 'Name' },
-        { key: 'costCenter', label: 'Cost Center' },
+        { key: 'costCenter', label: 'Cost Centre' },
         { key: 'account', label: 'Account' },
         { key: 'workorder', label: 'Workorder' },
         { key: 'qcName', label: 'QC Name' },
