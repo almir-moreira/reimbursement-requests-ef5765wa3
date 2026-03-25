@@ -48,7 +48,7 @@ export default function Login() {
             KAICIID
           </h1>
           <CardTitle className="text-xl font-serif text-foreground/80">
-            Reimbursement Portal
+            Reimbursement Requests
           </CardTitle>
           <CardDescription className="pt-2">
             {isRegistering

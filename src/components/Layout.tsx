@@ -70,7 +70,7 @@ export default function Layout() {
               KAICIID
             </h1>
             <div className="font-serif font-semibold text-lg text-foreground/80">
-              {lang === 'en' ? 'Reimbursement Portal' : 'بوابة الاسترداد'}
+              {lang === 'en' ? 'Reimbursement Requests' : 'طلبات الاسترداد'}
             </div>
           </div>
           <SidebarContent className="p-4 gap-2 mt-4">
@@ -102,7 +102,7 @@ export default function Layout() {
                   KAICIID
                 </span>
                 <span className="font-serif text-sm text-foreground/80 leading-tight">
-                  Reimbursement Portal
+                  Reimbursement Requests
                 </span>
               </div>
               <div className="hidden md:flex flex-col ml-2">
@@ -110,7 +110,7 @@ export default function Layout() {
                   KAICIID
                 </span>
                 <span className="font-serif text-sm text-foreground/80 leading-tight">
-                  Reimbursement Portal
+                  Reimbursement Requests
                 </span>
               </div>
             </div>

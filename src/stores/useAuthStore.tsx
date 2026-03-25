@@ -122,8 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsers((prev) => [...prev, newUser])
     await sendEmail({
       to: email,
-      subject: 'Welcome to KAICIID Reimbursement Portal',
-      body: `Hi ${name},\n\nPlease confirm your email address to access the portal. You can now login with your credentials.`,
+      subject: 'Welcome to KAICIID Reimbursement Requests',
+      body: `Hi ${name},\n\nPlease confirm your email address to access the application. You can now login with your credentials.`,
     })
   }
 
