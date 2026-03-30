@@ -28,6 +28,7 @@ export default function RequestForm() {
   const existing = requests.find((r) => r.id === id)
 
   const [formData, setFormData] = useState<Partial<ReimbursementRequest>>({})
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (isNew && user) {
@@ -67,7 +68,13 @@ export default function RequestForm() {
     }
   }, [isNew, existing, user, requests])
 
-  if (!formData.id) return null
+  if (!formData.id) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4a8ebf]"></div>
+      </div>
+    )
+  }
 
   const isPostCO = formData.status === 'Approved' || formData.status === 'Processed'
   const isRequesterEditing = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
@@ -75,45 +82,50 @@ export default function RequestForm() {
   const readOnly = (!isRequesterEditing && !isQcEditing) || isPostCO
 
   const handleSave = async () => {
-    const isResubmission = !isNew && formData.status === 'Rejected'
+    setIsSaving(true)
+    try {
+      const isResubmission = !isNew && formData.status === 'Rejected'
 
-    if (isNew) {
-      await addRequest(formData as ReimbursementRequest)
-      if (user?.role === 'requester') {
-        await updateProfile(user.id, formData.requesterDetails!)
-      }
+      if (isNew) {
+        await addRequest(formData as ReimbursementRequest)
+        if (user?.role === 'requester') {
+          await updateProfile(user.id, formData.requesterDetails!)
+        }
 
-      try {
-        await sendEmail({
-          to: 'qc@kaiciid.org',
-          subject: `New Reimbursement Request Submitted - ${formData.id}`,
-          body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+        try {
+          await sendEmail({
+            to: 'qc@kaiciid.org',
+            subject: `New Reimbursement Request Submitted - ${formData.id}`,
+            body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+          })
+        } catch (err) {
+          console.error('Failed to send email:', err)
+        }
+        toast({ title: 'Request Submitted Successfully' })
+      } else if (isResubmission) {
+        await updateRequest(formData.id!, {
+          ...formData,
+          status: 'Pending',
+          qcSignature: null,
+          history: [
+            ...(formData.history || []),
+            {
+              id: `h-${Date.now()}`,
+              date: new Date().toISOString(),
+              action: 'Resubmitted',
+              userId: user?.name || '',
+            },
+          ],
         })
-      } catch (err) {
-        console.error('Failed to send email:', err)
+        toast({ title: 'Request Resubmitted for Review' })
+      } else {
+        await updateRequest(formData.id!, formData)
+        toast({ title: 'Request Updated' })
       }
-      toast({ title: 'Request Submitted Successfully' })
-    } else if (isResubmission) {
-      await updateRequest(formData.id!, {
-        ...formData,
-        status: 'Pending',
-        qcSignature: null,
-        history: [
-          ...(formData.history || []),
-          {
-            id: `h-${Date.now()}`,
-            date: new Date().toISOString(),
-            action: 'Resubmitted',
-            userId: user?.name || '',
-          },
-        ],
-      })
-      toast({ title: 'Request Resubmitted for Review' })
-    } else {
-      await updateRequest(formData.id!, formData)
-      toast({ title: 'Request Updated' })
+      navigate('/requests')
+    } finally {
+      setIsSaving(false)
     }
-    navigate('/requests')
   }
 
   const handleAction = async (
@@ -121,116 +133,122 @@ export default function RequestForm() {
     comments: string,
     receipt?: string,
   ) => {
-    if (action === 'upload_receipt') {
-      await updateRequest(formData.id!, {
-        paymentReceipt: receipt,
-        history: [
-          ...(formData.history || []),
-          {
-            id: `h-${Date.now()}`,
-            date: new Date().toISOString(),
-            action: 'Receipt Uploaded',
-            userId: user?.name || 'Finance',
-            comments: 'Additional payment proof attached.',
-          },
-        ],
-      })
-      toast({ title: 'Payment Receipt Uploaded' })
-      navigate('/requests')
-      return
-    }
-
-    if (action === 'reject' && !comments) {
-      toast({ title: 'Rejection reason is required', variant: 'destructive' })
-      return
-    }
-
-    const signature: Signature = {
-      name: user?.name || '',
-      date: new Date().toISOString(),
-      role: user?.role || '',
-    }
-
-    let newStatus = formData.status
-    let notifyEmail = formData.requesterDetails?.email || 'requester@example.com'
-    let notifySubject = ''
-    let notifyBody = ''
-    let historyAction = action === 'approve' ? 'Approved' : 'Rejected'
-    const updates: Partial<ReimbursementRequest> = {}
-
-    if (user?.role === 'qc') {
-      if (action === 'approve') {
-        newStatus = 'Checked'
-        historyAction = 'Reviewed'
-        updates.qcSignature = signature
-      } else {
-        newStatus = 'Rejected'
-        updates.qcSignature = null
-        notifySubject = `Reimbursement Request Rejected: ${formData.id}`
-        notifyBody = `Your reimbursement request ${formData.id} was returned for adjustments. Reason: ${comments}`
-      }
-    } else if (user?.role === 'co') {
-      if (action === 'approve') {
-        newStatus = 'Approved'
-        historyAction = 'Approved'
-        updates.coSignature = signature
-      } else {
-        newStatus = 'Rejected'
-        updates.qcSignature = null
-        updates.coSignature = null
-        notifyEmail = 'qc@kaiciid.org'
-        notifySubject = `Request rejected by Certifying Officer: ${formData.id}`
-        notifyBody = `Request ${formData.id} was returned by Certifying Officer to QC. Reason: ${comments}`
-      }
-    } else if (user?.role === 'finance') {
-      if (action === 'approve') {
-        newStatus = 'Processed'
-        historyAction = 'Processed'
-        updates.financeSignature = signature
-        if (receipt) updates.paymentReceipt = receipt
-        notifySubject = `Reimbursement Request Processed: ${formData.id}`
-        notifyBody = `Your reimbursement request ${formData.id} has been processed. Payment Reference: ${receipt || 'N/A'}`
-      } else {
-        newStatus = 'Rejected'
-        updates.coSignature = null
-        updates.financeSignature = null
-        const reqCc =
-          formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
-        const ccData = costCenters.find((c) => c.code === reqCc)
-        notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
-        notifySubject = `Request rejected by Finance: ${formData.id}`
-        notifyBody = `Request ${formData.id} was rejected by Finance. Reason: ${comments}`
-      }
-    }
-
-    updates.history = [
-      ...(formData.history || []),
-      {
-        id: `h-${Date.now()}`,
-        date: new Date().toISOString(),
-        action: historyAction,
-        userId: user?.name || '',
-        comments,
-      },
-    ]
-
-    updates.status = newStatus as any
-    await updateRequest(formData.id!, updates)
-    toast({ title: `Request ${newStatus}` })
-
-    if (notifySubject) {
-      try {
-        await sendEmail({
-          to: notifyEmail,
-          subject: notifySubject,
-          body: notifyBody,
+    setIsSaving(true)
+    try {
+      if (action === 'upload_receipt') {
+        await updateRequest(formData.id!, {
+          paymentReceipt: receipt,
+          history: [
+            ...(formData.history || []),
+            {
+              id: `h-${Date.now()}`,
+              date: new Date().toISOString(),
+              action: 'Receipt Uploaded',
+              userId: user?.name || 'Finance',
+              comments: 'Additional payment proof attached.',
+            },
+          ],
         })
-      } catch (err) {
-        console.error('Failed to send notification email:', err)
+        toast({ title: 'Payment Receipt Uploaded' })
+        navigate('/requests')
+        return
       }
-    }
 
-    navigate('/requests')
+      if (action === 'reject' && !comments) {
+        toast({ title: 'Rejection reason is required', variant: 'destructive' })
+        setIsSaving(false)
+        return
+      }
+
+      const signature: Signature = {
+        name: user?.name || '',
+        date: new Date().toISOString(),
+        role: user?.role || '',
+      }
+
+      let newStatus = formData.status
+      let notifyEmail = formData.requesterDetails?.email || 'requester@example.com'
+      let notifySubject = ''
+      let notifyBody = ''
+      let historyAction = action === 'approve' ? 'Approved' : 'Rejected'
+      const updates: Partial<ReimbursementRequest> = {}
+
+      if (user?.role === 'qc') {
+        if (action === 'approve') {
+          newStatus = 'Checked'
+          historyAction = 'Reviewed'
+          updates.qcSignature = signature
+        } else {
+          newStatus = 'Rejected'
+          updates.qcSignature = null
+          notifySubject = `Reimbursement Request Rejected: ${formData.id}`
+          notifyBody = `Your reimbursement request ${formData.id} was returned for adjustments. Reason: ${comments}`
+        }
+      } else if (user?.role === 'co') {
+        if (action === 'approve') {
+          newStatus = 'Approved'
+          historyAction = 'Approved'
+          updates.coSignature = signature
+        } else {
+          newStatus = 'Rejected'
+          updates.qcSignature = null
+          updates.coSignature = null
+          notifyEmail = 'qc@kaiciid.org'
+          notifySubject = `Request rejected by Certifying Officer: ${formData.id}`
+          notifyBody = `Request ${formData.id} was returned by Certifying Officer to QC. Reason: ${comments}`
+        }
+      } else if (user?.role === 'finance') {
+        if (action === 'approve') {
+          newStatus = 'Processed'
+          historyAction = 'Processed'
+          updates.financeSignature = signature
+          if (receipt) updates.paymentReceipt = receipt
+          notifySubject = `Reimbursement Request Processed: ${formData.id}`
+          notifyBody = `Your reimbursement request ${formData.id} has been processed. Payment Reference: ${receipt || 'N/A'}`
+        } else {
+          newStatus = 'Rejected'
+          updates.coSignature = null
+          updates.financeSignature = null
+          const reqCc =
+            formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+          const ccData = costCenters.find((c) => c.code === reqCc)
+          notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
+          notifySubject = `Request rejected by Finance: ${formData.id}`
+          notifyBody = `Request ${formData.id} was rejected by Finance. Reason: ${comments}`
+        }
+      }
+
+      updates.history = [
+        ...(formData.history || []),
+        {
+          id: `h-${Date.now()}`,
+          date: new Date().toISOString(),
+          action: historyAction,
+          userId: user?.name || '',
+          comments,
+        },
+      ]
+
+      updates.status = newStatus as any
+      await updateRequest(formData.id!, updates)
+      toast({ title: `Request ${newStatus}` })
+
+      if (notifySubject) {
+        try {
+          await sendEmail({
+            to: notifyEmail,
+            subject: notifySubject,
+            body: notifyBody,
+          })
+        } catch (err) {
+          console.error('Failed to send notification email:', err)
+        }
+      }
+
+      navigate('/requests')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -262,9 +280,15 @@ export default function RequestForm() {
             {!readOnly && (
               <Button
                 onClick={handleSave}
+                disabled={isSaving}
                 className="flex-1 sm:flex-none bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold px-6"
               >
-                {isNew ? (
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : isNew ? (
                   <>
                     <Send className="w-4 h-4 mr-2" /> Submit Request
                   </>
