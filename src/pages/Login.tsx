@@ -27,15 +27,27 @@ export default function Login() {
     e.preventDefault()
 
     if (isRegistering) {
-      await register(email, name, password)
-      toast({ title: 'Account created! Please log in.' })
-      setIsRegistering(false)
+      try {
+        await register(email, name, password)
+        toast({ title: 'Account created! Please log in.' })
+        setIsRegistering(false)
+      } catch (error) {
+        toast({ title: 'Registration failed', variant: 'destructive' })
+      }
     } else {
-      const success = login(email, password)
-      if (success) {
-        navigate('/dashboard')
-      } else {
-        toast({ title: 'Invalid credentials', variant: 'destructive' })
+      try {
+        const success = await login(email, password)
+        if (success) {
+          navigate('/dashboard')
+        } else {
+          toast({ title: 'Invalid credentials', variant: 'destructive' })
+        }
+      } catch (error) {
+        toast({
+          title: 'Login failed',
+          description: 'An unexpected error occurred',
+          variant: 'destructive',
+        })
       }
     }
   }

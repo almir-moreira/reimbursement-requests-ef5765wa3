@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User } from '@/types'
 import { sendEmail } from '@/lib/smtp'
-import { supabase } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 interface AuthContextData {
   user: User | null
@@ -98,24 +98,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [users])
 
   const login = async (email: string, password?: string) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: password || 'default',
-      })
-      if (!error && data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
-        if (profile) {
-          setUser(profile as User)
-          return true
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password: password || 'default',
+        })
+        if (!error && data.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single()
+          if (profile) {
+            setUser(profile as User)
+            return true
+          }
         }
+      } catch (error) {
+        console.error('Supabase login error:', error)
       }
-    } catch {
-      /* ignore */
     }
 
     // Fallback to local data
@@ -131,40 +133,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, name: string, password?: string) => {
-    try {
-      await supabase.auth.signUp({
-        email,
-        password: password || 'default',
-        options: { data: { name } },
-      })
-      await supabase.from('profiles').insert([{ email, name, role: 'requester' }])
-    } catch {
-      /* ignore */
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.auth.signUp({
+          email,
+          password: password || 'default',
+          options: { data: { name } },
+        })
+        await supabase.from('profiles').insert([{ email, name, role: 'requester' }])
+      } catch (error) {
+        console.error('Supabase register error:', error)
+      }
     }
 
     const newUser: User = { id: `usr-${Date.now()}`, email, name, password, role: 'requester' }
     setUsers((prev) => [...prev, newUser])
-    await sendEmail({
-      to: email,
-      subject: 'Welcome to KAICIID Reimbursement Requests',
-      body: `Hi ${name},\n\nPlease confirm your email address to access the application.`,
-    })
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to KAICIID Reimbursement Requests',
+        body: `Hi ${name},\n\nPlease confirm your email address to access the application.`,
+      })
+    } catch (e) {
+      console.warn('Email sending bypassed or failed', e)
+    }
   }
 
   const logout = async () => {
-    try {
-      await supabase.auth.signOut()
-    } catch {
-      /* ignore */
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.error('Supabase logout error:', error)
+      }
     }
     setUser(null)
   }
 
   const updateProfile = async (id: string, data: Partial<User>) => {
-    try {
-      await supabase.from('profiles').update(data).eq('id', id)
-    } catch {
-      /* ignore */
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('profiles').update(data).eq('id', id)
+      } catch (error) {
+        console.error('Supabase updateProfile error:', error)
+      }
     }
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)))
   }
