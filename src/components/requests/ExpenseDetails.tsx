@@ -205,7 +205,8 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                           step="0.0001"
                           value={exp.exchangeRate || ''}
                           onChange={(e) => updateExp(i, 'exchangeRate', parseFloat(e.target.value))}
-                          className="w-24 text-center font-mono text-xs bg-white mx-auto"
+                          className={`w-24 text-center font-mono text-xs mx-auto ${!canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'}`}
+                          disabled={!canEditExpenses}
                         />
                       ) : (
                         <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">

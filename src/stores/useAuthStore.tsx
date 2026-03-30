@@ -136,7 +136,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (id: string, data: Partial<User>) => {
     try {
-      await supabase.from('profiles').update(data).eq('id', id)
+      const allowedFields = [
+        'name',
+        'email',
+        'role',
+        'city',
+        'bankName',
+        'country',
+        'address',
+        'zipCode',
+        'phone',
+        'bankHolder',
+        'iban',
+        'swift',
+        'bankCode',
+        'organization',
+        'state',
+        'bankAccount',
+        'bic',
+      ]
+      const updateData: any = {}
+      Object.keys(data).forEach((key) => {
+        if (allowedFields.includes(key)) {
+          updateData[key] = data[key as keyof User]
+        }
+      })
+      await supabase.from('profiles').update(updateData).eq('id', id)
       if (user?.id === id) {
         setUser({ ...user, ...data } as User)
       }

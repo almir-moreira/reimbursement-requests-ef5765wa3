@@ -25,7 +25,8 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
   const reqUser = formData.requesterDetails || {}
 
   const isQc = user?.role === 'qc'
-  const canEditQcFields = !readOnly
+  const canEditEvent = !readOnly
+  const canEditCostCenterFields = !readOnly && user?.role !== 'requester'
   const canEditRequesterFields = !readOnly && !isQc
 
   const handleEventChange = (eventId: string) => {
@@ -75,7 +76,7 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         <div className="space-y-2 lg:col-span-2">
           <Label className="text-muted-foreground text-xs uppercase">Event</Label>
           <Select
-            disabled={!canEditQcFields}
+            disabled={!canEditEvent}
             value={formData.eventId}
             onValueChange={handleEventChange}
           >
@@ -94,11 +95,13 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Cost Centre</Label>
           <Input
-            disabled={!canEditQcFields}
+            disabled={!canEditCostCenterFields}
             value={formData.costCenter || ''}
             onChange={(e) => onChange({ costCenter: e.target.value })}
             className={
-              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+              !canEditCostCenterFields
+                ? 'bg-muted/50 font-mono text-xs'
+                : 'font-mono text-xs bg-white'
             }
             placeholder="e.g. CC-01"
           />
@@ -106,29 +109,33 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Account</Label>
           <Input
-            disabled={!canEditQcFields}
+            disabled={!canEditCostCenterFields}
             value={formData.account || ''}
             onChange={(e) => onChange({ account: e.target.value })}
             className={
-              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+              !canEditCostCenterFields
+                ? 'bg-muted/50 font-mono text-xs'
+                : 'font-mono text-xs bg-white'
             }
           />
         </div>
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Workorder</Label>
           <Input
-            disabled={!canEditQcFields}
+            disabled={!canEditCostCenterFields}
             value={formData.workorder || ''}
             onChange={(e) => onChange({ workorder: e.target.value })}
             className={
-              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+              !canEditCostCenterFields
+                ? 'bg-muted/50 font-mono text-xs'
+                : 'font-mono text-xs bg-white'
             }
           />
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h4 className="text-sm font-semibold border-b pb-2">Requester Info</h4>
+      <div className="space-y-6 pt-6 border-t border-border">
+        <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Requester Info</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Requester</Label>
@@ -216,8 +223,8 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         </div>
       </div>
 
-      <div className="space-y-4 pt-6 border-t border-border">
-        <h3 className="font-serif font-bold text-xl text-primary">Bank Information</h3>
+      <div className="space-y-6 pt-6 border-t border-border">
+        <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Bank Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Holder</Label>

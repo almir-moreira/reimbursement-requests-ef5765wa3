@@ -82,14 +82,48 @@ export default function RequestForm() {
   const readOnly = (!isRequesterEditing && !isQcEditing) || isPostCO
 
   const handleSave = async () => {
+    if (!formData.eventId) {
+      toast({
+        title: 'Validation Error',
+        description: 'Event is mandatory.',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (!formData.expenses || formData.expenses.length === 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'At least one Expense detail is mandatory.',
+        variant: 'destructive',
+      })
+      return
+    }
+    const validAttachments = formData.attachments?.filter((a) => a.fileName) || []
+    if (validAttachments.length === 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'At least one Attachment file is mandatory.',
+        variant: 'destructive',
+      })
+      return
+    }
+    if (!formData.signature || formData.signature.trim() === '') {
+      toast({
+        title: 'Validation Error',
+        description: 'Signature is mandatory.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsSaving(true)
     try {
       const isResubmission = !isNew && formData.status === 'Rejected'
 
       if (isNew) {
         await addRequest(formData as ReimbursementRequest)
-        if (user?.role === 'requester') {
-          await updateProfile(user.id, formData.requesterDetails!)
+        if (user?.role === 'requester' && formData.requesterDetails) {
+          await updateProfile(user.id, formData.requesterDetails)
         }
 
         try {
@@ -103,6 +137,9 @@ export default function RequestForm() {
         }
         toast({ title: 'Request Submitted Successfully' })
       } else if (isResubmission) {
+        if (user?.role === 'requester' && formData.requesterDetails) {
+          await updateProfile(user.id, formData.requesterDetails)
+        }
         await updateRequest(formData.id!, {
           ...formData,
           status: 'Pending',
@@ -330,27 +367,28 @@ export default function RequestForm() {
               readOnly={readOnly}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border">
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs uppercase">
-                  Requester Signature
-                </Label>
-                <Input
-                  disabled={!isRequesterEditing}
-                  value={formData.signature || ''}
-                  onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
-                  className="font-serif italic text-lg h-12 bg-muted/10"
-                  placeholder="Type your full name as signature"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs uppercase">Date</Label>
-                <Input
-                  disabled
-                  type="date"
-                  value={formData.date || ''}
-                  className="h-12 bg-muted/30"
-                />
+            <div className="space-y-6 pt-6 border-t border-border">
+              <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Requester Signature</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs uppercase">Signature</Label>
+                  <Input
+                    disabled={!isRequesterEditing}
+                    value={formData.signature || ''}
+                    onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
+                    className="font-serif italic text-lg h-12 bg-muted/10"
+                    placeholder="Type your full name as signature"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs uppercase">Date</Label>
+                  <Input
+                    disabled
+                    type="date"
+                    value={formData.date || ''}
+                    className="h-12 bg-muted/30"
+                  />
+                </div>
               </div>
             </div>
 
