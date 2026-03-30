@@ -55,7 +55,10 @@ export default function RequestsList() {
       if (user.role === 'admin' || user.role === 'finance') return true
       if (user.role === 'requester') return req.requesterId === user.id
       if (user.role === 'qc') return true
-      if (user.role === 'co') return req.status !== 'Pending' && req.status !== 'Rejected'
+      if (user.role === 'co') {
+        if (req.status === 'Pending') return false
+        return req.costCenter === user.costCenter
+      }
       return false
     })
 
@@ -164,10 +167,10 @@ export default function RequestsList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All">All Statuses</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Checked">Checked</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Processed">Processed</SelectItem>
+                <SelectItem value="Pending">Pending Review</SelectItem>
+                <SelectItem value="Checked">Pending Approval</SelectItem>
+                <SelectItem value="Approved">Pending Processing</SelectItem>
+                <SelectItem value="Processed">Processed & Closed</SelectItem>
                 <SelectItem value="Rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
@@ -230,10 +233,15 @@ export default function RequestsList() {
                       ${req.status === 'Processed' ? 'bg-success/10 text-success border-success/20 shadow-sm' : ''}
                       ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm' : ''}
                       ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm' : ''}
-                      ${req.status === 'Approved' || req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm' : ''}
+                      ${req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm' : ''}
+                      ${req.status === 'Approved' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20 shadow-sm' : ''}
                     `}
                     >
-                      {t(req.status) || req.status}
+                      {req.status === 'Pending' && 'Pending Review'}
+                      {req.status === 'Checked' && 'Pending Approval'}
+                      {req.status === 'Approved' && 'Pending Processing'}
+                      {req.status === 'Processed' && 'Processed & Closed'}
+                      {req.status === 'Rejected' && 'Rejected'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

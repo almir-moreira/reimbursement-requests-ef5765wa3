@@ -25,7 +25,7 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
   const reqUser = formData.requesterDetails || {}
 
   const isQc = user?.role === 'qc'
-  const canEditQcFields = !readOnly || isQc
+  const canEditQcFields = !readOnly
   const canEditRequesterFields = !readOnly && !isQc
 
   const handleEventChange = (eventId: string) => {
@@ -56,7 +56,21 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         </div>
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Status</Label>
-          <Input disabled value={t(formData.status || '')} className="bg-muted/50 font-semibold" />
+          <Input
+            disabled
+            value={
+              formData.status === 'Pending'
+                ? 'Pending Review'
+                : formData.status === 'Checked'
+                  ? 'Pending Approval'
+                  : formData.status === 'Approved'
+                    ? 'Pending Processing'
+                    : formData.status === 'Processed'
+                      ? 'Processed & Closed'
+                      : formData.status
+            }
+            className="bg-muted/50 font-semibold"
+          />
         </div>
         <div className="space-y-2 lg:col-span-2">
           <Label className="text-muted-foreground text-xs uppercase">Event</Label>

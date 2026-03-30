@@ -23,6 +23,7 @@ export interface User {
   bankCode?: string
   bankCountry?: string
   additionalBankInfo?: string
+  costCenter?: string
 }
 
 export interface Expense {

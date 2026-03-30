@@ -69,9 +69,10 @@ export default function RequestForm() {
 
   if (!formData.id) return null
 
+  const isPostCO = formData.status === 'Approved' || formData.status === 'Processed'
   const isRequesterEditing = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
-  const isQcEditing = user?.role === 'qc'
-  const readOnly = !isRequesterEditing && !isQcEditing
+  const isQcEditing = user?.role === 'qc' && !isPostCO
+  const readOnly = (!isRequesterEditing && !isQcEditing) || isPostCO
 
   const handleSave = async () => {
     const isResubmission = !isNew && formData.status === 'Rejected'
@@ -183,12 +184,12 @@ export default function RequestForm() {
         newStatus = 'Approved'
         updates.coSignature = signature
       } else {
-        newStatus = 'Pending'
+        newStatus = 'Rejected'
         updates.qcSignature = null
         updates.coSignature = null
         notifyEmail = 'qc@kaiciid.org'
-        notifySubject = `Request returned to QC: ${formData.id}`
-        notifyBody = `Request ${formData.id} was returned by Certifying Officer. Reason: ${comments}`
+        notifySubject = `Request rejected by Certifying Officer: ${formData.id}`
+        notifyBody = `Request ${formData.id} was returned by Certifying Officer to QC. Reason: ${comments}`
       }
     } else if (user?.role === 'finance') {
       if (action === 'approve') {
@@ -198,15 +199,15 @@ export default function RequestForm() {
         notifySubject = `Reimbursement Request Processed: ${formData.id}`
         notifyBody = `Your reimbursement request ${formData.id} has been processed. Payment Reference: ${receipt || 'N/A'}`
       } else {
-        newStatus = 'Checked'
+        newStatus = 'Rejected'
         updates.coSignature = null
         updates.financeSignature = null
         const reqCc =
           formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
         const ccData = costCenters.find((c) => c.code === reqCc)
         notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
-        notifySubject = `Request returned to Certifying Officer: ${formData.id}`
-        notifyBody = `Request ${formData.id} was returned by Finance. Reason: ${comments}`
+        notifySubject = `Request rejected by Finance: ${formData.id}`
+        notifyBody = `Request ${formData.id} was rejected by Finance. Reason: ${comments}`
       }
     }
 

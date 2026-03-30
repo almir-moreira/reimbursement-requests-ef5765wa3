@@ -9,22 +9,41 @@ export default function Dashboard() {
   const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
 
-  const userRequests =
-    user?.role === 'requester' ? requests.filter((r) => r.requesterId === user.id) : requests
+  const userRequests = requests.filter((req) => {
+    if (!user) return false
+    if (user.role === 'admin' || user.role === 'finance') return true
+    if (user.role === 'requester') return req.requesterId === user.id
+    if (user.role === 'qc') return true
+    if (user.role === 'co') {
+      if (req.status === 'Pending') return false
+      return req.costCenter === user.costCenter
+    }
+    return false
+  })
 
   const total = userRequests.length
-  const pending = userRequests.filter((r) => r.status === 'Pending').length
-  const approved = userRequests.filter(
-    (r) => r.status === 'Approved' || r.status === 'Checked',
-  ).length
+  const pendingReview = userRequests.filter((r) => r.status === 'Pending').length
+  const pendingApproval = userRequests.filter((r) => r.status === 'Checked').length
+  const pendingProcessing = userRequests.filter((r) => r.status === 'Approved').length
   const processed = userRequests.filter((r) => r.status === 'Processed').length
   const rejected = userRequests.filter((r) => r.status === 'Rejected').length
 
   const stats = [
     { title: 'Total Requests', value: total, icon: FileText, color: 'text-[#4a8ebf]' },
-    { title: 'Pending Approval', value: pending, icon: Clock, color: 'text-orange-500' },
-    { title: 'In Progress (QC/CO)', value: approved, icon: CheckCircle, color: 'text-blue-500' },
-    { title: 'Processed & Closed', value: processed, icon: DollarSign, color: 'text-success' },
+    { title: 'Pending Review', value: pendingReview, icon: Clock, color: 'text-orange-500' },
+    {
+      title: 'Pending Approval',
+      value: pendingApproval,
+      icon: CheckCircle,
+      color: 'text-blue-500',
+    },
+    {
+      title: 'Pending Processing',
+      value: pendingProcessing,
+      icon: DollarSign,
+      color: 'text-purple-500',
+    },
+    { title: 'Processed & Closed', value: processed, icon: CheckCircle, color: 'text-success' },
     { title: 'Rejected', value: rejected, icon: XCircle, color: 'text-destructive' },
   ]
 
@@ -45,7 +64,7 @@ export default function Dashboard() {
         </p>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-8">
         {stats.map((stat, i) => (
           <Card key={i} className="border-border shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">

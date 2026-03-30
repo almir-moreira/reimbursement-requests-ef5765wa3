@@ -21,7 +21,7 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
   const { user } = useAuthStore()
 
   const isQc = user?.role === 'qc'
-  const canEditAttachments = !readOnly || isQc
+  const canEditAttachments = !readOnly
 
   const addAttachment = () => {
     onChange({

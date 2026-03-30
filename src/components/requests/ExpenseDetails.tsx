@@ -27,7 +27,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
 
   const isQc = user?.role === 'qc'
   const isInternal = user?.role !== 'requester'
-  const canEditExpenses = !readOnly || isQc
+  const canEditExpenses = !readOnly
 
   const defaultEvent = events.find((e) => e.id === formData.eventId)
   const defaultAccount = defaultEvent?.account || formData.account || ''

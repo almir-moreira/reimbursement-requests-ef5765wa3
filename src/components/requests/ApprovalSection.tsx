@@ -138,9 +138,9 @@ export function ApprovalSection({ formData, onAction }: Props) {
                 <X className="w-5 h-5 mr-2" />
               )}
               {user.role === 'co'
-                ? 'Return to QC'
+                ? 'Reject & Return to QC'
                 : user.role === 'finance'
-                  ? 'Return to CO'
+                  ? 'Reject Request'
                   : 'Reject to Requester'}
             </Button>
           </div>
