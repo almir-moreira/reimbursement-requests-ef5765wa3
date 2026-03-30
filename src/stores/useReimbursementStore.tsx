@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { ReimbursementRequest, User } from '@/types'
-import { supabase } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 interface ReimbursementContextData {
   requests: ReimbursementRequest[]
@@ -54,19 +54,23 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
   }, [requests])
 
   const addRequest = async (req: ReimbursementRequest) => {
-    try {
-      await supabase.from('requests').insert([req])
-    } catch {
-      /* ignore */
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('requests').insert([req])
+      } catch (error) {
+        console.error('Supabase fetch error:', error)
+      }
     }
     setRequests((prev) => [req, ...prev])
   }
 
   const updateRequest = async (id: string, req: Partial<ReimbursementRequest>) => {
-    try {
-      await supabase.from('requests').update(req).eq('id', id)
-    } catch {
-      /* ignore */
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('requests').update(req).eq('id', id)
+      } catch (error) {
+        console.error('Supabase fetch error:', error)
+      }
     }
     setRequests((prev) =>
       prev.map((r) => {

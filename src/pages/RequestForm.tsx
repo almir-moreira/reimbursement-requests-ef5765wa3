@@ -82,11 +82,15 @@ export default function RequestForm() {
         await updateProfile(user.id, formData.requesterDetails!)
       }
 
-      await sendEmail({
-        to: 'qc@kaiciid.org',
-        subject: `New Reimbursement Request Submitted - ${formData.id}`,
-        body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
-      })
+      try {
+        await sendEmail({
+          to: 'qc@kaiciid.org',
+          subject: `New Reimbursement Request Submitted - ${formData.id}`,
+          body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+        })
+      } catch (err) {
+        console.error('Failed to send email:', err)
+      }
       toast({ title: 'Request Submitted Successfully' })
     } else if (isResubmission) {
       await updateRequest(formData.id!, {
@@ -211,11 +215,15 @@ export default function RequestForm() {
     toast({ title: `Request ${newStatus}` })
 
     if (notifySubject) {
-      await sendEmail({
-        to: notifyEmail,
-        subject: notifySubject,
-        body: notifyBody,
-      })
+      try {
+        await sendEmail({
+          to: notifyEmail,
+          subject: notifySubject,
+          body: notifyBody,
+        })
+      } catch (err) {
+        console.error('Failed to send notification email:', err)
+      }
     }
 
     navigate('/requests')
