@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { supabase } from '@/lib/supabase/client'
+import useAuthStore from './useAuthStore'
 
 export interface EventDetail {
   id: string
@@ -62,55 +64,16 @@ interface MasterDataState {
 
 interface MasterDataContextData extends MasterDataState {
   updateData: (key: keyof MasterDataState, data: any) => void
+  fetchMasterData: () => Promise<void>
 }
 
 const initialData: MasterDataState = {
-  events: [
-    {
-      id: 'ev-1',
-      name: 'Workshop',
-      costCenter: 'CC-01',
-      account: '62000',
-      workorder: 'P1134-12',
-      qcName: 'Quality Control',
-      qcEmail: 'qc@kaiciid.org',
-    },
-    {
-      id: 'ev-2',
-      name: 'Conference',
-      costCenter: 'CC-02',
-      account: '62001',
-      workorder: 'P1135-12',
-      qcName: 'Jane Smith',
-      qcEmail: 'jane.smith@kaiciid.org',
-    },
-  ],
-  exchangeRates: [
-    { id: 'r-1', currency: 'GBP', rateToUsd: 1.25 },
-    { id: 'r-2', currency: 'EUR', rateToUsd: 1.08 },
-    { id: 'r-3', currency: 'USD', rateToUsd: 1 },
-    { id: 'r-4', currency: 'KES', rateToUsd: 0.0076 },
-  ],
-  countries: [
-    { id: 'c-1', name: 'Kenya' },
-    { id: 'c-2', name: 'Portugal' },
-    { id: 'c-3', name: 'USA' },
-    { id: 'c-4', name: 'UK' },
-  ],
-  costCenters: [
-    {
-      id: 'cc-1',
-      code: 'CC-01',
-      name: 'Operations',
-      coName: 'Certifying Officer',
-      coEmail: 'co@kaiciid.org',
-    },
-  ],
-  accounts: [
-    { id: 'a-1', code: '62000', name: 'Travel' },
-    { id: 'a-2', code: '62001', name: 'Meals' },
-  ],
-  workorders: [{ id: 'w-1', code: 'P1134-12', name: 'Field Visit' }],
+  events: [],
+  exchangeRates: [],
+  countries: [],
+  costCenters: [],
+  accounts: [],
+  workorders: [],
   smtpSettings: {
     host: 'smtp.gmail.com',
     port: '587',
@@ -124,33 +87,64 @@ const initialData: MasterDataState = {
 const MasterDataContext = createContext<MasterDataContextData | undefined>(undefined)
 
 export function MasterDataProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<MasterDataState>(() => {
+  const [state, setState] = useState<MasterDataState>(initialData)
+  const { user } = useAuthStore()
+
+  const fetchMasterData = async () => {
+    if (!user) return
     try {
-      const saved = localStorage.getItem('master_data_v6')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        return {
-          ...initialData,
-          ...parsed,
-          smtpSettings: parsed.smtpSettings || initialData.smtpSettings,
-        }
-      }
-    } catch {
-      // ignore
+      const [
+        { data: events },
+        { data: exchangeRates },
+        { data: countries },
+        { data: costCenters },
+        { data: accounts },
+        { data: workorders },
+        { data: smtpSettings },
+      ] = await Promise.all([
+        supabase.from('events').select('*'),
+        supabase.from('exchange_rates').select('*'),
+        supabase.from('countries').select('*'),
+        supabase.from('cost_centers').select('*'),
+        supabase.from('accounts').select('*'),
+        supabase.from('workorders').select('*'),
+        supabase.from('smtp_settings').select('*'),
+      ])
+
+      setState((prev) => ({
+        ...prev,
+        events: (events as EventDetail[]) || [],
+        exchangeRates: (exchangeRates as ExchangeRate[]) || [],
+        countries: (countries as Country[]) || [],
+        costCenters: (costCenters as CostCenter[]) || [],
+        accounts: (accounts as Account[]) || [],
+        workorders: (workorders as Workorder[]) || [],
+        smtpSettings: smtpSettings?.[0]
+          ? {
+              host: smtpSettings[0].host,
+              port: smtpSettings[0].port,
+              user: smtpSettings[0].user,
+              password: smtpSettings[0].password,
+              fromEmail: smtpSettings[0].fromEmail,
+              encryption: smtpSettings[0].encryption as any,
+            }
+          : prev.smtpSettings,
+      }))
+    } catch (error) {
+      console.error('Fetch master data error:', error)
     }
-    return initialData
-  })
+  }
 
   useEffect(() => {
-    localStorage.setItem('master_data_v6', JSON.stringify(state))
-  }, [state])
+    fetchMasterData()
+  }, [user])
 
-  const updateData = (key: keyof MasterDataState, data: any) => {
+  const updateData = async (key: keyof MasterDataState, data: any) => {
     setState((prev) => ({ ...prev, [key]: data }))
   }
 
   return (
-    <MasterDataContext.Provider value={{ ...state, updateData }}>
+    <MasterDataContext.Provider value={{ ...state, updateData, fetchMasterData }}>
       {children}
     </MasterDataContext.Provider>
   )

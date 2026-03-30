@@ -1,63 +1,76 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { ReimbursementRequest, User } from '@/types'
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { ReimbursementRequest } from '@/types'
+import { supabase } from '@/lib/supabase/client'
+import useAuthStore from './useAuthStore'
 
 interface ReimbursementContextData {
   requests: ReimbursementRequest[]
   addRequest: (req: ReimbursementRequest) => Promise<void>
   updateRequest: (id: string, req: Partial<ReimbursementRequest>) => Promise<void>
+  fetchRequests: () => Promise<void>
 }
 
 const ReimbursementContext = createContext<ReimbursementContextData | undefined>(undefined)
 
 export function ReimbursementProvider({ children }: { children: ReactNode }) {
-  const [requests, setRequests] = useState<ReimbursementRequest[]>(() => {
+  const [requests, setRequests] = useState<ReimbursementRequest[]>([])
+  const { user } = useAuthStore()
+
+  const fetchRequests = async () => {
+    if (!user) return
     try {
-      const saved = localStorage.getItem('reimbursement_requests_v2')
-      if (saved) {
-        return JSON.parse(saved) as ReimbursementRequest[]
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (!error && data) {
+        setRequests(data.map((d) => d.data as ReimbursementRequest))
       }
-    } catch {
-      /* ignore */
+    } catch (error) {
+      console.error('Fetch requests error:', error)
     }
-    return []
-  })
+  }
 
   useEffect(() => {
-    localStorage.setItem('reimbursement_requests_v2', JSON.stringify(requests))
-  }, [requests])
+    fetchRequests()
+  }, [user])
 
   const addRequest = async (req: ReimbursementRequest) => {
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('requests').insert([req])
-      } catch (error) {
-        console.error('Supabase fetch error:', error)
+    try {
+      const dbReq = {
+        id: req.id,
+        user_id: user?.id,
+        status: req.status,
+        data: req as any,
       }
+      await supabase.from('requests').insert([dbReq])
+      setRequests((prev) => [req, ...prev])
+    } catch (error) {
+      console.error('Add request error:', error)
     }
-    setRequests((prev) => [req, ...prev])
   }
 
   const updateRequest = async (id: string, req: Partial<ReimbursementRequest>) => {
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('requests').update(req).eq('id', id)
-      } catch (error) {
-        console.error('Supabase fetch error:', error)
-      }
+    try {
+      const existing = requests.find((r) => r.id === id)
+      const updatedReq = { ...existing, ...req } as ReimbursementRequest
+
+      await supabase
+        .from('requests')
+        .update({
+          status: updatedReq.status,
+          data: updatedReq as any,
+        })
+        .eq('id', id)
+
+      setRequests((prev) => prev.map((r) => (r.id === id ? updatedReq : r)))
+    } catch (error) {
+      console.error('Update request error:', error)
     }
-    setRequests((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          return { ...r, ...req }
-        }
-        return r
-      }),
-    )
   }
 
   return (
-    <ReimbursementContext.Provider value={{ requests, addRequest, updateRequest }}>
+    <ReimbursementContext.Provider value={{ requests, addRequest, updateRequest, fetchRequests }}>
       {children}
     </ReimbursementContext.Provider>
   )
