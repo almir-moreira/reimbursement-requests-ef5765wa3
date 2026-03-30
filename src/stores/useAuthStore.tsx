@@ -66,7 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('auth_user_v3')
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     return null
   })
 
@@ -74,7 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('auth_users_list_v3')
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     return initialUsers
   })
 
@@ -110,7 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return true
         }
       }
-    } catch {}
+    } catch {
+      /* ignore */
+    }
 
     // Fallback to local data
     const found = users.find(
@@ -132,7 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: { data: { name } },
       })
       await supabase.from('profiles').insert([{ email, name, role: 'requester' }])
-    } catch {}
+    } catch {
+      /* ignore */
+    }
 
     const newUser: User = { id: `usr-${Date.now()}`, email, name, password, role: 'requester' }
     setUsers((prev) => [...prev, newUser])
@@ -146,14 +154,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await supabase.auth.signOut()
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     setUser(null)
   }
 
   const updateProfile = async (id: string, data: Partial<User>) => {
     try {
       await supabase.from('profiles').update(data).eq('id', id)
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)))
   }
 

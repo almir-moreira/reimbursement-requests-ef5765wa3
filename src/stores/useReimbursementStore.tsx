@@ -14,7 +14,9 @@ const getUsers = (): User[] => {
   try {
     const saved = localStorage.getItem('auth_users_list_v3')
     if (saved) return JSON.parse(saved)
-  } catch {}
+  } catch {
+    /* ignore */
+  }
   return []
 }
 
@@ -41,7 +43,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
           return req
         })
       }
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     return []
   })
 
@@ -52,14 +56,18 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
   const addRequest = async (req: ReimbursementRequest) => {
     try {
       await supabase.from('requests').insert([req])
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     setRequests((prev) => [req, ...prev])
   }
 
   const updateRequest = async (id: string, req: Partial<ReimbursementRequest>) => {
     try {
       await supabase.from('requests').update(req).eq('id', id)
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     setRequests((prev) =>
       prev.map((r) => {
         if (r.id === id) {
