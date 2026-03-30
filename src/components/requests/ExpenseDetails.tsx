@@ -24,7 +24,10 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
   const { user, lang } = useAuthStore()
   const { exchangeRates, events } = useMasterDataStore()
   const expenses = formData.expenses || []
+
+  const isQc = user?.role === 'qc'
   const isInternal = user?.role !== 'requester'
+  const canEditExpenses = !readOnly || isQc
 
   const defaultEvent = events.find((e) => e.id === formData.eventId)
   const defaultAccount = defaultEvent?.account || formData.account || ''
@@ -57,14 +60,21 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
     const newExps = [...expenses]
     newExps[index] = { ...newExps[index], [field]: value }
 
-    if (field === 'amount' || field === 'currency') {
+    if (field === 'amount' || field === 'currency' || field === 'exchangeRate') {
       const amt = Number(field === 'amount' ? value : newExps[index].amount) || 0
       const curr = field === 'currency' ? value : newExps[index].currency || 'GBP'
 
-      const { usdRate, effectiveRate } = getRates(curr)
-      newExps[index].amountUsd = amt * usdRate
-      newExps[index].exchangeRate = effectiveRate
-      newExps[index].amountEuros = amt * effectiveRate
+      let effectiveRate = newExps[index].exchangeRate
+      if (field === 'exchangeRate') {
+        effectiveRate = Number(value) || 0
+      } else {
+        const rates = getRates(curr)
+        effectiveRate = rates.effectiveRate
+        newExps[index].exchangeRate = effectiveRate
+      }
+
+      newExps[index].amountUsd = amt * getRates(curr).usdRate
+      newExps[index].amountEuros = amt * (effectiveRate || 1)
     }
     onChange({ expenses: newExps })
   }
@@ -113,11 +123,11 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                 <>
                   <th className="p-3 font-semibold w-24 text-start">Account</th>
                   <th className="p-3 font-semibold w-32 text-start">Budget Line</th>
-                  <th className="p-3 font-semibold w-24 text-center">Exch. Rate</th>
+                  <th className="p-3 font-semibold w-28 text-center">Exch. Rate</th>
                 </>
               )}
               <th className="p-3 font-semibold w-32 text-right">Amt (EUR)</th>
-              {!readOnly && <th className="p-3 font-semibold w-12 text-center"></th>}
+              {canEditExpenses && <th className="p-3 font-semibold w-12 text-center"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -125,28 +135,36 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
               <tr key={exp.id} className="hover:bg-muted/10 transition-colors">
                 <td className="p-2">
                   <Input
-                    disabled={readOnly}
+                    disabled={!canEditExpenses}
                     value={exp.description}
                     onChange={(e) => updateExp(i, 'description', e.target.value)}
-                    className={readOnly ? 'bg-transparent border-transparent px-1' : ''}
+                    className={
+                      !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
+                    }
                   />
                 </td>
                 <td className="p-2">
                   <Input
-                    disabled={readOnly}
+                    disabled={!canEditExpenses}
                     type="number"
                     value={exp.amount || ''}
                     onChange={(e) => updateExp(i, 'amount', e.target.value)}
-                    className={readOnly ? 'bg-transparent border-transparent px-1' : ''}
+                    className={
+                      !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
+                    }
                   />
                 </td>
                 <td className="p-2">
                   <Select
-                    disabled={readOnly}
+                    disabled={!canEditExpenses}
                     value={exp.currency}
                     onValueChange={(v) => updateExp(i, 'currency', v)}
                   >
-                    <SelectTrigger className={readOnly ? 'bg-transparent border-transparent' : ''}>
+                    <SelectTrigger
+                      className={
+                        !canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'
+                      }
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -162,32 +180,38 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                   <>
                     <td className="p-2">
                       <Input
-                        disabled={readOnly && user.role !== 'qc'}
+                        disabled={!canEditExpenses}
                         value={exp.account || ''}
                         onChange={(e) => updateExp(i, 'account', e.target.value)}
                         className={
-                          readOnly && user.role !== 'qc'
-                            ? 'bg-transparent border-transparent px-1'
-                            : 'bg-white'
+                          !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
                         }
                       />
                     </td>
                     <td className="p-2">
                       <Input
-                        disabled={readOnly && user.role !== 'qc'}
+                        disabled={!canEditExpenses}
                         value={exp.workorder || ''}
                         onChange={(e) => updateExp(i, 'workorder', e.target.value)}
                         className={
-                          readOnly && user.role !== 'qc'
-                            ? 'bg-transparent border-transparent px-1'
-                            : 'bg-white'
+                          !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
                         }
                       />
                     </td>
                     <td className="p-2 text-center">
-                      <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                        {exp.exchangeRate?.toFixed(4) || '1.0000'}
-                      </span>
+                      {isQc ? (
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          value={exp.exchangeRate || ''}
+                          onChange={(e) => updateExp(i, 'exchangeRate', parseFloat(e.target.value))}
+                          className="w-24 text-center font-mono text-xs bg-white mx-auto"
+                        />
+                      ) : (
+                        <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                          {exp.exchangeRate?.toFixed(4) || '1.0000'}
+                        </span>
+                      )}
                     </td>
                   </>
                 )}
@@ -196,7 +220,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     {exp.amountEuros?.toFixed(2) || '0.00'}
                   </span>
                 </td>
-                {!readOnly && (
+                {canEditExpenses && (
                   <td className="p-2 text-center">
                     <Button
                       variant="ghost"
@@ -225,7 +249,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
       </div>
 
       <div className="flex justify-between items-center mt-4">
-        {!readOnly ? (
+        {canEditExpenses ? (
           <Button
             type="button"
             variant="outline"

@@ -12,10 +12,16 @@ interface Props {
   readOnly: boolean
 }
 
+import useAuthStore from '@/stores/useAuthStore'
+
 export function Attachments({ formData, onChange, readOnly }: Props) {
   const attachments = formData.attachments || []
   const [previewAtt, setPreviewAtt] = useState<Attachment | null>(null)
   const [zoom, setZoom] = useState(1)
+  const { user } = useAuthStore()
+
+  const isQc = user?.role === 'qc'
+  const canEditAttachments = !readOnly || isQc
 
   const addAttachment = () => {
     onChange({
@@ -155,16 +161,16 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
             <div className="flex-1 space-y-2 w-full min-w-0">
               <Label className="text-xs uppercase text-muted-foreground">Description</Label>
               <Input
-                disabled={readOnly}
+                disabled={!canEditAttachments}
                 value={att.description}
                 onChange={(e) => updateAtt(i, 'description', e.target.value)}
                 placeholder="Receipt description"
-                className={readOnly ? 'bg-white cursor-default text-foreground' : ''}
+                className={!canEditAttachments ? 'bg-white cursor-default text-foreground' : ''}
               />
             </div>
             <div className="flex-1 space-y-2 w-full min-w-0">
               <Label className="text-xs uppercase text-muted-foreground">File</Label>
-              {readOnly ? (
+              {!canEditAttachments ? (
                 <div className="flex items-center p-2.5 h-10 bg-white rounded-md border border-input shadow-sm hover:border-[#4a8ebf] transition-colors group">
                   <Paperclip className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
                   <button
@@ -216,7 +222,7 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
                 </div>
               )}
             </div>
-            {!readOnly && (
+            {canEditAttachments && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -232,7 +238,7 @@ export function Attachments({ formData, onChange, readOnly }: Props) {
           <p className="text-sm text-muted-foreground italic">No attachments added.</p>
         )}
       </div>
-      {!readOnly && (
+      {canEditAttachments && (
         <Button
           type="button"
           variant="outline"

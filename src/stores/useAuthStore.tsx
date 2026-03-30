@@ -1,16 +1,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { User, Role } from '@/types'
+import { User } from '@/types'
 import { sendEmail } from '@/lib/smtp'
+import { supabase } from '@/lib/supabase'
 
 interface AuthContextData {
   user: User | null
   lang: 'en' | 'ar'
   setLang: (lang: 'en' | 'ar') => void
   users: User[]
-  login: (email: string, password?: string) => boolean
-  register: (email: string, name: string, password?: string) => void
-  logout: () => void
-  updateProfile: (id: string, data: Partial<User>) => void
+  login: (email: string, password?: string) => Promise<boolean>
+  register: (email: string, name: string, password?: string) => Promise<void>
+  logout: () => Promise<void>
+  updateProfile: (id: string, data: Partial<User>) => Promise<void>
   adminAddUser: (data: Partial<User>) => void
   adminDeleteUser: (id: string) => void
   updatePassword: (email: string, newPassword: string) => boolean
@@ -65,9 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('auth_user_v3')
       if (saved) return JSON.parse(saved)
-    } catch {
-      // ignore
-    }
+    } catch {}
     return null
   })
 
@@ -75,9 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('auth_users_list_v3')
       if (saved) return JSON.parse(saved)
-    } catch {
-      // ignore
-    }
+    } catch {}
     return initialUsers
   })
 
@@ -90,16 +87,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem('auth_users_list_v3', JSON.stringify(users))
-    // Sync current user if modified in users list
     if (user) {
       const updatedUser = users.find((u) => u.id === user.id)
-      if (updatedUser && JSON.stringify(updatedUser) !== JSON.stringify(user)) {
-        setUser(updatedUser)
-      }
+      if (updatedUser && JSON.stringify(updatedUser) !== JSON.stringify(user)) setUser(updatedUser)
     }
   }, [users])
 
-  const login = (email: string, password?: string) => {
+  const login = async (email: string, password?: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: password || 'default',
+      })
+      if (!error && data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+        if (profile) {
+          setUser(profile as User)
+          return true
+        }
+      }
+    } catch {}
+
+    // Fallback to local data
     const found = users.find(
       (u) =>
         u.email.toLowerCase() === email.toLowerCase() && (!password || u.password === password),
@@ -112,34 +125,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, name: string, password?: string) => {
-    const newUser: User = {
-      id: `usr-${Date.now()}`,
-      email,
-      name,
-      password,
-      role: 'requester',
-    }
+    try {
+      await supabase.auth.signUp({
+        email,
+        password: password || 'default',
+        options: { data: { name } },
+      })
+      await supabase.from('profiles').insert([{ email, name, role: 'requester' }])
+    } catch {}
+
+    const newUser: User = { id: `usr-${Date.now()}`, email, name, password, role: 'requester' }
     setUsers((prev) => [...prev, newUser])
     await sendEmail({
       to: email,
       subject: 'Welcome to KAICIID Reimbursement Requests',
-      body: `Hi ${name},\n\nPlease confirm your email address to access the application. You can now login with your credentials.`,
+      body: `Hi ${name},\n\nPlease confirm your email address to access the application.`,
     })
   }
 
-  const logout = () => setUser(null)
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch {}
+    setUser(null)
+  }
 
-  const updateProfile = (id: string, data: Partial<User>) => {
+  const updateProfile = async (id: string, data: Partial<User>) => {
+    try {
+      await supabase.from('profiles').update(data).eq('id', id)
+    } catch {}
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)))
   }
 
-  const adminAddUser = (data: Partial<User>) => {
+  const adminAddUser = (data: Partial<User>) =>
     setUsers((prev) => [...prev, { ...data, id: `usr-${Date.now()}` } as User])
-  }
-
-  const adminDeleteUser = (id: string) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id))
-  }
+  const adminDeleteUser = (id: string) => setUsers((prev) => prev.filter((u) => u.id !== id))
 
   const updatePassword = (email: string, newPassword: string) => {
     let updated = false

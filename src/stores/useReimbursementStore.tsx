@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { ReimbursementRequest, User } from '@/types'
+import { supabase } from '@/lib/supabase'
 
 interface ReimbursementContextData {
   requests: ReimbursementRequest[]
-  addRequest: (req: ReimbursementRequest) => void
-  updateRequest: (id: string, req: Partial<ReimbursementRequest>) => void
+  addRequest: (req: ReimbursementRequest) => Promise<void>
+  updateRequest: (id: string, req: Partial<ReimbursementRequest>) => Promise<void>
 }
 
 const ReimbursementContext = createContext<ReimbursementContextData | undefined>(undefined)
@@ -13,9 +14,7 @@ const getUsers = (): User[] => {
   try {
     const saved = localStorage.getItem('auth_users_list_v3')
     if (saved) return JSON.parse(saved)
-  } catch {
-    // ignore
-  }
+  } catch {}
   return []
 }
 
@@ -42,9 +41,7 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
           return req
         })
       }
-    } catch {
-      // ignore
-    }
+    } catch {}
     return []
   })
 
@@ -52,11 +49,17 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('reimbursement_requests_v2', JSON.stringify(requests))
   }, [requests])
 
-  const addRequest = (req: ReimbursementRequest) => {
+  const addRequest = async (req: ReimbursementRequest) => {
+    try {
+      await supabase.from('requests').insert([req])
+    } catch {}
     setRequests((prev) => [req, ...prev])
   }
 
-  const updateRequest = (id: string, req: Partial<ReimbursementRequest>) => {
+  const updateRequest = async (id: string, req: Partial<ReimbursementRequest>) => {
+    try {
+      await supabase.from('requests').update(req).eq('id', id)
+    } catch {}
     setRequests((prev) =>
       prev.map((r) => {
         if (r.id === id) {

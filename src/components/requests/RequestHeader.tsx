@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import useMasterDataStore from '@/stores/useMasterDataStore'
+import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
 
 interface Props {
@@ -20,7 +21,12 @@ interface Props {
 export function RequestHeader({ formData, onChange, readOnly }: Props) {
   const { events } = useMasterDataStore()
   const { t } = useTranslation()
+  const { user } = useAuthStore()
   const reqUser = formData.requesterDetails || {}
+
+  const isQc = user?.role === 'qc'
+  const canEditQcFields = !readOnly || isQc
+  const canEditRequesterFields = !readOnly && !isQc
 
   const handleEventChange = (eventId: string) => {
     const event = events.find((e) => e.id === eventId)
@@ -54,7 +60,11 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         </div>
         <div className="space-y-2 lg:col-span-2">
           <Label className="text-muted-foreground text-xs uppercase">Event</Label>
-          <Select disabled={readOnly} value={formData.eventId} onValueChange={handleEventChange}>
+          <Select
+            disabled={!canEditQcFields}
+            value={formData.eventId}
+            onValueChange={handleEventChange}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select Event" />
             </SelectTrigger>
@@ -70,27 +80,35 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Cost Centre</Label>
           <Input
-            disabled={readOnly}
+            disabled={!canEditQcFields}
             value={formData.costCenter || ''}
             onChange={(e) => onChange({ costCenter: e.target.value })}
-            className={readOnly ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs'}
+            className={
+              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+            }
             placeholder="e.g. CC-01"
           />
         </div>
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Account</Label>
           <Input
-            disabled
+            disabled={!canEditQcFields}
             value={formData.account || ''}
-            className="bg-muted/50 font-mono text-xs"
+            onChange={(e) => onChange({ account: e.target.value })}
+            className={
+              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+            }
           />
         </div>
         <div className="space-y-2 lg:col-span-1">
           <Label className="text-muted-foreground text-xs uppercase">Workorder</Label>
           <Input
-            disabled
+            disabled={!canEditQcFields}
             value={formData.workorder || ''}
-            className="bg-muted/50 font-mono text-xs"
+            onChange={(e) => onChange({ workorder: e.target.value })}
+            className={
+              !canEditQcFields ? 'bg-muted/50 font-mono text-xs' : 'font-mono text-xs bg-white'
+            }
           />
         </div>
       </div>
@@ -101,84 +119,84 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Requester</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.name || ''}
               onChange={(e) => updateRequesterDetails('name', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">Email</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.email || ''}
               onChange={(e) => updateRequesterDetails('email', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">Organization</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.organization || ''}
               onChange={(e) => updateRequesterDetails('organization', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
 
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Address</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.address || ''}
               onChange={(e) => updateRequesterDetails('address', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">City</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.city || ''}
               onChange={(e) => updateRequesterDetails('city', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">State</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.state || ''}
               onChange={(e) => updateRequesterDetails('state', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">ZIP Code</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.zipCode || ''}
               onChange={(e) => updateRequesterDetails('zipCode', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">Country</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.country || ''}
               onChange={(e) => updateRequesterDetails('country', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Telephone</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.phone || ''}
               onChange={(e) => updateRequesterDetails('phone', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
         </div>
@@ -190,56 +208,56 @@ export function RequestHeader({ formData, onChange, readOnly }: Props) {
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">Holder</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.bankHolder || ''}
               onChange={(e) => updateRequesterDetails('bankHolder', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">Bank Name</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.bankName || ''}
               onChange={(e) => updateRequesterDetails('bankName', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">Account Number</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.bankAccount || ''}
               onChange={(e) => updateRequesterDetails('bankAccount', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
 
           <div className="space-y-2 md:col-span-2">
             <Label className="text-muted-foreground text-xs uppercase">IBAN</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.iban || ''}
               onChange={(e) => updateRequesterDetails('iban', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">SWIFT</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.swift || ''}
               onChange={(e) => updateRequesterDetails('swift', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs uppercase">BIC</Label>
             <Input
-              disabled={readOnly}
+              disabled={!canEditRequesterFields}
               value={reqUser.bic || ''}
               onChange={(e) => updateRequesterDetails('bic', e.target.value)}
-              className={readOnly ? 'bg-muted/30' : ''}
+              className={!canEditRequesterFields ? 'bg-muted/30' : ''}
             />
           </div>
         </div>

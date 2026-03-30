@@ -69,16 +69,17 @@ export default function RequestForm() {
 
   if (!formData.id) return null
 
-  const isEditingAllowed = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
-  const readOnly = !isEditingAllowed
+  const isRequesterEditing = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
+  const isQcEditing = user?.role === 'qc'
+  const readOnly = !isRequesterEditing && !isQcEditing
 
   const handleSave = async () => {
     const isResubmission = !isNew && formData.status === 'Rejected'
 
     if (isNew) {
-      addRequest(formData as ReimbursementRequest)
+      await addRequest(formData as ReimbursementRequest)
       if (user?.role === 'requester') {
-        updateProfile(user.id, formData.requesterDetails!)
+        await updateProfile(user.id, formData.requesterDetails!)
       }
 
       await sendEmail({
@@ -88,7 +89,7 @@ export default function RequestForm() {
       })
       toast({ title: 'Request Submitted Successfully' })
     } else if (isResubmission) {
-      updateRequest(formData.id!, {
+      await updateRequest(formData.id!, {
         ...formData,
         status: 'Pending',
         qcSignature: null,
@@ -104,7 +105,7 @@ export default function RequestForm() {
       })
       toast({ title: 'Request Resubmitted for Review' })
     } else {
-      updateRequest(formData.id!, formData)
+      await updateRequest(formData.id!, formData)
       toast({ title: 'Request Updated' })
     }
     navigate('/requests')
@@ -116,7 +117,7 @@ export default function RequestForm() {
     receipt?: string,
   ) => {
     if (action === 'upload_receipt') {
-      updateRequest(formData.id!, {
+      await updateRequest(formData.id!, {
         paymentReceipt: receipt,
         history: [
           ...(formData.history || []),
@@ -206,7 +207,7 @@ export default function RequestForm() {
     }
 
     updates.status = newStatus as any
-    updateRequest(formData.id!, updates)
+    await updateRequest(formData.id!, updates)
     toast({ title: `Request ${newStatus}` })
 
     if (notifySubject) {
@@ -299,7 +300,7 @@ export default function RequestForm() {
                   Requester Signature
                 </Label>
                 <Input
-                  disabled={readOnly}
+                  disabled={!isRequesterEditing}
                   value={formData.signature || ''}
                   onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
                   className="font-serif italic text-lg h-12 bg-muted/10"
