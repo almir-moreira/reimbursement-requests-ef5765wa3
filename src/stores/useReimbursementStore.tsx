@@ -10,38 +10,12 @@ interface ReimbursementContextData {
 
 const ReimbursementContext = createContext<ReimbursementContextData | undefined>(undefined)
 
-const getUsers = (): User[] => {
-  try {
-    const saved = localStorage.getItem('auth_users_list_v3')
-    if (saved) return JSON.parse(saved)
-  } catch {
-    /* ignore */
-  }
-  return []
-}
-
 export function ReimbursementProvider({ children }: { children: ReactNode }) {
   const [requests, setRequests] = useState<ReimbursementRequest[]>(() => {
     try {
       const saved = localStorage.getItem('reimbursement_requests_v2')
       if (saved) {
-        const parsed = JSON.parse(saved) as ReimbursementRequest[]
-        const users = getUsers()
-
-        return parsed.map((req) => {
-          if (req.history) {
-            req.history = req.history.map((h) => {
-              if (h.action === 'Approved') {
-                const u = users.find((user) => user.id === h.userId)
-                if (u?.role === 'finance' || h.userId === 'u-4') {
-                  return { ...h, action: 'Processed' }
-                }
-              }
-              return h
-            })
-          }
-          return req
-        })
+        return JSON.parse(saved) as ReimbursementRequest[]
       }
     } catch {
       /* ignore */
@@ -75,20 +49,7 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
     setRequests((prev) =>
       prev.map((r) => {
         if (r.id === id) {
-          const updated = { ...r, ...req }
-          if (updated.history) {
-            const users = getUsers()
-            updated.history = updated.history.map((h) => {
-              if (h.action === 'Approved') {
-                const u = users.find((user) => user.id === h.userId)
-                if (u?.role === 'finance' || h.userId === 'u-4') {
-                  return { ...h, action: 'Processed' }
-                }
-              }
-              return h
-            })
-          }
-          return updated
+          return { ...r, ...req }
         }
         return r
       }),

@@ -1,6 +1,7 @@
 import { useTranslation } from '@/lib/i18n'
 import useReimbursementStore from '@/stores/useReimbursementStore'
 import useAuthStore from '@/stores/useAuthStore'
+import useMasterDataStore from '@/stores/useMasterDataStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
 
@@ -8,6 +9,7 @@ export default function Dashboard() {
   const { t } = useTranslation()
   const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
+  const { costCenters, events } = useMasterDataStore()
 
   const userRequests = requests.filter((req) => {
     if (!user) return false
@@ -16,7 +18,12 @@ export default function Dashboard() {
     if (user.role === 'qc') return true
     if (user.role === 'co') {
       if (req.status === 'Pending') return false
-      return req.costCenter === user.costCenter
+      const allowedCostCenters = costCenters
+        .filter((c: any) => c.coEmail === user.email)
+        .map((c: any) => c.code)
+      const reqCostCenter =
+        req.costCenter || events.find((e: any) => e.id === req.eventId)?.costCenter
+      return allowedCostCenters.includes(reqCostCenter)
     }
     return false
   })

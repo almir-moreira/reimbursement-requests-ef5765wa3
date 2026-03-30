@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
 import useReimbursementStore from '@/stores/useReimbursementStore'
 import useAuthStore from '@/stores/useAuthStore'
+import useMasterDataStore from '@/stores/useMasterDataStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +32,7 @@ export default function RequestsList() {
   const { t } = useTranslation()
   const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
+  const { costCenters, events } = useMasterDataStore()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -57,7 +59,12 @@ export default function RequestsList() {
       if (user.role === 'qc') return true
       if (user.role === 'co') {
         if (req.status === 'Pending') return false
-        return req.costCenter === user.costCenter
+        const allowedCostCenters = costCenters
+          .filter((c: any) => c.coEmail === user.email)
+          .map((c: any) => c.code)
+        const reqCostCenter =
+          req.costCenter || events.find((e: any) => e.id === req.eventId)?.costCenter
+        return allowedCostCenters.includes(reqCostCenter)
       }
       return false
     })

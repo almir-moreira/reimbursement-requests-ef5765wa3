@@ -151,27 +151,17 @@ export default function RequestForm() {
       role: user?.role || '',
     }
 
-    const updates: Partial<ReimbursementRequest> = {
-      history: [
-        ...(formData.history || []),
-        {
-          id: `h-${Date.now()}`,
-          date: new Date().toISOString(),
-          action: action === 'approve' ? 'Approved' : 'Rejected',
-          userId: user?.name || '',
-          comments,
-        },
-      ],
-    }
-
     let newStatus = formData.status
     let notifyEmail = formData.requesterDetails?.email || 'requester@example.com'
     let notifySubject = ''
     let notifyBody = ''
+    let historyAction = action === 'approve' ? 'Approved' : 'Rejected'
+    const updates: Partial<ReimbursementRequest> = {}
 
     if (user?.role === 'qc') {
       if (action === 'approve') {
         newStatus = 'Checked'
+        historyAction = 'Reviewed'
         updates.qcSignature = signature
       } else {
         newStatus = 'Rejected'
@@ -182,6 +172,7 @@ export default function RequestForm() {
     } else if (user?.role === 'co') {
       if (action === 'approve') {
         newStatus = 'Approved'
+        historyAction = 'Approved'
         updates.coSignature = signature
       } else {
         newStatus = 'Rejected'
@@ -194,6 +185,7 @@ export default function RequestForm() {
     } else if (user?.role === 'finance') {
       if (action === 'approve') {
         newStatus = 'Processed'
+        historyAction = 'Processed'
         updates.financeSignature = signature
         if (receipt) updates.paymentReceipt = receipt
         notifySubject = `Reimbursement Request Processed: ${formData.id}`
@@ -210,6 +202,17 @@ export default function RequestForm() {
         notifyBody = `Request ${formData.id} was rejected by Finance. Reason: ${comments}`
       }
     }
+
+    updates.history = [
+      ...(formData.history || []),
+      {
+        id: `h-${Date.now()}`,
+        date: new Date().toISOString(),
+        action: historyAction,
+        userId: user?.name || '',
+        comments,
+      },
+    ]
 
     updates.status = newStatus as any
     await updateRequest(formData.id!, updates)
@@ -354,7 +357,7 @@ export default function RequestForm() {
                     </div>
                     <div className="w-40 font-bold">
                       <span
-                        className={`px-2 py-1 rounded-md ${h.action === 'Rejected' ? 'bg-destructive/10 text-destructive' : 'bg-[#4a8ebf]/10 text-[#4a8ebf]'}`}
+                        className={`px-2 py-1 rounded-md ${h.action === 'Rejected' ? 'bg-destructive/10 text-destructive' : h.action === 'Processed' ? 'bg-success/10 text-success' : 'bg-[#4a8ebf]/10 text-[#4a8ebf]'}`}
                       >
                         {h.action}
                       </span>
