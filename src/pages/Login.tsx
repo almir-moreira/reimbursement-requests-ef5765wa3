@@ -33,19 +33,35 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail || !password) {
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Please enter both email and password.',
+      })
+      return
+    }
+
     setLoading(true)
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: trimmedEmail,
         password,
       })
 
       if (error) {
+        const isInvalidCredentials =
+          error.message.includes('Invalid login credentials') || error.status === 400
+
         toast({
           variant: 'destructive',
           title: 'Authentication Error',
-          description: 'Incorrect email or password. Please try again.',
+          description: isInvalidCredentials
+            ? 'Invalid login credentials. Please check your email and password and try again.'
+            : error.message || 'Incorrect email or password. Please try again.',
         })
         return
       }
