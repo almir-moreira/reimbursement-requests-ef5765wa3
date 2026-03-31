@@ -25,14 +25,22 @@ import {
 } from '@/components/ui/sidebar'
 
 export default function Layout() {
-  const { user, lang, setLang, logout } = useAuthStore()
+  const { user, loading, lang, setLang, logout } = useAuthStore()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const location = useLocation()
 
   useEffect(() => {
-    if (!user) navigate('/login')
-  }, [user, navigate])
+    if (!loading && !user) navigate('/login')
+  }, [user, loading, navigate])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-[#4a8ebf] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
 
   if (!user) return null
 
@@ -147,8 +155,10 @@ export default function Layout() {
             <div className="flex-1">
               <Outlet />
             </div>
-            <footer className="mt-8 pt-4 border-t border-border/50 text-center text-xs text-muted-foreground">
-              KAICIID Reimbursement Portal • {new Date().getFullYear()}
+            <footer className="mt-8 pt-4 border-t border-border/50 text-center text-xs text-muted-foreground flex justify-center gap-2">
+              <span>KAICIID Reimbursement Portal • {new Date().getFullYear()}</span>
+              <span>•</span>
+              <span>v0.0.91</span>
             </footer>
           </main>
         </div>

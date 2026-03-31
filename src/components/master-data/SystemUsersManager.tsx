@@ -29,6 +29,13 @@ export function SystemUsersManager() {
 
   const [editing, setEditing] = useState<Partial<User> | null>(null)
   const [isNew, setIsNew] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+
+  const openEdit = (u: User) => {
+    setEditing({ ...u })
+    setIsNew(false)
+    setIsOpen(true)
+  }
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +44,8 @@ export function SystemUsersManager() {
     } else if (editing && editing.id) {
       updateProfile(editing.id, editing)
     }
-    setEditing(null)
+    setIsOpen(false)
+    setTimeout(() => setEditing(null), 200)
     setIsNew(false)
   }
 
@@ -66,15 +74,13 @@ export function SystemUsersManager() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setEditing(u)
-                        setIsNew(false)
-                      }}
-                      className="h-8 w-8 text-[#4a8ebf]"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit(u)}
+                      className="text-[#4a8ebf] flex items-center gap-1 h-8"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3.5 h-3.5" />
+                      <span className="text-xs font-medium">Edit Role</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -96,13 +102,14 @@ export function SystemUsersManager() {
         onClick={() => {
           setEditing({ role: 'qc' })
           setIsNew(true)
+          setIsOpen(true)
         }}
         className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white"
       >
         <Plus className="w-4 h-4 mr-2" /> Add System User
       </Button>
 
-      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && setIsOpen(false)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{isNew ? 'Add System User' : 'Edit System User'}</DialogTitle>
@@ -155,7 +162,7 @@ export function SystemUsersManager() {
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setEditing(null)}>
+                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white">

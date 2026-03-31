@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 import logoImg from '@/assets/kaiciid-logo-2023-e2011.jpg'
+import useAuthStore from '@/stores/useAuthStore'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -22,6 +23,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,7 +54,7 @@ export default function Login() {
         title: 'Login successful',
         description: 'Welcome to the reimbursement system.',
       })
-      navigate('/dashboard')
+      // Navigation is handled by the useEffect watching 'user'
     } catch (error: any) {
       toast({
         variant: 'destructive',
