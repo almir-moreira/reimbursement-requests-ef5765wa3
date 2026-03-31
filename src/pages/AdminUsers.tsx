@@ -23,7 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, Users, UserPlus, RefreshCw } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Search, Users, RefreshCw } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
 interface Profile {
@@ -41,6 +48,10 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('All')
+
+  const [editingUser, setEditingUser] = useState<Profile | null>(null)
+  const [newRole, setNewRole] = useState<string>('')
+  const [updating, setUpdating] = useState(false)
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -63,6 +74,25 @@ export default function AdminUsers() {
       fetchUsers()
     }
   }, [user?.role])
+
+  const handleUpdateRole = async () => {
+    if (!editingUser) return
+    setUpdating(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', editingUser.id)
+      if (error) throw error
+      toast({ title: 'Role updated successfully' })
+      setEditingUser(null)
+      fetchUsers()
+    } catch (err: any) {
+      toast({ title: 'Error updating role', description: err.message, variant: 'destructive' })
+    } finally {
+      setUpdating(false)
+    }
+  }
 
   const filteredUsers = users.filter((u) => {
     if (roleFilter !== 'All' && u.role !== roleFilter) return false
@@ -98,9 +128,6 @@ export default function AdminUsers() {
                 Manage all registered users and their platform roles.
               </CardDescription>
             </div>
-            <Button className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white">
-              <UserPlus className="w-4 h-4 mr-2" /> Invite User
-            </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
@@ -182,7 +209,15 @@ export default function AdminUsers() {
                         {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-[#4a8ebf]">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[#4a8ebf]"
+                          onClick={() => {
+                            setEditingUser(u)
+                            setNewRole(u.role || 'requester')
+                          }}
+                        >
                           Edit Role
                         </Button>
                       </TableCell>
@@ -194,6 +229,47 @@ export default function AdminUsers() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit User Role</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>User</Label>
+              <Input value={editingUser?.name || editingUser?.email || ''} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="qc">Quality Control (QC)</SelectItem>
+                  <SelectItem value="co">Cost Center Owner (CO)</SelectItem>
+                  <SelectItem value="requester">Requester</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingUser(null)} disabled={updating}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateRole}
+              disabled={updating}
+              className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white"
+            >
+              {updating ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
