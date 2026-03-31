@@ -229,8 +229,30 @@ export default function RequestsList() {
                       </TableCell>
                       <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
                       <TableCell className="text-sm font-medium">
-                        {req.data?.currency || 'USD'}{' '}
-                        {Number(req.data?.totalAmount || 0).toFixed(2)}
+                        {(() => {
+                          let currency = req.data?.currency
+                          if (
+                            !currency &&
+                            Array.isArray(req.data?.expenses) &&
+                            req.data.expenses.length > 0
+                          ) {
+                            currency = req.data.expenses[0].currency
+                          }
+                          currency = currency || 'USD'
+
+                          let total = Number(req.data?.totalAmount)
+                          if (!total || isNaN(total)) {
+                            if (Array.isArray(req.data?.expenses)) {
+                              total = req.data.expenses.reduce(
+                                (sum: number, exp: any) => sum + (Number(exp.amount) || 0),
+                                0,
+                              )
+                            } else {
+                              total = Number(req.data?.amount || 0)
+                            }
+                          }
+                          return `${currency} ${total.toFixed(2)}`
+                        })()}
                       </TableCell>
                       <TableCell>
                         <Badge
