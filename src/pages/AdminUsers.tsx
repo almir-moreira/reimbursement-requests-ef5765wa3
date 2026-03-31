@@ -42,10 +42,6 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('All')
 
-  if (user?.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />
-  }
-
   const fetchUsers = async () => {
     setLoading(true)
     try {
@@ -63,8 +59,10 @@ export default function AdminUsers() {
   }
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (user?.role === 'admin') {
+      fetchUsers()
+    }
+  }, [user?.role])
 
   const filteredUsers = users.filter((u) => {
     if (roleFilter !== 'All' && u.role !== roleFilter) return false
@@ -74,6 +72,10 @@ export default function AdminUsers() {
     }
     return true
   })
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-20">
