@@ -230,13 +230,17 @@ export default function RequestsList() {
                       <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
                       <TableCell className="text-sm font-medium">
                         {(() => {
-                          let currency = req.data?.currency
+                          let currency =
+                            req.data?.currency ||
+                            req.data?.requestCurrency ||
+                            req.data?.reimbursementCurrency
                           if (
                             !currency &&
                             Array.isArray(req.data?.expenses) &&
                             req.data.expenses.length > 0
                           ) {
-                            currency = req.data.expenses[0].currency
+                            currency =
+                              req.data.expenses[0].currency || req.data.expenses[0].originalCurrency
                           }
                           currency = currency || 'USD'
 
@@ -244,14 +248,16 @@ export default function RequestsList() {
                             Number(req.data?.totalAmount) ||
                             Number(req.data?.total) ||
                             Number(req.data?.amount) ||
+                            Number(req.data?.totalReimbursement) ||
+                            Number(req.data?.requestedAmount) ||
                             0
-                          if (!total) {
-                            if (Array.isArray(req.data?.expenses)) {
-                              total = req.data.expenses.reduce(
-                                (sum: number, exp: any) => sum + (Number(exp.amount) || 0),
-                                0,
-                              )
-                            }
+
+                          if (!total && Array.isArray(req.data?.expenses)) {
+                            total = req.data.expenses.reduce(
+                              (sum: number, exp: any) =>
+                                sum + (Number(exp.amount) || Number(exp.amountRequested) || 0),
+                              0,
+                            )
                           }
                           return `${currency} ${total.toFixed(2)}`
                         })()}

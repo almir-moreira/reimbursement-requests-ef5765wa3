@@ -1,20 +1,35 @@
+import { useState, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
-import useReimbursementStore from '@/stores/useReimbursementStore'
 import useAuthStore from '@/stores/useAuthStore'
 import useMasterDataStore from '@/stores/useMasterDataStore'
+import { supabase } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
+import { FileText, CheckCircle, Clock, DollarSign, XCircle, Rocket } from 'lucide-react'
 
 export default function Dashboard() {
   const { t } = useTranslation()
-  const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
   const { costCenters, events } = useMasterDataStore()
+  const [requests, setRequests] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      if (!user) return
+      try {
+        const { data, error } = await supabase.from('requests').select('*')
+        if (error) throw error
+        setRequests(data || [])
+      } catch (err) {
+        console.error('Error fetching requests:', err)
+      }
+    }
+    fetchRequests()
+  }, [user])
 
   const userRequests = requests.filter((req) => {
     if (!user) return false
     if (user.role === 'admin' || user.role === 'finance') return true
-    if (user.role === 'requester') return req.requesterId === user.id
+    if (user.role === 'requester') return req.user_id === user.id
     if (user.role === 'qc') return true
     if (user.role === 'co') {
       if (req.status === 'Pending') return false
@@ -22,7 +37,7 @@ export default function Dashboard() {
         .filter((c: any) => c.coEmail === user.email)
         .map((c: any) => c.code)
       const reqCostCenter =
-        req.costCenter || events.find((e: any) => e.id === req.eventId)?.costCenter
+        req.data?.costCenter || events.find((e: any) => e.id === req.data?.eventId)?.costCenter
       return allowedCostCenters.includes(reqCostCenter)
     }
     return false
@@ -70,6 +85,19 @@ export default function Dashboard() {
           workflow.
         </p>
       )}
+
+      <div className="flex gap-4 mb-6">
+        <button
+          className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white px-4 py-2 rounded-md font-medium flex items-center shadow-md transition-colors"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('skip-publish-trigger', { bubbles: true }))
+            alert('Sua solicitação de publicação foi enviada!')
+          }}
+        >
+          <Rocket className="w-4 h-4 mr-2" />
+          Publicar App
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-8">
         {stats.map((stat, i) => (

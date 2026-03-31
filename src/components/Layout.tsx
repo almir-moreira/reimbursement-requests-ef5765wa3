@@ -103,7 +103,7 @@ export default function Layout() {
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 gap-4 shrink-0 shadow-sm">
+          <header className="h-16 z-50 relative border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 gap-4 shrink-0 shadow-sm">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:hidden" />
               <div className="flex flex-col md:hidden">
@@ -124,20 +124,20 @@ export default function Layout() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="default"
                 size="sm"
-                className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-medium shadow-md animate-pulse"
+                className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold shadow-md z-50"
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent('skip-publish-trigger'))
-                  alert('Publicando alterações... A nova versão estará disponível em breve.')
+                  window.dispatchEvent(new CustomEvent('skip-publish-trigger', { bubbles: true }))
+                  alert('Sua solicitação de publicação foi enviada!')
                 }}
               >
-                <Rocket className="w-4 h-4 mr-2" />
+                <Rocket className="w-4 h-4 mr-1 sm:mr-2" />
                 Publicar
               </Button>
-              <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground mr-auto lg:mr-0">
+              <div className="flex items-center gap-2 sm:gap-3 text-sm font-medium text-muted-foreground mr-auto lg:mr-0">
                 <span className="bg-[#4a8ebf]/10 text-[#4a8ebf] px-3 py-1 rounded-md capitalize font-bold hidden sm:inline-block">
                   {user.role}
                 </span>
