@@ -13,10 +13,12 @@ import {
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
+import pkg from '../../package.json'
 import {
   SidebarProvider,
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -91,6 +93,11 @@ export default function Layout() {
               ))}
             </SidebarMenu>
           </SidebarContent>
+          <SidebarFooter className="p-4 border-t border-border">
+            <div className="text-xs text-center text-muted-foreground font-mono">
+              v{pkg.version}
+            </div>
+          </SidebarFooter>
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-w-0">

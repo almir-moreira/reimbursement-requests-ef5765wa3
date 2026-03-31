@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,18 +13,27 @@ import {
 } from '@/components/ui/card'
 import useAuthStore from '@/stores/useAuthStore'
 import { toast } from '@/hooks/use-toast'
+import pkg from '../../package.json'
 
 export default function Login() {
-  const { login, register } = useAuthStore()
+  const { login, register, user } = useAuthStore()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
+
   const [isRegistering, setIsRegistering] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('dorna@example.com')
   const [password, setPassword] = useState('password')
   const [name, setName] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
 
     if (isRegistering) {
       try {
@@ -33,14 +42,18 @@ export default function Login() {
         setIsRegistering(false)
       } catch (error) {
         toast({ title: 'Registration failed', variant: 'destructive' })
+      } finally {
+        setIsLoading(false)
       }
     } else {
       try {
         const success = await login(email, password)
         if (success) {
-          navigate('/dashboard')
+          // Navigation is handled by the useEffect watching the user state
+          // to prevent race conditions with Supabase's onAuthStateChange
         } else {
           toast({ title: 'Invalid credentials', variant: 'destructive' })
+          setIsLoading(false)
         }
       } catch (error) {
         toast({
@@ -48,6 +61,7 @@ export default function Login() {
           description: 'An unexpected error occurred',
           variant: 'destructive',
         })
+        setIsLoading(false)
       }
     }
   }
@@ -115,9 +129,10 @@ export default function Login() {
 
             <Button
               type="submit"
+              disabled={isLoading}
               className="w-full h-12 text-md bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold"
             >
-              {isRegistering ? 'Register' : 'Sign In'}
+              {isLoading ? '...' : isRegistering ? 'Register' : 'Sign In'}
             </Button>
           </form>
 
@@ -134,7 +149,7 @@ export default function Login() {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-center border-t border-border pt-4">
+        <CardFooter className="flex flex-col items-center justify-center border-t border-border pt-4 gap-2">
           <Button
             variant="link"
             onClick={() => setIsRegistering(!isRegistering)}
@@ -142,6 +157,7 @@ export default function Login() {
           >
             {isRegistering ? 'Already have an account? Sign In' : 'Need an account? Create one'}
           </Button>
+          <div className="text-xs text-muted-foreground font-mono">v{pkg.version}</div>
         </CardFooter>
       </Card>
     </div>
