@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import pkg from '../../package.json'
 
 export default function Login() {
   const { t } = useTranslation()
@@ -38,6 +39,30 @@ export default function Login() {
 
       toast({ title: 'Logged in successfully' })
       // Navigate immediately. The onAuthStateChange listener in the app will update the store.
+      navigate('/dashboard', { replace: true })
+    } catch (error: any) {
+      toast({
+        title: 'Login failed',
+        description: error.message || 'Invalid credentials',
+        variant: 'destructive',
+      })
+      setLoading(false)
+    }
+  }
+
+  const handleDemoLogin = async (demoEmail: string) => {
+    setEmail(demoEmail)
+    setPassword('securepassword123')
+
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: 'securepassword123',
+      })
+      if (error) throw error
+
+      toast({ title: 'Logged in successfully' })
       navigate('/dashboard', { replace: true })
     } catch (error: any) {
       toast({
@@ -106,8 +131,9 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmail('requester@kaiciid.org')}
+                  onClick={() => handleDemoLogin('requester@kaiciid.org')}
                   className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
+                  disabled={loading}
                 >
                   Requester
                 </Button>
@@ -115,8 +141,9 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmail('qc@kaiciid.org')}
+                  onClick={() => handleDemoLogin('qc@kaiciid.org')}
                   className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
+                  disabled={loading}
                 >
                   QC
                 </Button>
@@ -124,8 +151,9 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmail('co@kaiciid.org')}
+                  onClick={() => handleDemoLogin('co@kaiciid.org')}
                   className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
+                  disabled={loading}
                 >
                   CO
                 </Button>
@@ -133,8 +161,9 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmail('finance@kaiciid.org')}
+                  onClick={() => handleDemoLogin('finance@kaiciid.org')}
                   className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
+                  disabled={loading}
                 >
                   Finance
                 </Button>
@@ -142,8 +171,9 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmail('admin@kaiciid.org')}
+                  onClick={() => handleDemoLogin('admin@kaiciid.org')}
                   className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
+                  disabled={loading}
                 >
                   Admin
                 </Button>
@@ -152,6 +182,9 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
+      <div className="fixed bottom-4 text-center w-full text-xs text-muted-foreground/50 font-mono">
+        v{pkg.version}
+      </div>
     </div>
   )
 }

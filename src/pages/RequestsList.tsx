@@ -1,12 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from '@/lib/i18n'
-import useReimbursementStore from '@/stores/useReimbursementStore'
 import useAuthStore from '@/stores/useAuthStore'
-import useMasterDataStore from '@/stores/useMasterDataStore'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -22,281 +20,247 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Eye, Search, ChevronUp, ChevronDown } from 'lucide-react'
-
-type SortColumn = 'id' | 'date' | 'requester' | 'total'
-type SortDirection = 'asc' | 'desc'
+import { format } from 'date-fns'
+import { FileText, Plus, Search, Filter } from 'lucide-react'
 
 export default function RequestsList() {
   const { t } = useTranslation()
-  const { requests } = useReimbursementStore()
   const { user } = useAuthStore()
-  const { costCenters, events } = useMasterDataStore()
+  const [requests, setRequests] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [dateFilter, setDateFilter] = useState('')
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const [sortCol, setSortCol] = useState<SortColumn>('date')
-  const [sortDir, setSortDir] = useState<SortDirection>('desc')
 
-  const handleSort = (col: SortColumn) => {
-    if (sortCol === col) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortCol(col)
-      setSortDir('asc')
+  useEffect(() => {
+    fetchRequests()
+  }, [user])
+
+  const fetchRequests = async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      let query = supabase
+        .from('requests')
+        .select('*, profiles(name, email)')
+        .order('created_at', { ascending: false })
+
+      const { data, error } = await query
+      if (error) throw error
+
+      setRequests(data || [])
+    } catch (error) {
+      console.error('Error fetching requests:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const sortedAndFiltered = useMemo(() => {
-    let result = requests.filter((req) => {
-      if (!user) return false
-      // Admin and Finance have global visibility
-      if (user.role === 'admin' || user.role === 'finance') return true
-      if (user.role === 'requester') return req.requesterId === user.id
-      if (user.role === 'qc') return true
-      if (user.role === 'co') {
-        if (req.status === 'Pending') return false
-        const allowedCostCenters = costCenters
-          .filter((c: any) => c.coEmail === user.email)
-          .map((c: any) => c.code)
-        const reqCostCenter =
-          req.costCenter || events.find((e: any) => e.id === req.eventId)?.costCenter
-        return allowedCostCenters.includes(reqCostCenter)
+  const filteredRequests = useMemo(() => {
+    return requests.filter((req) => {
+      if (statusFilter !== 'all' && req.status !== statusFilter) return false
+      if (dateFilter) {
+        const reqDate = req.created_at ? req.created_at.substring(0, 10) : ''
+        if (reqDate !== dateFilter) return false
       }
-      return false
+      if (search) {
+        const searchLower = search.toLowerCase()
+        const reqId = req.id.toLowerCase()
+        const reqEvent = req.data?.event?.toLowerCase() || ''
+        if (!reqId.includes(searchLower) && !reqEvent.includes(searchLower)) return false
+      }
+      return true
     })
+  }, [requests, statusFilter, dateFilter, search])
 
-    if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
-        (r) =>
-          r.id.toLowerCase().includes(q) ||
-          (r.requesterDetails?.name || '').toLowerCase().includes(q),
-      )
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'approved':
+        return 'bg-green-100 text-green-800'
+      case 'rejected':
+        return 'bg-red-100 text-red-800'
+      case 'processed':
+        return 'bg-blue-100 text-blue-800'
+      case 'paid':
+        return 'bg-purple-100 text-purple-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
-
-    if (statusFilter !== 'All') {
-      result = result.filter((r) => r.status === statusFilter)
-    }
-    if (dateFrom) result = result.filter((r) => r.date >= dateFrom)
-    if (dateTo) result = result.filter((r) => r.date <= dateTo)
-
-    result.sort((a, b) => {
-      let valA: any = a.id
-      let valB: any = b.id
-
-      if (sortCol === 'date') {
-        valA = a.date
-        valB = b.date
-      }
-      if (sortCol === 'requester') {
-        valA = a.requesterDetails?.name || ''
-        valB = b.requesterDetails?.name || ''
-      }
-      if (sortCol === 'total') {
-        valA = a.expenses?.reduce((s: any, e: any) => s + (e.amountEuros || 0), 0) || 0
-        valB = b.expenses?.reduce((s: any, e: any) => s + (e.amountEuros || 0), 0) || 0
-      }
-
-      if (valA < valB) return sortDir === 'asc' ? -1 : 1
-      if (valA > valB) return sortDir === 'asc' ? 1 : -1
-      return 0
-    })
-
-    return result
-  }, [requests, user, search, statusFilter, dateFrom, dateTo, sortCol, sortDir])
-
-  const SortHeader = ({
-    col,
-    label,
-    alignRight,
-  }: {
-    col: SortColumn
-    label: string
-    alignRight?: boolean
-  }) => (
-    <TableHead
-      className={`cursor-pointer hover:bg-muted/50 select-none transition-colors ${alignRight ? 'text-right' : ''}`}
-      onClick={() => handleSort(col)}
-    >
-      <div className={`flex items-center gap-1 ${alignRight ? 'justify-end' : ''}`}>
-        {label}
-        {sortCol === col ? (
-          sortDir === 'asc' ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : (
-            <ChevronDown className="w-3 h-3" />
-          )
-        ) : (
-          <div className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-        )}
-      </div>
-    </TableHead>
-  )
+  }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-10">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-serif text-foreground/80">
-          <span className="font-bold text-[#4a8ebf]">KAICIID</span> |{' '}
-          {user?.role === 'requester' ? 'My Reimbursements' : t('requests')}
-        </h1>
-        {user?.role === 'requester' && (
-          <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#4a8ebf] font-serif">
+            {t('requests') || 'Reimbursement Requests'}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Manage and track your reimbursement requests
+          </p>
+        </div>
+        {(user?.role === 'requester' || user?.role === 'admin') && (
+          <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-medium">
             <Link to="/requests/new">
-              <Plus className="w-4 h-4 mr-2" /> {t('newRequest')}
+              <Plus className="w-4 h-4 mr-2" />
+              New Request
             </Link>
           </Button>
         )}
       </div>
 
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden mt-6">
-        <div className="p-4 border-b border-border bg-muted/20 flex flex-wrap gap-4 items-end">
-          <div className="space-y-1.5 flex-1 min-w-[200px]">
-            <Label>Search</Label>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-3 border-b border-border bg-muted/30">
+          <CardTitle className="text-base flex items-center gap-2 font-medium">
+            <Filter className="w-4 h-4 text-[#4a8ebf]" />
+            Filter Requests
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Search</label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by ID or Event..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Draft">Draft</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Approved">Approved</SelectItem>
+                  <SelectItem value="Rejected">Rejected</SelectItem>
+                  <SelectItem value="Processed">Processed</SelectItem>
+                  <SelectItem value="Paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Date</label>
               <Input
-                placeholder="Request ID or Requester Name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-background"
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-9"
               />
             </div>
           </div>
-          <div className="space-y-1.5 w-[140px]">
-            <Label>Status</Label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="bg-background">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Statuses</SelectItem>
-                <SelectItem value="Pending">Pending Review</SelectItem>
-                <SelectItem value="Checked">Pending Approval</SelectItem>
-                <SelectItem value="Approved">Pending Processing</SelectItem>
-                <SelectItem value="Processed">Processed & Closed</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5 w-[140px]">
-            <Label>From Date</Label>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="bg-background"
-            />
-          </div>
-          <div className="space-y-1.5 w-[140px]">
-            <Label>To Date</Label>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="bg-background"
-            />
-          </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <Table>
-          <TableHeader className="bg-muted/50 border-b border-border group">
-            <TableRow>
-              <SortHeader col="id" label="Request ID" />
-              <SortHeader col="date" label={t('date')} />
-              <SortHeader col="requester" label="Requester" />
-              <TableHead>Event</TableHead>
-              <SortHeader col="total" label="Total EUR" alignRight />
-              <TableHead>{t('status')}</TableHead>
-              <TableHead className="text-right">{t('actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-border/50">
-            {sortedAndFiltered.map((req) => {
-              const total =
-                req.expenses?.reduce((sum: any, e: any) => sum + (e.amountEuros || 0), 0) || 0
-
-              // Determine if action is required by current user
-              const needsAction =
-                (user?.role === 'qc' && req.status === 'Pending') ||
-                (user?.role === 'co' && req.status === 'Checked') ||
-                (user?.role === 'finance' && req.status === 'Approved') ||
-                (user?.role === 'requester' && req.status === 'Rejected') ||
-                (user?.role === 'finance' && req.status === 'Processed' && !req.paymentReceipt)
-
-              return (
-                <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-bold font-mono text-sm text-[#4a8ebf]">
-                    {req.id}
-                  </TableCell>
-                  <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{req.requesterDetails?.name}</TableCell>
-                  <TableCell
-                    className="max-w-[150px] truncate"
-                    title={events.find((e: any) => e.id === req.eventId)?.name || 'N/A'}
-                  >
-                    {events.find((e: any) => e.id === req.eventId)?.name || 'N/A'}
-                  </TableCell>
-                  <TableCell className="font-semibold text-right">€ {total.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`
-                      ${req.status === 'Processed' ? 'bg-success/10 text-success border-success/20 shadow-sm' : ''}
-                      ${req.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20 font-bold shadow-sm' : ''}
-                      ${req.status === 'Pending' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-sm' : ''}
-                      ${req.status === 'Checked' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-sm' : ''}
-                      ${req.status === 'Approved' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20 shadow-sm' : ''}
-                    `}
-                    >
-                      {req.status === 'Pending' && 'Pending Review'}
-                      {req.status === 'Checked' && 'Pending Approval'}
-                      {req.status === 'Approved' && 'Pending Processing'}
-                      {req.status === 'Processed' && 'Processed & Closed'}
-                      {req.status === 'Rejected' && 'Rejected'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant={needsAction ? 'default' : 'outline'}
-                      size="sm"
-                      asChild
-                      className={
-                        needsAction
-                          ? 'bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 font-bold'
-                          : 'text-[#4a8ebf] hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10 border-[#4a8ebf]/20'
-                      }
-                    >
-                      <Link to={`/requests/${req.id}`}>
-                        {needsAction ? (
-                          <>
-                            Review <span className="sr-only">Request</span>
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="w-4 h-4 mr-2" /> View Details
-                          </>
-                        )}
-                      </Link>
-                    </Button>
-                  </TableCell>
+      <Card className="border-border shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    ID
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    Date
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    Event
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    Requester
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    Amount
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-right font-semibold text-xs uppercase text-muted-foreground">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              )
-            })}
-            {sortedAndFiltered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground text-lg">
-                  No requests found matching your criteria.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="w-6 h-6 border-2 border-[#4a8ebf] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-sm">Loading requests...</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredRequests.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <FileText className="w-8 h-8 text-muted-foreground/30" />
+                        <p className="text-sm">No requests found matching your filters.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredRequests.map((req) => (
+                    <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
+                      <TableCell className="font-medium font-mono text-xs">
+                        {req.id.substring(0, 8)}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {req.created_at ? format(new Date(req.created_at), 'MMM dd, yyyy') : '-'}
+                      </TableCell>
+                      <TableCell className="text-sm font-medium">
+                        {req.data?.event || 'N/A'}
+                      </TableCell>
+                      <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
+                      <TableCell className="text-sm font-medium">
+                        {req.data?.currency || 'USD'}{' '}
+                        {Number(req.data?.totalAmount || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`${getStatusColor(req.status)} border-transparent font-medium`}
+                        >
+                          {req.status || 'Draft'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="hover:text-[#4a8ebf] hover:bg-[#4a8ebf]/10"
+                        >
+                          <Link to={`/requests/${req.id}`}>
+                            <FileText className="w-4 h-4 mr-2" />
+                            View
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
