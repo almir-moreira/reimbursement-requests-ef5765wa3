@@ -1,190 +1,130 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from '@/lib/i18n'
-import useAuthStore from '@/stores/useAuthStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { toast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase/client'
-import pkg from '../../package.json'
+import { Loader2 } from 'lucide-react'
+import logoImg from '@/assets/kaiciid-logo-2023-e2011.jpg'
 
 export default function Login() {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { user } = useAuthStore()
-
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('securepassword123')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
-  useEffect(() => {
-    // If the user is already authenticated in the store, redirect them immediately
-    if (user) {
-      navigate('/dashboard', { replace: true })
-    }
-  }, [user, navigate])
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) return
-
     setLoading(true)
-    try {
-      // Direct call to supabase to ensure immediate feedback and prevent multiple clicks
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
 
-      toast({ title: 'Logged in successfully' })
-      // Navigate immediately. The onAuthStateChange listener in the app will update the store.
-      navigate('/dashboard', { replace: true })
-    } catch (error: any) {
-      toast({
-        title: 'Login failed',
-        description: error.message || 'Invalid credentials',
-        variant: 'destructive',
-      })
-      setLoading(false)
-    }
-  }
-
-  const handleDemoLogin = async (demoEmail: string) => {
-    setEmail(demoEmail)
-    setPassword('securepassword123')
-
-    setLoading(true)
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: 'securepassword123',
+        email,
+        password,
       })
-      if (error) throw error
 
-      toast({ title: 'Logged in successfully' })
-      navigate('/dashboard', { replace: true })
+      if (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro de Autenticação',
+          description: 'E-mail ou senha incorretos. Tente novamente.',
+        })
+        return
+      }
+
+      toast({
+        title: 'Login realizado com sucesso',
+        description: 'Bem-vindo ao sistema de reembolsos.',
+      })
+      navigate('/dashboard')
     } catch (error: any) {
       toast({
-        title: 'Login failed',
-        description: error.message || 'Invalid credentials',
         variant: 'destructive',
+        title: 'Erro inesperado',
+        description: 'Ocorreu um erro ao tentar fazer login. Tente mais tarde.',
       })
+    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/20 p-4">
-      <Card className="w-full max-w-md shadow-lg border-border animate-fade-in-up">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <div className="mx-auto bg-[#4a8ebf]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <span className="font-bold text-2xl text-[#4a8ebf]">K</span>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+      <Card className="w-full max-w-md shadow-lg border-slate-200">
+        <CardHeader className="space-y-6 flex flex-col items-center pt-8 pb-4">
+          <div className="w-full flex justify-center bg-white p-6 rounded-xl border border-slate-100 shadow-sm mb-2">
+            <img src={logoImg} alt="KAICIID Logo" className="h-24 w-auto object-contain" />
           </div>
-          <CardTitle className="text-2xl font-serif text-[#4a8ebf]">KAICIID</CardTitle>
-          <CardDescription className="text-md">Reimbursement Requests Portal</CardDescription>
+          <div className="space-y-2 text-center w-full">
+            <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
+              Acesso Restrito
+            </CardTitle>
+            <CardDescription className="text-base text-slate-500">
+              Insira suas credenciais para acessar a plataforma
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin}>
+          <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-slate-700 font-medium">
+                E-mail
+              </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@kaiciid.org"
+                placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-slate-700 font-medium">
+                  Senha
+                </Label>
               </div>
               <Input
                 id="password"
                 type="password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
+          </CardContent>
+          <CardFooter className="pb-8 pt-2">
             <Button
               type="submit"
-              className="w-full bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold h-11"
+              className="w-full h-12 text-base font-medium transition-all"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing In...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Entrando...
                 </>
               ) : (
-                'Sign In'
+                'Entrar na Plataforma'
               )}
             </Button>
-
-            <div className="text-center mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-4 font-medium">Demo Accounts:</p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('requester@kaiciid.org')}
-                  className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
-                  disabled={loading}
-                >
-                  Requester
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('qc@kaiciid.org')}
-                  className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
-                  disabled={loading}
-                >
-                  QC
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('co@kaiciid.org')}
-                  className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
-                  disabled={loading}
-                >
-                  CO
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('finance@kaiciid.org')}
-                  className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
-                  disabled={loading}
-                >
-                  Finance
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('admin@kaiciid.org')}
-                  className="text-xs hover:bg-[#4a8ebf]/10 hover:text-[#4a8ebf]"
-                  disabled={loading}
-                >
-                  Admin
-                </Button>
-              </div>
-            </div>
-          </form>
-        </CardContent>
+          </CardFooter>
+        </form>
       </Card>
-      <div className="fixed bottom-4 text-center w-full text-xs text-muted-foreground/50 font-mono">
-        v{pkg.version}
-      </div>
     </div>
   )
 }
