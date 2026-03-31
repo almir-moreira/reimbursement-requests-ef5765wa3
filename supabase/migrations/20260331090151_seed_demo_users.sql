@@ -1,4 +1,4 @@
-DO $
+DO $$
 DECLARE
   v_user_id uuid;
   v_users json[] := array[
@@ -38,4 +38,4 @@ BEGIN
       ON CONFLICT (id) DO NOTHING;
     END IF;
   END LOOP;
-END $;
+END $$;
