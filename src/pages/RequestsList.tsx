@@ -218,8 +218,11 @@ export default function RequestsList() {
                 ) : (
                   filteredRequests.map((req) => (
                     <TableRow key={req.id} className="hover:bg-muted/30 transition-colors">
-                      <TableCell className="font-medium font-mono text-xs">
-                        {req.id.substring(0, 8)}
+                      <TableCell
+                        className="font-medium font-mono text-xs max-w-[200px] truncate"
+                        title={req.id}
+                      >
+                        {req.id}
                       </TableCell>
                       <TableCell className="text-sm">
                         {req.created_at ? format(new Date(req.created_at), 'MMM dd, yyyy') : '-'}

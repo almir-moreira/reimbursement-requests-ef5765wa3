@@ -141,7 +141,6 @@ export function SystemUsersManager() {
                 <Select
                   value={editing.role}
                   onValueChange={(v: Role) => setEditing({ ...editing, role: v })}
-                  disabled={editing.role === 'admin' && !isNew}
                 >
                   <SelectTrigger>
                     <SelectValue />

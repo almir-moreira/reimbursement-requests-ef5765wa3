@@ -13,7 +13,6 @@ import {
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
-import pkg from '../../package.json'
 import {
   SidebarProvider,
   Sidebar,
@@ -94,11 +93,7 @@ export default function Layout() {
               ))}
             </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter className="p-4 border-t border-border">
-            <div className="text-xs text-center text-muted-foreground font-mono">
-              v{pkg.version}
-            </div>
-          </SidebarFooter>
+          <SidebarFooter className="p-4 border-t border-border"></SidebarFooter>
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -153,7 +148,7 @@ export default function Layout() {
               <Outlet />
             </div>
             <footer className="mt-8 pt-4 border-t border-border/50 text-center text-xs text-muted-foreground">
-              KAICIID Reimbursement Portal • v{pkg.version} • {new Date().getFullYear()}
+              KAICIID Reimbursement Portal • {new Date().getFullYear()}
             </footer>
           </main>
         </div>

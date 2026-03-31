@@ -16,42 +16,48 @@ import { supabase } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 import logoImg from '@/assets/kaiciid-logo-2023-e2011.jpg'
 
-export default function Login() {
+export default function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            name,
+          },
+        },
       })
 
       if (error) {
         toast({
           variant: 'destructive',
-          title: 'Authentication Error',
-          description: 'Incorrect email or password. Please try again.',
+          title: 'Registration Error',
+          description: error.message,
         })
         return
       }
 
       toast({
-        title: 'Login successful',
-        description: 'Welcome to the reimbursement system.',
+        title: 'Account created',
+        description: 'Your account has been created successfully. You can now log in.',
       })
-      navigate('/dashboard')
+      navigate('/login')
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Unexpected error',
-        description: 'An error occurred while trying to log in. Please try again later.',
+        description: 'An error occurred while trying to register. Please try again later.',
       })
     } finally {
       setLoading(false)
@@ -67,15 +73,29 @@ export default function Login() {
           </div>
           <div className="space-y-2 text-center w-full">
             <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
-              Restricted Access
+              Create an Account
             </CardTitle>
             <CardDescription className="text-base text-slate-500">
-              Enter your credentials to access the platform
+              Fill in your details to create a new account
             </CardDescription>
           </div>
         </CardHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleRegister}>
           <CardContent className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-slate-700 font-medium">
+                Full Name
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="h-11"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-700 font-medium">
                 Email
@@ -91,17 +111,9 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-slate-700 font-medium">
-                  Password
-                </Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-sm font-medium text-[#4a8ebf] hover:underline"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
+              <Label htmlFor="password" className="text-slate-700 font-medium">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -110,28 +122,29 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="h-11"
+                minLength={8}
               />
             </div>
           </CardContent>
           <CardFooter className="pb-8 pt-2 flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full h-12 text-base font-medium transition-all"
+              className="w-full h-12 text-base font-medium transition-all bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white"
               disabled={loading}
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
-                'Sign in to Platform'
+                'Create Account'
               )}
             </Button>
             <div className="text-center text-sm text-slate-500">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-[#4a8ebf] hover:underline font-medium">
-                Create an Account
+              Already have an account?{' '}
+              <Link to="/login" className="text-[#4a8ebf] hover:underline font-medium">
+                Sign in
               </Link>
             </div>
           </CardFooter>
