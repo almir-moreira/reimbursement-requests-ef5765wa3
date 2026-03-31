@@ -9,7 +9,6 @@ import {
   Globe,
   BarChart,
   Settings,
-  Rocket,
 } from 'lucide-react'
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
@@ -125,18 +124,6 @@ export default function Layout() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <Button
-                variant="default"
-                size="sm"
-                className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold shadow-md z-50"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('skip-publish-trigger', { bubbles: true }))
-                  alert('Sua solicitação de publicação foi enviada!')
-                }}
-              >
-                <Rocket className="w-4 h-4 mr-1 sm:mr-2" />
-                Publicar
-              </Button>
               <div className="flex items-center gap-2 sm:gap-3 text-sm font-medium text-muted-foreground mr-auto lg:mr-0">
                 <span className="bg-[#4a8ebf]/10 text-[#4a8ebf] px-3 py-1 rounded-md capitalize font-bold hidden sm:inline-block">
                   {user.role}
