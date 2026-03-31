@@ -36,22 +36,22 @@ export default function Login() {
       if (error) {
         toast({
           variant: 'destructive',
-          title: 'Erro de Autenticação',
-          description: 'E-mail ou senha incorretos. Tente novamente.',
+          title: 'Authentication Error',
+          description: 'Incorrect email or password. Please try again.',
         })
         return
       }
 
       toast({
-        title: 'Login realizado com sucesso',
-        description: 'Bem-vindo ao sistema de reembolsos.',
+        title: 'Login successful',
+        description: 'Welcome to the reimbursement system.',
       })
       navigate('/dashboard')
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Erro inesperado',
-        description: 'Ocorreu um erro ao tentar fazer login. Tente mais tarde.',
+        title: 'Unexpected error',
+        description: 'An error occurred while trying to log in. Please try again later.',
       })
     } finally {
       setLoading(false)
@@ -67,10 +67,10 @@ export default function Login() {
           </div>
           <div className="space-y-2 text-center w-full">
             <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
-              Acesso Restrito
+              Restricted Access
             </CardTitle>
             <CardDescription className="text-base text-slate-500">
-              Insira suas credenciais para acessar a plataforma
+              Enter your credentials to access the platform
             </CardDescription>
           </div>
         </CardHeader>
@@ -78,12 +78,12 @@ export default function Login() {
           <CardContent className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-700 font-medium">
-                E-mail
+                Email
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -93,7 +93,7 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-slate-700 font-medium">
-                  Senha
+                  Password
                 </Label>
               </div>
               <Input
@@ -116,10 +116,10 @@ export default function Login() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Entrando...
+                  Signing in...
                 </>
               ) : (
-                'Entrar na Plataforma'
+                'Sign in to Platform'
               )}
             </Button>
           </CardFooter>
