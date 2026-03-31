@@ -240,15 +240,17 @@ export default function RequestsList() {
                           }
                           currency = currency || 'USD'
 
-                          let total = Number(req.data?.totalAmount)
-                          if (!total || isNaN(total)) {
+                          let total =
+                            Number(req.data?.totalAmount) ||
+                            Number(req.data?.total) ||
+                            Number(req.data?.amount) ||
+                            0
+                          if (!total) {
                             if (Array.isArray(req.data?.expenses)) {
                               total = req.data.expenses.reduce(
                                 (sum: number, exp: any) => sum + (Number(exp.amount) || 0),
                                 0,
                               )
-                            } else {
-                              total = Number(req.data?.amount || 0)
                             }
                           }
                           return `${currency} ${total.toFixed(2)}`
