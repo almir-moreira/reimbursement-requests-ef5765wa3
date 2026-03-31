@@ -57,6 +57,7 @@ export default function Layout() {
     navItems.push({ name: t('masterData'), path: '/master-data', icon: Database })
   }
   if (user.role === 'admin') {
+    navItems.push({ name: 'Admin Users', path: '/admin/users', icon: Database })
     navItems.push({ name: t('smtpSettings'), path: '/settings/smtp', icon: Settings })
   }
 
@@ -147,8 +148,13 @@ export default function Layout() {
               </Button>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-4 md:p-8 bg-muted/20">
-            <Outlet />
+          <main className="flex-1 overflow-auto p-4 md:p-8 bg-muted/20 flex flex-col">
+            <div className="flex-1">
+              <Outlet />
+            </div>
+            <footer className="mt-8 pt-4 border-t border-border/50 text-center text-xs text-muted-foreground">
+              KAICIID Reimbursement Portal • v{pkg.version} • {new Date().getFullYear()}
+            </footer>
           </main>
         </div>
       </div>

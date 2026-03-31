@@ -97,8 +97,8 @@ export default function RequestsList() {
         valB = b.requesterDetails?.name || ''
       }
       if (sortCol === 'total') {
-        valA = a.expenses.reduce((s, e) => s + (e.amountEuros || 0), 0)
-        valB = b.expenses.reduce((s, e) => s + (e.amountEuros || 0), 0)
+        valA = a.expenses?.reduce((s: any, e: any) => s + (e.amountEuros || 0), 0) || 0
+        valB = b.expenses?.reduce((s: any, e: any) => s + (e.amountEuros || 0), 0) || 0
       }
 
       if (valA < valB) return sortDir === 'asc' ? -1 : 1
@@ -141,7 +141,8 @@ export default function RequestsList() {
     <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up pb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-serif text-foreground/80">
-          <span className="font-bold text-[#4a8ebf]">KAICIID</span> | {t('requests')}
+          <span className="font-bold text-[#4a8ebf]">KAICIID</span> |{' '}
+          {user?.role === 'requester' ? 'My Reimbursements' : t('requests')}
         </h1>
         {user?.role === 'requester' && (
           <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-bold">
@@ -208,6 +209,7 @@ export default function RequestsList() {
               <SortHeader col="id" label="Request ID" />
               <SortHeader col="date" label={t('date')} />
               <SortHeader col="requester" label="Requester" />
+              <TableHead>Event</TableHead>
               <SortHeader col="total" label="Total EUR" alignRight />
               <TableHead>{t('status')}</TableHead>
               <TableHead className="text-right">{t('actions')}</TableHead>
@@ -215,7 +217,8 @@ export default function RequestsList() {
           </TableHeader>
           <TableBody className="divide-y divide-border/50">
             {sortedAndFiltered.map((req) => {
-              const total = req.expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
+              const total =
+                req.expenses?.reduce((sum: any, e: any) => sum + (e.amountEuros || 0), 0) || 0
 
               // Determine if action is required by current user
               const needsAction =
@@ -232,6 +235,12 @@ export default function RequestsList() {
                   </TableCell>
                   <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>
                   <TableCell>{req.requesterDetails?.name}</TableCell>
+                  <TableCell
+                    className="max-w-[150px] truncate"
+                    title={events.find((e: any) => e.id === req.eventId)?.name || 'N/A'}
+                  >
+                    {events.find((e: any) => e.id === req.eventId)?.name || 'N/A'}
+                  </TableCell>
                   <TableCell className="font-semibold text-right">€ {total.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge
@@ -280,7 +289,7 @@ export default function RequestsList() {
             })}
             {sortedAndFiltered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground text-lg">
+                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground text-lg">
                   No requests found matching your criteria.
                 </TableCell>
               </TableRow>

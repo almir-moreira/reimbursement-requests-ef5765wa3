@@ -12,6 +12,7 @@ import RequestForm from './pages/RequestForm'
 import MasterData from './pages/MasterData'
 import Reporting from './pages/Reporting'
 import SmtpSettings from './pages/SmtpSettings'
+import AdminUsers from './pages/AdminUsers'
 import { AppProviders } from './stores/main'
 
 const App = () => (
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/master-data" element={<MasterData />} />
             <Route path="/reporting" element={<Reporting />} />
             <Route path="/settings/smtp" element={<SmtpSettings />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </TooltipProvider>
