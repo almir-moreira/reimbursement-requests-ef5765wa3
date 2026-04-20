@@ -169,6 +169,7 @@ export default function RequestForm() {
     action: 'approve' | 'reject' | 'upload_receipt',
     comments: string,
     receipt?: string,
+    paymentMethod?: string,
   ) => {
     setIsSaving(true)
     try {
@@ -215,6 +216,7 @@ export default function RequestForm() {
           newStatus = 'Checked'
           historyAction = 'Reviewed'
           updates.qcSignature = signature
+          if (paymentMethod) updates.paymentMethod = paymentMethod as any
         } else {
           newStatus = 'Rejected'
           updates.qcSignature = null

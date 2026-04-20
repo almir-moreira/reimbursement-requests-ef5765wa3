@@ -78,4 +78,5 @@ export interface ReimbursementRequest {
   coSignature?: Signature | null
   financeSignature?: Signature | null
   paymentReceipt?: string
+  paymentMethod?: 'Cash' | 'Bank Transfer'
 }
