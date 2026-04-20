@@ -33,12 +33,19 @@ export function ApprovalSection({ formData, onAction }: Props) {
 
   if (!user || user.role === 'requester' || user.role === 'admin') return null
 
+  const isCash = formData.paymentMethod === 'Cash'
+  const isQcProcessingCash = user.role === 'qc' && formData.status === 'Approved' && isCash
+  const canEditPaymentMethod = user.role === 'qc' && formData.status === 'Pending'
+
   const canApprove =
     (user.role === 'qc' && formData.status === 'Pending') ||
     (user.role === 'co' && formData.status === 'Checked') ||
-    (user.role === 'finance' && formData.status === 'Approved')
+    (user.role === 'finance' && formData.status === 'Approved' && !isCash) ||
+    isQcProcessingCash
 
-  const canUploadReceipt = user.role === 'finance' && formData.status === 'Processed'
+  const canUploadReceipt =
+    (user.role === 'finance' && formData.status === 'Processed' && !isCash) ||
+    (user.role === 'qc' && formData.status === 'Processed' && isCash)
 
   return (
     <div className="space-y-6 pt-6 border-t border-border mt-10 bg-[#4a8ebf]/5 p-6 rounded-xl border border-[#4a8ebf]/20">
@@ -85,7 +92,7 @@ export function ApprovalSection({ formData, onAction }: Props) {
           className={`p-4 rounded-lg border shadow-sm ${formData.financeSignature ? 'bg-white border-border' : 'bg-muted/50 border-dashed border-border'}`}
         >
           <h4 className="text-xs uppercase text-muted-foreground font-bold mb-1">
-            Finance Processed
+            Payment Processed
           </h4>
           {formData.financeSignature ? (
             <>
@@ -105,7 +112,7 @@ export function ApprovalSection({ formData, onAction }: Props) {
         </div>
       </div>
 
-      {formData.paymentMethod && (!canApprove || user.role !== 'qc') && (
+      {formData.paymentMethod && !canEditPaymentMethod && (
         <div className="mb-6 p-4 rounded-lg border shadow-sm bg-white border-border inline-block min-w-[200px]">
           <h4 className="text-xs uppercase text-muted-foreground font-bold mb-1">Payment Method</h4>
           <p className="font-medium text-sm">{formData.paymentMethod}</p>
@@ -114,8 +121,8 @@ export function ApprovalSection({ formData, onAction }: Props) {
 
       {canApprove && (
         <div className="space-y-4">
-          {user.role === 'qc' && (
-            <div className="space-y-2">
+          {canEditPaymentMethod && (
+            <div className="space-y-2 mb-4">
               <Label className="text-sm font-semibold">Payment Method</Label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                 <SelectTrigger className="bg-white max-w-xl">
@@ -139,7 +146,7 @@ export function ApprovalSection({ formData, onAction }: Props) {
             />
           </div>
 
-          {user.role === 'finance' && (
+          {(user.role === 'finance' || isQcProcessingCash) && (
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Upload Payment Receipt (Optional)</Label>
               <div className="flex items-center gap-4">
@@ -158,21 +165,23 @@ export function ApprovalSection({ formData, onAction }: Props) {
               className="bg-success hover:bg-success/90 h-12 px-8 text-md font-bold text-white shadow-sm"
             >
               <Check className="w-5 h-5 mr-2" />
-              {user.role === 'finance' ? 'Process Payment' : 'Approve Request'}
+              {user.role === 'finance' || isQcProcessingCash
+                ? 'Process Payment'
+                : 'Approve Request'}
             </Button>
             <Button
               onClick={() => onAction('reject', comments, undefined, paymentMethod)}
               variant="destructive"
               className="h-12 px-8 text-md font-bold shadow-sm"
             >
-              {user.role === 'co' || user.role === 'finance' ? (
+              {user.role === 'co' || user.role === 'finance' || isQcProcessingCash ? (
                 <RotateCcw className="w-5 h-5 mr-2" />
               ) : (
                 <X className="w-5 h-5 mr-2" />
               )}
               {user.role === 'co'
                 ? 'Reject & Return to QC'
-                : user.role === 'finance'
+                : user.role === 'finance' || isQcProcessingCash
                   ? 'Reject Request'
                   : 'Reject to Requester'}
             </Button>

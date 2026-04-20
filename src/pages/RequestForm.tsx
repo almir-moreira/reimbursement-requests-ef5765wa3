@@ -173,6 +173,10 @@ export default function RequestForm() {
   ) => {
     setIsSaving(true)
     try {
+      const isCash = formData.paymentMethod === 'Cash'
+      const isQcProcessingCash = user?.role === 'qc' && formData.status === 'Approved' && isCash
+      const isQcUploadingReceipt = user?.role === 'qc' && formData.status === 'Processed' && isCash
+
       if (action === 'upload_receipt') {
         await updateRequest(formData.id!, {
           paymentReceipt: receipt,
@@ -182,7 +186,7 @@ export default function RequestForm() {
               id: `h-${Date.now()}`,
               date: new Date().toISOString(),
               action: 'Receipt Uploaded',
-              userId: user?.name || 'Finance',
+              userId: user?.name || (isQcUploadingReceipt ? 'QC' : 'Finance'),
               comments: 'Additional payment proof attached.',
             },
           ],
@@ -211,7 +215,7 @@ export default function RequestForm() {
       let historyAction = action === 'approve' ? 'Approved' : 'Rejected'
       const updates: Partial<ReimbursementRequest> = {}
 
-      if (user?.role === 'qc') {
+      if (user?.role === 'qc' && !isQcProcessingCash) {
         if (action === 'approve') {
           newStatus = 'Checked'
           historyAction = 'Reviewed'
@@ -236,7 +240,7 @@ export default function RequestForm() {
           notifySubject = `Request rejected by Certifying Officer: ${formData.id}`
           notifyBody = `Request ${formData.id} was returned by Certifying Officer to QC. Reason: ${comments}`
         }
-      } else if (user?.role === 'finance') {
+      } else if (user?.role === 'finance' || isQcProcessingCash) {
         if (action === 'approve') {
           newStatus = 'Processed'
           historyAction = 'Processed'
@@ -252,8 +256,8 @@ export default function RequestForm() {
             formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
           const ccData = costCenters.find((c) => c.code === reqCc)
           notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
-          notifySubject = `Request rejected by Finance: ${formData.id}`
-          notifyBody = `Request ${formData.id} was rejected by Finance. Reason: ${comments}`
+          notifySubject = `Request rejected by ${isQcProcessingCash ? 'QC' : 'Finance'}: ${formData.id}`
+          notifyBody = `Request ${formData.id} was rejected by ${isQcProcessingCash ? 'QC' : 'Finance'}. Reason: ${comments}`
         }
       }
 
