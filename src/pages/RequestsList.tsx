@@ -188,6 +188,11 @@ export default function RequestsList() {
                   <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
                     Amount
                   </TableHead>
+                  {user?.role !== 'requester' && (
+                    <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                      Payment Method
+                    </TableHead>
+                  )}
                   <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
                     Status
                   </TableHead>
@@ -199,7 +204,10 @@ export default function RequestsList() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <TableCell
+                      colSpan={user?.role !== 'requester' ? 8 : 7}
+                      className="text-center py-12 text-muted-foreground"
+                    >
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="w-6 h-6 border-2 border-[#4a8ebf] border-t-transparent rounded-full animate-spin"></div>
                         <p className="text-sm">Loading requests...</p>
@@ -208,7 +216,10 @@ export default function RequestsList() {
                   </TableRow>
                 ) : filteredRequests.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <TableCell
+                      colSpan={user?.role !== 'requester' ? 8 : 7}
+                      className="text-center py-12 text-muted-foreground"
+                    >
                       <div className="flex flex-col items-center justify-center gap-2">
                         <FileText className="w-8 h-8 text-muted-foreground/30" />
                         <p className="text-sm">No requests found matching your filters.</p>
@@ -265,6 +276,17 @@ export default function RequestsList() {
                           return `${currency} ${total.toFixed(2)}`
                         })()}
                       </TableCell>
+                      {user?.role !== 'requester' && (
+                        <TableCell className="text-sm">
+                          {req.data?.paymentMethod || req.data?.payment_method ? (
+                            <Badge variant="outline" className="font-normal text-xs bg-muted/50">
+                              {req.data?.paymentMethod || req.data?.payment_method}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <Badge
                           variant="secondary"
