@@ -185,8 +185,11 @@ export default function RequestsList() {
                   <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
                     Requester
                   </TableHead>
-                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground text-right">
                     Amount
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs uppercase text-muted-foreground text-right">
+                    Amt (EUR)
                   </TableHead>
                   {user?.role !== 'requester' && (
                     <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
@@ -205,7 +208,7 @@ export default function RequestsList() {
                 {loading ? (
                   <TableRow>
                     <TableCell
-                      colSpan={user?.role !== 'requester' ? 8 : 7}
+                      colSpan={user?.role !== 'requester' ? 9 : 8}
                       className="text-center py-12 text-muted-foreground"
                     >
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -217,7 +220,7 @@ export default function RequestsList() {
                 ) : filteredRequests.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={user?.role !== 'requester' ? 8 : 7}
+                      colSpan={user?.role !== 'requester' ? 9 : 8}
                       className="text-center py-12 text-muted-foreground"
                     >
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -242,7 +245,7 @@ export default function RequestsList() {
                         {req.data?.event || 'N/A'}
                       </TableCell>
                       <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
-                      <TableCell className="text-sm font-medium">
+                      <TableCell className="text-sm font-medium text-right whitespace-nowrap">
                         {(() => {
                           let currency =
                             req.data?.currency ||
@@ -273,7 +276,41 @@ export default function RequestsList() {
                               0,
                             )
                           }
-                          return `${currency} ${total.toFixed(2)}`
+
+                          const formatted = new Intl.NumberFormat('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(total)
+
+                          return `${currency} ${formatted}`
+                        })()}
+                      </TableCell>
+                      <TableCell className="text-sm font-medium text-right whitespace-nowrap">
+                        {(() => {
+                          let totalEur =
+                            Number(req.data?.totalAmountEur) ||
+                            Number(req.data?.totalEur) ||
+                            Number(req.data?.amountEur) ||
+                            0
+
+                          if (!totalEur && Array.isArray(req.data?.expenses)) {
+                            totalEur = req.data.expenses.reduce(
+                              (sum: number, exp: any) =>
+                                sum +
+                                (Number(exp.amountEur) ||
+                                  Number(exp.amount_eur) ||
+                                  Number(exp.eurAmount) ||
+                                  0),
+                              0,
+                            )
+                          }
+
+                          const formattedEur = new Intl.NumberFormat('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(totalEur)
+
+                          return `EUR ${formattedEur}`
                         })()}
                       </TableCell>
                       {user?.role !== 'requester' && (
