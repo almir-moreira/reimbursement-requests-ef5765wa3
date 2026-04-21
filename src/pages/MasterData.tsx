@@ -6,6 +6,7 @@ import useAuthStore from '@/stores/useAuthStore'
 import { CrudTable } from '@/components/master-data/CrudTable'
 import { RequesterManager } from '@/components/master-data/RequesterManager'
 import { SystemUsersManager } from '@/components/master-data/SystemUsersManager'
+import { ExchangeRatesManager } from '@/components/master-data/ExchangeRatesManager'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 export default function MasterData() {
@@ -28,15 +29,6 @@ export default function MasterData() {
   const defaultTab = visibleTabs[0]?.id || ''
 
   const dynamicTabsData = [
-    {
-      key: 'exchangeRates',
-      data: store.exchangeRates,
-      cols: [
-        { key: 'currency', label: 'Currency' },
-        { key: 'rateToUsd', label: 'Rate to USD', type: 'number' },
-      ],
-      tpl: { currency: '', rateToUsd: 1 },
-    },
     {
       key: 'events',
       data: store.events,
@@ -142,6 +134,20 @@ export default function MasterData() {
               </CardHeader>
               <CardContent>
                 <RequesterManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {visibleTabs.find((t) => t.id === 'exchangeRates') && (
+          <TabsContent value="exchangeRates" className="mt-2">
+            <Card className="border-border shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl font-serif text-[#4a8ebf]">Exchange Rates</CardTitle>
+                <CardDescription>Manage exchange rates via Excel import.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExchangeRatesManager />
               </CardContent>
             </Card>
           </TabsContent>
