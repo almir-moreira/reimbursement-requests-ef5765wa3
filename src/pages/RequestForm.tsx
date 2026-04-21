@@ -120,16 +120,22 @@ export default function RequestForm() {
     try {
       const isResubmission = !isNew && formData.status === 'Rejected'
 
+      const totalAmount =
+        formData.expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0
+      const totalAmountEuros =
+        formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
+      const payload = { ...formData, totalAmount, totalAmountEuros } as ReimbursementRequest
+
       if (isNew) {
-        await addRequest(formData as ReimbursementRequest)
-        if (user?.role === 'requester' && formData.requesterDetails) {
-          await updateProfile(user.id, formData.requesterDetails)
+        await addRequest(payload)
+        if (user?.role === 'requester' && payload.requesterDetails) {
+          await updateProfile(user.id, payload.requesterDetails)
         }
 
         try {
           await sendEmail({
             to: 'qc@kaiciid.org',
-            subject: `New Reimbursement Request Submitted - ${formData.id}`,
+            subject: `New Reimbursement Request Submitted - ${payload.id}`,
             body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
           })
         } catch (err) {
@@ -137,15 +143,15 @@ export default function RequestForm() {
         }
         toast({ title: 'Request Submitted Successfully' })
       } else if (isResubmission) {
-        if (user?.role === 'requester' && formData.requesterDetails) {
-          await updateProfile(user.id, formData.requesterDetails)
+        if (user?.role === 'requester' && payload.requesterDetails) {
+          await updateProfile(user.id, payload.requesterDetails)
         }
-        await updateRequest(formData.id!, {
-          ...formData,
+        await updateRequest(payload.id!, {
+          ...payload,
           status: 'Pending',
           qcSignature: null,
           history: [
-            ...(formData.history || []),
+            ...(payload.history || []),
             {
               id: `h-${Date.now()}`,
               date: new Date().toISOString(),
@@ -156,7 +162,7 @@ export default function RequestForm() {
         })
         toast({ title: 'Request Resubmitted for Review' })
       } else {
-        await updateRequest(formData.id!, formData)
+        await updateRequest(payload.id!, payload)
         toast({ title: 'Request Updated' })
       }
       navigate('/requests')
@@ -178,8 +184,16 @@ export default function RequestForm() {
       const isQcUploadingReceipt = user?.role === 'qc' && formData.status === 'Processed' && isCash
 
       if (action === 'upload_receipt') {
+        const totalAmount =
+          formData.expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0
+        const totalAmountEuros =
+          formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
+
         await updateRequest(formData.id!, {
+          ...formData,
           paymentReceipt: receipt,
+          totalAmount,
+          totalAmountEuros,
           history: [
             ...(formData.history || []),
             {
@@ -261,7 +275,7 @@ export default function RequestForm() {
         }
       }
 
-      updates.history = [
+      const newHistory = [
         ...(formData.history || []),
         {
           id: `h-${Date.now()}`,
@@ -272,8 +286,21 @@ export default function RequestForm() {
         },
       ]
 
-      updates.status = newStatus as any
-      await updateRequest(formData.id!, updates)
+      const totalAmount =
+        formData.expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0
+      const totalAmountEuros =
+        formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
+
+      const fullPayload = {
+        ...formData,
+        ...updates,
+        status: newStatus as any,
+        history: newHistory,
+        totalAmount,
+        totalAmountEuros,
+      }
+
+      await updateRequest(formData.id!, fullPayload)
       toast({ title: `Request ${newStatus}` })
 
       if (notifySubject) {

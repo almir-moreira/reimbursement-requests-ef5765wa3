@@ -288,6 +288,7 @@ export default function RequestsList() {
                       <TableCell className="text-sm font-medium text-right whitespace-nowrap">
                         {(() => {
                           let totalEur =
+                            Number(req.data?.totalAmountEuros) ||
                             Number(req.data?.totalAmountEur) ||
                             Number(req.data?.totalEur) ||
                             Number(req.data?.amountEur) ||
@@ -297,7 +298,8 @@ export default function RequestsList() {
                             totalEur = req.data.expenses.reduce(
                               (sum: number, exp: any) =>
                                 sum +
-                                (Number(exp.amountEur) ||
+                                (Number(exp.amountEuros) ||
+                                  Number(exp.amountEur) ||
                                   Number(exp.amount_eur) ||
                                   Number(exp.eurAmount) ||
                                   0),
@@ -310,7 +312,7 @@ export default function RequestsList() {
                             maximumFractionDigits: 2,
                           }).format(totalEur)
 
-                          return `EUR ${formattedEur}`
+                          return `€ ${formattedEur}`
                         })()}
                       </TableCell>
                       {user?.role !== 'requester' && (
