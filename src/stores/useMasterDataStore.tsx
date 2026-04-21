@@ -13,9 +13,11 @@ export interface EventDetail {
 }
 
 export interface ExchangeRate {
-  id: string
-  currency: string
-  rateToUsd: number
+  Country: string
+  Currency: string | null
+  Currency_Code: string
+  Effective_Date: string | null
+  Operational_Rate: number | null
 }
 
 export interface Country {

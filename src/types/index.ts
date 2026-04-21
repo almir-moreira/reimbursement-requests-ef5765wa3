@@ -34,6 +34,7 @@ export interface Expense {
   account?: string
   workorder?: string
   exchangeRate?: number
+  operationalRate?: number
   amountUsd?: number
   amountEuros?: number
 }

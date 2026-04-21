@@ -33,11 +33,14 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
   const defaultAccount = defaultEvent?.account || formData.account || ''
   const defaultWorkorder = defaultEvent?.workorder || formData.workorder || ''
 
-  const getRates = (currency: string) => {
-    const usdRate = exchangeRates.find((r) => r.currency === currency)?.rateToUsd || 1
-    const eurRateToUsd = exchangeRates.find((r) => r.currency === 'EUR')?.rateToUsd || 1.08
-    const effectiveRate = usdRate / eurRateToUsd
-    return { usdRate, effectiveRate }
+  const getRates = (currencyCode: string) => {
+    const opRate =
+      exchangeRates.find((r) => r.Currency_Code === currencyCode)?.Operational_Rate || 1
+    const eurOpRate = exchangeRates.find((r) => r.Currency_Code === 'EUR')?.Operational_Rate || 0.92
+
+    const usdRate = 1 / opRate
+    const effectiveRate = eurOpRate / opRate
+    return { usdRate, effectiveRate, opRate }
   }
 
   const addExpense = () => {
@@ -48,7 +51,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
           id: `exp-${Date.now()}`,
           description: '',
           amount: 0,
-          currency: 'GBP',
+          currency: 'USD',
           account: defaultAccount,
           workorder: defaultWorkorder,
         },
@@ -62,18 +65,20 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
 
     if (field === 'amount' || field === 'currency' || field === 'exchangeRate') {
       const amt = Number(field === 'amount' ? value : newExps[index].amount) || 0
-      const curr = field === 'currency' ? value : newExps[index].currency || 'GBP'
+      const curr = field === 'currency' ? value : newExps[index].currency || 'USD'
+
+      const rates = getRates(curr)
 
       let effectiveRate = newExps[index].exchangeRate
       if (field === 'exchangeRate') {
         effectiveRate = Number(value) || 0
       } else {
-        const rates = getRates(curr)
         effectiveRate = rates.effectiveRate
         newExps[index].exchangeRate = effectiveRate
       }
 
-      newExps[index].amountUsd = amt * getRates(curr).usdRate
+      newExps[index].operationalRate = rates.opRate
+      newExps[index].amountUsd = amt * rates.usdRate
       newExps[index].amountEuros = amt * (effectiveRate || 1)
     }
     onChange({ expenses: newExps })
@@ -95,8 +100,9 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
         e.workorder = defaultWorkorder
         changed = true
       }
-      if (e.amountEuros === undefined) {
-        const { usdRate, effectiveRate } = getRates(e.currency)
+      if (e.amountEuros === undefined || e.operationalRate === undefined) {
+        const { usdRate, effectiveRate, opRate } = getRates(e.currency)
+        e.operationalRate = opRate
         e.amountUsd = e.amount * usdRate
         e.exchangeRate = effectiveRate
         e.amountEuros = e.amount * effectiveRate
@@ -109,6 +115,15 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
 
   const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
 
+  // Deduplicate exchange rates by Currency_Code to avoid duplicate keys in the select
+  const uniqueRatesMap = new Map()
+  exchangeRates.forEach((r) => {
+    if (!uniqueRatesMap.has(r.Currency_Code)) {
+      uniqueRatesMap.set(r.Currency_Code, r)
+    }
+  })
+  const uniqueRates = Array.from(uniqueRatesMap.values())
+
   return (
     <div className="space-y-6 pt-6 border-t border-border" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Expense Details</h3>
@@ -116,14 +131,15 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 border-b border-border">
             <tr className="text-start text-muted-foreground">
-              <th className="p-3 font-semibold min-w-[200px] text-start">Description</th>
-              <th className="p-3 font-semibold w-24 text-start">Amount</th>
-              <th className="p-3 font-semibold w-24 text-start">Currency</th>
+              <th className="p-3 font-semibold min-w-[150px] text-start">Description</th>
+              <th className="p-3 font-semibold w-32 text-start">Amount</th>
+              <th className="p-3 font-semibold w-40 text-start">Currency</th>
+              <th className="p-3 font-semibold w-24 text-center">Op. Rate</th>
               {isInternal && (
                 <>
                   <th className="p-3 font-semibold w-24 text-start">Account</th>
                   <th className="p-3 font-semibold w-32 text-start">Budget Line</th>
-                  <th className="p-3 font-semibold w-28 text-center">Exch. Rate</th>
+                  <th className="p-3 font-semibold w-24 text-center">Exch. Rate</th>
                 </>
               )}
               <th className="p-3 font-semibold w-32 text-right">Amt (EUR)</th>
@@ -150,7 +166,9 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                     value={exp.amount || ''}
                     onChange={(e) => updateExp(i, 'amount', e.target.value)}
                     className={
-                      !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
+                      !canEditExpenses
+                        ? 'bg-transparent border-transparent px-1 font-mono text-sm'
+                        : 'bg-white font-mono text-sm'
                     }
                   />
                 </td>
@@ -162,19 +180,26 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                   >
                     <SelectTrigger
                       className={
-                        !canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'
+                        !canEditExpenses
+                          ? 'bg-transparent border-transparent text-xs'
+                          : 'bg-white text-xs'
                       }
                     >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {exchangeRates.map((r) => (
-                        <SelectItem key={r.currency} value={r.currency}>
-                          {r.currency}
+                      {uniqueRates.map((r) => (
+                        <SelectItem key={r.Currency_Code} value={r.Currency_Code}>
+                          {r.Currency_Code} - {r.Country}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </td>
+                <td className="p-2 text-center">
+                  <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                    {exp.operationalRate?.toFixed(2) || getRates(exp.currency).opRate.toFixed(2)}
+                  </span>
                 </td>
                 {isInternal && (
                   <>
@@ -205,7 +230,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                           step="0.0001"
                           value={exp.exchangeRate || ''}
                           onChange={(e) => updateExp(i, 'exchangeRate', parseFloat(e.target.value))}
-                          className={`w-24 text-center font-mono text-xs mx-auto ${!canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'}`}
+                          className={`w-20 text-center font-mono text-xs mx-auto px-1 ${!canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'}`}
                           disabled={!canEditExpenses}
                         />
                       ) : (
@@ -217,8 +242,8 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
                   </>
                 )}
                 <td className="p-2 text-right">
-                  <span className="font-semibold text-[#4a8ebf] pr-2">
-                    {exp.amountEuros?.toFixed(2) || '0.00'}
+                  <span className="font-semibold text-[#4a8ebf] pr-2 whitespace-nowrap">
+                    € {exp.amountEuros?.toFixed(2) || '0.00'}
                   </span>
                 </td>
                 {canEditExpenses && (
@@ -238,7 +263,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
             {expenses.length === 0 && (
               <tr>
                 <td
-                  colSpan={isInternal ? 8 : 5}
+                  colSpan={isInternal ? 9 : 6}
                   className="text-center p-8 text-muted-foreground bg-muted/20"
                 >
                   No expenses added yet.
