@@ -23,7 +23,7 @@ export function ExchangeRatesManager() {
   const fetchData = async () => {
     setLoading(true)
     const [ratesRes, logsRes] = await Promise.all([
-      supabase.from('exchange_rates').select('*').order('Currency_Code'),
+      supabase.from('exchange_rates').select('*').order('Country'),
       supabase
         .from('exchange_rates_log')
         .select('*, imported_by(name)')
@@ -149,7 +149,7 @@ export function ExchangeRatesManager() {
               </TableRow>
             ) : (
               rates.map((rate) => (
-                <TableRow key={rate.Currency_Code}>
+                <TableRow key={rate.Country}>
                   <TableCell className="font-medium">{rate.Currency_Code}</TableCell>
                   <TableCell>{rate.Country}</TableCell>
                   <TableCell>{rate.Currency}</TableCell>
