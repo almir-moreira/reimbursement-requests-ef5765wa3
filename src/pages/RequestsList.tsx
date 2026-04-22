@@ -95,8 +95,19 @@ export default function RequestsList() {
         if (pm !== paymentMethodFilter) return false
       }
       if (eventFilter !== 'all') {
-        const reqEvent = req.data?.event || ''
-        if (reqEvent !== eventFilter) return false
+        let reqEvent =
+          req.data?.event || req.data?.eventId || req.data?.eventName || req.data?.event_id || ''
+        if (typeof reqEvent === 'object' && reqEvent !== null) {
+          reqEvent = reqEvent.id || reqEvent.name || ''
+        }
+
+        const selectedEvent = events.find((e) => e.id === eventFilter)
+
+        if (selectedEvent) {
+          if (reqEvent !== selectedEvent.id && reqEvent !== selectedEvent.name) return false
+        } else if (reqEvent !== eventFilter) {
+          return false
+        }
       }
       if (search) {
         const searchLower = search.toLowerCase()
@@ -177,7 +188,7 @@ export default function RequestsList() {
                 <SelectContent>
                   <SelectItem value="all">All Events</SelectItem>
                   {events.map((ev) => (
-                    <SelectItem key={ev.id} value={ev.name || ev.id}>
+                    <SelectItem key={ev.id} value={ev.id}>
                       {ev.name}
                     </SelectItem>
                   ))}
@@ -305,7 +316,19 @@ export default function RequestsList() {
                         {req.created_at ? format(new Date(req.created_at), 'MMM dd, yyyy') : '-'}
                       </TableCell>
                       <TableCell className="text-sm font-medium">
-                        {req.data?.event || 'N/A'}
+                        {(() => {
+                          let evVal =
+                            req.data?.event ||
+                            req.data?.eventName ||
+                            req.data?.eventId ||
+                            req.data?.event_id
+                          if (typeof evVal === 'object' && evVal !== null) {
+                            evVal = evVal.id || evVal.name
+                          }
+                          if (!evVal) return <span className="text-muted-foreground">N/A</span>
+                          const found = events.find((e) => e.id === evVal || e.name === evVal)
+                          return found ? found.name : String(evVal)
+                        })()}
                       </TableCell>
                       <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
                       <TableCell className="text-sm font-medium text-right whitespace-nowrap">
