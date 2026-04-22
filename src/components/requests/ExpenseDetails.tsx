@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
-import { ReimbursementRequest, Expense } from '@/types'
-import { Input } from '@/components/ui/input'
+import { useState, useEffect } from 'react'
+import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -10,294 +10,258 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Trash2 } from 'lucide-react'
-import useAuthStore from '@/stores/useAuthStore'
-import useMasterDataStore from '@/stores/useMasterDataStore'
+import { supabase } from '@/lib/supabase/client'
 
-interface Props {
-  formData: Partial<ReimbursementRequest>
-  onChange: (data: Partial<ReimbursementRequest>) => void
-  readOnly: boolean
-}
-
-export function ExpenseDetails({ formData, onChange, readOnly }: Props) {
-  const { user, lang } = useAuthStore()
-  const { exchangeRates, events } = useMasterDataStore()
-  const expenses = formData.expenses || []
-
-  const isQc = user?.role === 'qc'
-  const isInternal = user?.role !== 'requester'
-  const canEditExpenses = !readOnly
-
-  const defaultEvent = events.find((e) => e.id === formData.eventId)
-  const defaultAccount = defaultEvent?.account || formData.account || ''
-  const defaultWorkorder = defaultEvent?.workorder || formData.workorder || ''
-
-  const getRates = (currencyCode: string) => {
-    const opRate =
-      exchangeRates.find((r) => r.Currency_Code === currencyCode)?.Operational_Rate || 1
-    const eurOpRate = exchangeRates.find((r) => r.Currency_Code === 'EUR')?.Operational_Rate || 0.92
-
-    const usdRate = 1 / opRate
-    const effectiveRate = eurOpRate / opRate
-    return { usdRate, effectiveRate, opRate }
-  }
-
-  const addExpense = () => {
-    onChange({
-      expenses: [
-        ...expenses,
-        {
-          id: `exp-${Date.now()}`,
-          description: '',
-          amount: 0,
-          currency: 'USD',
-          account: defaultAccount,
-          workorder: defaultWorkorder,
-        },
-      ],
-    })
-  }
-
-  const updateExp = (index: number, field: keyof Expense, value: any) => {
-    const newExps = [...expenses]
-    newExps[index] = { ...newExps[index], [field]: value }
-
-    if (field === 'amount' || field === 'currency' || field === 'exchangeRate') {
-      const amt = Number(field === 'amount' ? value : newExps[index].amount) || 0
-      const curr = field === 'currency' ? value : newExps[index].currency || 'USD'
-
-      const rates = getRates(curr)
-
-      let effectiveRate = newExps[index].exchangeRate
-      if (field === 'exchangeRate') {
-        effectiveRate = Number(value) || 0
-      } else {
-        effectiveRate = rates.effectiveRate
-        newExps[index].exchangeRate = effectiveRate
-      }
-
-      newExps[index].operationalRate = rates.opRate
-      newExps[index].amountUsd = amt * rates.usdRate
-      newExps[index].amountEuros = amt * (effectiveRate || 1)
-    }
-    onChange({ expenses: newExps })
-  }
-
-  const removeExp = (index: number) => {
-    onChange({ expenses: expenses.filter((_, i) => i !== index) })
-  }
+export function ExpenseDetails({ formData, onChange, readOnly }: any) {
+  const [countries, setCountries] = useState<string[]>([])
+  const [currencies, setCurrencies] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    let changed = false
-    const newExps = expenses.map((exp) => {
-      let e = { ...exp }
-      if (!e.account && defaultAccount) {
-        e.account = defaultAccount
-        changed = true
-      }
-      if (!e.workorder && defaultWorkorder) {
-        e.workorder = defaultWorkorder
-        changed = true
-      }
-      if (e.amountEuros === undefined || e.operationalRate === undefined) {
-        const { usdRate, effectiveRate, opRate } = getRates(e.currency)
-        e.operationalRate = opRate
-        e.amountUsd = e.amount * usdRate
-        e.exchangeRate = effectiveRate
-        e.amountEuros = e.amount * effectiveRate
-        changed = true
-      }
-      return e
-    })
-    if (changed && !readOnly) onChange({ expenses: newExps })
-  }, [formData.eventId, defaultAccount, defaultWorkorder, exchangeRates])
+    const fetchDropdownData = async () => {
+      setIsLoading(true)
+      try {
+        // Fetch Countries
+        const { data: countriesData } = await supabase
+          .from('countries')
+          .select('name')
+          .order('name')
 
-  const totalEuros = expenses.reduce((sum, e) => sum + (e.amountEuros || 0), 0)
+        if (countriesData) {
+          setCountries(countriesData.map((c) => c.name).filter(Boolean) as string[])
+        }
 
-  // Deduplicate exchange rates by Currency_Code to avoid duplicate keys in the select
-  const uniqueRatesMap = new Map()
-  exchangeRates.forEach((r) => {
-    if (!uniqueRatesMap.has(r.Currency_Code)) {
-      uniqueRatesMap.set(r.Currency_Code, r)
+        // Fetch Currencies
+        const { data: ratesData } = await supabase.from('exchange_rates').select('Currency_Code')
+
+        if (ratesData) {
+          const uniqueCurrencies = Array.from(new Set(ratesData.map((r) => r.Currency_Code)))
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b))
+          setCurrencies(uniqueCurrencies)
+        }
+      } catch (error) {
+        console.error('Error fetching dropdown data:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  })
-  const uniqueRates = Array.from(uniqueRatesMap.values())
+
+    fetchDropdownData()
+  }, [])
+
+  const expenses = formData.expenses || []
+
+  const handleAddExpense = () => {
+    const newExpense = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+      country: '',
+      currency: 'EUR',
+      amount: 0,
+      exchangeRate: 1,
+      amountEuros: 0,
+    }
+    onChange({ expenses: [...expenses, newExpense] })
+  }
+
+  const handleRemoveExpense = (id: string) => {
+    onChange({ expenses: expenses.filter((e: any) => e.id !== id) })
+  }
+
+  const handleExpenseChange = async (id: string, field: string, value: any) => {
+    let newExpenses = [...expenses]
+    const index = newExpenses.findIndex((e: any) => e.id === id)
+    if (index === -1) return
+
+    const expense = { ...newExpenses[index], [field]: value }
+
+    // Auto-calculate euros based on selected currency and exchange rates
+    if (field === 'currency') {
+      if (value === 'EUR') {
+        expense.exchangeRate = 1
+        expense.amountEuros = expense.amount || 0
+      } else {
+        const { data } = await supabase
+          .from('exchange_rates')
+          .select('Operational_Rate')
+          .eq('Currency_Code', value)
+          .order('Effective_Date', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (data?.Operational_Rate) {
+          expense.exchangeRate = data.Operational_Rate
+          expense.amountEuros = parseFloat(
+            ((expense.amount || 0) / data.Operational_Rate).toFixed(2),
+          )
+        } else {
+          expense.exchangeRate = 1
+          expense.amountEuros = expense.amount || 0
+        }
+      }
+    } else if (field === 'amount') {
+      const amount = parseFloat(value) || 0
+      expense.amount = amount
+      expense.amountEuros = parseFloat((amount / (expense.exchangeRate || 1)).toFixed(2))
+    } else if (field === 'exchangeRate') {
+      const rate = parseFloat(value) || 1
+      expense.exchangeRate = rate
+      expense.amountEuros = parseFloat(((expense.amount || 0) / rate).toFixed(2))
+    }
+
+    newExpenses[index] = expense
+    onChange({ expenses: newExpenses })
+  }
 
   return (
-    <div className="space-y-6 pt-6 border-t border-border" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Expense Details</h3>
-      <div className="overflow-x-auto border border-border rounded-lg shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 border-b border-border">
-            <tr className="text-start text-muted-foreground">
-              <th className="p-3 font-semibold min-w-[150px] text-start">Description</th>
-              <th className="p-3 font-semibold w-32 text-start">Amount</th>
-              <th className="p-3 font-semibold w-40 text-start">Currency</th>
-              <th className="p-3 font-semibold w-24 text-center">Op. Rate</th>
-              {isInternal && (
-                <>
-                  <th className="p-3 font-semibold w-24 text-start">Account</th>
-                  <th className="p-3 font-semibold w-32 text-start">Budget Line</th>
-                  <th className="p-3 font-semibold w-24 text-center">Exch. Rate</th>
-                </>
-              )}
-              <th className="p-3 font-semibold w-32 text-right">Amt (EUR)</th>
-              {canEditExpenses && <th className="p-3 font-semibold w-12 text-center"></th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {expenses.map((exp, i) => (
-              <tr key={exp.id} className="hover:bg-muted/10 transition-colors">
-                <td className="p-2">
-                  <Input
-                    disabled={!canEditExpenses}
-                    value={exp.description}
-                    onChange={(e) => updateExp(i, 'description', e.target.value)}
-                    className={
-                      !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
-                    }
-                  />
-                </td>
-                <td className="p-2">
-                  <Input
-                    disabled={!canEditExpenses}
-                    type="number"
-                    value={exp.amount || ''}
-                    onChange={(e) => updateExp(i, 'amount', e.target.value)}
-                    className={
-                      !canEditExpenses
-                        ? 'bg-transparent border-transparent px-1 font-mono text-sm'
-                        : 'bg-white font-mono text-sm'
-                    }
-                  />
-                </td>
-                <td className="p-2">
-                  <Select
-                    disabled={!canEditExpenses}
-                    value={exp.currency}
-                    onValueChange={(v) => updateExp(i, 'currency', v)}
-                  >
-                    <SelectTrigger
-                      className={
-                        !canEditExpenses
-                          ? 'bg-transparent border-transparent text-xs'
-                          : 'bg-white text-xs'
-                      }
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uniqueRates.map((r) => (
-                        <SelectItem key={r.Currency_Code} value={r.Currency_Code}>
-                          {r.Currency_Code} - {r.Country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="p-2 text-center">
-                  <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                    {exp.operationalRate?.toFixed(2) || getRates(exp.currency).opRate.toFixed(2)}
-                  </span>
-                </td>
-                {isInternal && (
-                  <>
-                    <td className="p-2">
-                      <Input
-                        disabled={!canEditExpenses}
-                        value={exp.account || ''}
-                        onChange={(e) => updateExp(i, 'account', e.target.value)}
-                        className={
-                          !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
-                        }
-                      />
-                    </td>
-                    <td className="p-2">
-                      <Input
-                        disabled={!canEditExpenses}
-                        value={exp.workorder || ''}
-                        onChange={(e) => updateExp(i, 'workorder', e.target.value)}
-                        className={
-                          !canEditExpenses ? 'bg-transparent border-transparent px-1' : 'bg-white'
-                        }
-                      />
-                    </td>
-                    <td className="p-2 text-center">
-                      {isQc ? (
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          value={exp.exchangeRate || ''}
-                          onChange={(e) => updateExp(i, 'exchangeRate', parseFloat(e.target.value))}
-                          className={`w-20 text-center font-mono text-xs mx-auto px-1 ${!canEditExpenses ? 'bg-transparent border-transparent' : 'bg-white'}`}
-                          disabled={!canEditExpenses}
-                        />
-                      ) : (
-                        <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                          {exp.exchangeRate?.toFixed(4) || '1.0000'}
-                        </span>
-                      )}
-                    </td>
-                  </>
-                )}
-                <td className="p-2 text-right">
-                  <span className="font-semibold text-[#4a8ebf] pr-2 whitespace-nowrap">
-                    € {exp.amountEuros?.toFixed(2) || '0.00'}
-                  </span>
-                </td>
-                {canEditExpenses && (
-                  <td className="p-2 text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeExp(i)}
-                      className="text-destructive hover:bg-destructive/10 h-8 w-8"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-            {expenses.length === 0 && (
-              <tr>
-                <td
-                  colSpan={isInternal ? 9 : 6}
-                  className="text-center p-8 text-muted-foreground bg-muted/20"
-                >
-                  No expenses added yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-between items-center mt-4">
-        {canEditExpenses ? (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Expense Details</h3>
+        {!readOnly && (
           <Button
-            type="button"
+            onClick={handleAddExpense}
             variant="outline"
             size="sm"
-            onClick={addExpense}
-            className="text-[#4a8ebf] border-[#4a8ebf] hover:bg-[#4a8ebf]/10"
+            className="text-[#4a8ebf] border-[#4a8ebf]"
+            disabled={isLoading}
           >
             <Plus className="w-4 h-4 mr-2" /> Add Expense
           </Button>
-        ) : (
-          <div />
         )}
+      </div>
 
-        <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border">
-          <Label className="text-muted-foreground uppercase text-xs font-bold tracking-wider">
-            Total Amount in Euros
-          </Label>
-          <div className="text-2xl font-bold text-[#4a8ebf] min-w-[120px] text-right">
-            € {totalEuros.toFixed(2)}
+      <div className="space-y-4">
+        {expenses.map((expense: any, index: number) => (
+          <div
+            key={expense.id || index}
+            className="p-4 border border-border rounded-lg bg-muted/10 relative"
+          >
+            {!readOnly && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => handleRemoveExpense(expense.id)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-2">
+              <div className="space-y-2 lg:col-span-1">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  disabled={readOnly}
+                  value={expense.date || ''}
+                  onChange={(e) => handleExpenseChange(expense.id, 'date', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2 lg:col-span-2">
+                <Label>Description</Label>
+                <Input
+                  disabled={readOnly}
+                  value={expense.description || ''}
+                  placeholder="Expense description"
+                  onChange={(e) => handleExpenseChange(expense.id, 'description', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2 lg:col-span-1">
+                <Label>Country</Label>
+                <Select
+                  disabled={readOnly || isLoading}
+                  value={expense.country || ''}
+                  onValueChange={(val) => handleExpenseChange(expense.id, 'country', val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 lg:col-span-1">
+                <Label>Currency</Label>
+                <Select
+                  disabled={readOnly || isLoading}
+                  value={expense.currency || ''}
+                  onValueChange={(val) => handleExpenseChange(expense.id, 'currency', val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                    {currencies
+                      .filter((c) => c !== 'EUR')
+                      .map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 lg:col-span-1">
+                <Label>Amount</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  disabled={readOnly}
+                  value={expense.amount || ''}
+                  onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 bg-muted/20 p-3 rounded-md">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Exchange Rate to EUR</Label>
+                <div className="font-mono text-sm">{expense.exchangeRate || 1}</div>
+              </div>
+              <div className="space-y-1 md:col-span-2 flex justify-end items-end">
+                <div className="text-right">
+                  <Label className="text-xs text-muted-foreground mr-3">Amount in EUR</Label>
+                  <span className="font-bold text-lg">
+                    € {Number(expense.amountEuros || 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        {expenses.length === 0 && (
+          <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
+            {isLoading ? 'Loading expense options...' : 'No expenses added yet.'}
+          </div>
+        )}
+      </div>
+
+      {expenses.length > 0 && (
+        <div className="flex justify-end p-4 bg-muted/30 rounded-lg mt-4 border border-border">
+          <div className="text-right">
+            <div className="text-sm text-muted-foreground mb-1">Total Reimbursement Amount</div>
+            <div className="text-2xl font-bold text-[#4a8ebf]">
+              €{' '}
+              {expenses
+                .reduce((sum: number, e: any) => sum + (Number(e.amountEuros) || 0), 0)
+                .toFixed(2)}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
