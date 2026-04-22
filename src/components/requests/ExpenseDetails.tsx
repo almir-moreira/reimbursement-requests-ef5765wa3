@@ -11,27 +11,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase/client'
+import useAuthStore from '@/stores/useAuthStore'
 
 export function ExpenseDetails({ formData, onChange, readOnly }: any) {
-  const [countries, setCountries] = useState<string[]>([])
   const [currencies, setCurrencies] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuthStore()
 
   useEffect(() => {
     const fetchDropdownData = async () => {
       setIsLoading(true)
       try {
-        // Fetch Countries
-        const { data: countriesData } = await supabase
-          .from('countries')
-          .select('name')
-          .order('name')
-
-        if (countriesData) {
-          setCountries(countriesData.map((c) => c.name).filter(Boolean) as string[])
-        }
-
-        // Fetch Currencies
         const { data: ratesData } = await supabase.from('exchange_rates').select('Currency_Code')
 
         if (ratesData) {
@@ -57,7 +47,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
       id: crypto.randomUUID(),
       date: new Date().toISOString().split('T')[0],
       description: '',
-      country: '',
       currency: 'EUR',
       amount: 0,
       exchangeRate: 1,
@@ -77,7 +66,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
 
     const expense = { ...newExpenses[index], [field]: value }
 
-    // Auto-calculate euros based on selected currency and exchange rates
     if (field === 'currency') {
       if (value === 'EUR') {
         expense.exchangeRate = 1
@@ -142,14 +130,14 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="absolute top-2 right-2 text-destructive hover:text-destructive hover:bg-destructive/10 z-10"
                 onClick={() => handleRemoveExpense(expense.id)}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-2">
               <div className="space-y-2 lg:col-span-1">
                 <Label>Date</Label>
                 <Input
@@ -171,26 +159,6 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
               </div>
 
               <div className="space-y-2 lg:col-span-1">
-                <Label>Country</Label>
-                <Select
-                  disabled={readOnly || isLoading}
-                  value={expense.country || ''}
-                  onValueChange={(val) => handleExpenseChange(expense.id, 'country', val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2 lg:col-span-1">
                 <Label>Currency</Label>
                 <Select
                   disabled={readOnly || isLoading}
@@ -198,7 +166,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   onValueChange={(val) => handleExpenseChange(expense.id, 'currency', val)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Currency" />
+                    <SelectValue placeholder="Currency" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="EUR">EUR</SelectItem>
@@ -224,22 +192,23 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 bg-muted/20 p-3 rounded-md">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Exchange Rate to EUR</Label>
-                <div className="font-mono text-sm">{expense.exchangeRate || 1}</div>
-              </div>
-              <div className="space-y-1 md:col-span-2 flex justify-end items-end">
-                <div className="text-right">
-                  <Label className="text-xs text-muted-foreground mr-3">Amount in EUR</Label>
-                  <span className="font-bold text-lg">
-                    € {Number(expense.amountEuros || 0).toFixed(2)}
-                  </span>
+              <div className="space-y-2 lg:col-span-2">
+                <Label>Amount in EUR</Label>
+                <div className="h-10 px-3 py-2 border rounded-md bg-background flex items-center font-bold text-foreground">
+                  € {Number(expense.amountEuros || 0).toFixed(2)}
                 </div>
               </div>
             </div>
+
+            {user?.role !== 'requester' && (
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>Exchange Rate Applied:</span>
+                  <span className="font-mono font-medium">{expense.exchangeRate || 1}</span>
+                </div>
+              </div>
+            )}
           </div>
         ))}
         {expenses.length === 0 && (
