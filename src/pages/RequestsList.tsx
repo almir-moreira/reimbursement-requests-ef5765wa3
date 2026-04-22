@@ -35,10 +35,24 @@ export default function RequestsList() {
   const [dateFilter, setDateFilter] = useState('')
   const [search, setSearch] = useState('')
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('all')
+  const [eventFilter, setEventFilter] = useState('all')
+  const [events, setEvents] = useState<any[]>([])
 
   useEffect(() => {
     fetchRequests()
+    fetchEvents()
   }, [user])
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase.from('events').select('*').order('name')
+      if (!error && data) {
+        setEvents(data)
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error)
+    }
+  }
 
   const fetchRequests = async () => {
     if (!user) return
@@ -80,15 +94,18 @@ export default function RequestsList() {
         const pm = req.data?.paymentMethod || req.data?.payment_method
         if (pm !== paymentMethodFilter) return false
       }
+      if (eventFilter !== 'all') {
+        const reqEvent = req.data?.event || ''
+        if (reqEvent !== eventFilter) return false
+      }
       if (search) {
         const searchLower = search.toLowerCase()
         const reqId = req.id.toLowerCase()
-        const reqEvent = req.data?.event?.toLowerCase() || ''
-        if (!reqId.includes(searchLower) && !reqEvent.includes(searchLower)) return false
+        if (!reqId.includes(searchLower)) return false
       }
       return true
     })
-  }, [requests, statusFilter, dateFilter, search, paymentMethodFilter])
+  }, [requests, statusFilter, dateFilter, search, paymentMethodFilter, eventFilter])
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -138,18 +155,34 @@ export default function RequestsList() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Search</label>
+              <label className="text-xs font-medium text-muted-foreground">Search ID</label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by ID or Event..."
+                  placeholder="Search by ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 h-9"
                 />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Event</label>
+              <Select value={eventFilter} onValueChange={setEventFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Filter by event" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Events</SelectItem>
+                  {events.map((ev) => (
+                    <SelectItem key={ev.id} value={ev.name || ev.id}>
+                      {ev.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Status</label>
