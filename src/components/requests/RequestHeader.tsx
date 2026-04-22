@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -12,71 +12,54 @@ import useMasterDataStore from '@/stores/useMasterDataStore'
 import { supabase } from '@/lib/supabase/client'
 
 export function RequestHeader({ formData, onChange, readOnly }: any) {
-  const { events, costCenters } = useMasterDataStore()
+  const { events } = useMasterDataStore()
   const [countries, setCountries] = useState<string[]>([])
 
   useEffect(() => {
     const fetchCountries = async () => {
-      const { data } = await supabase.from('countries').select('name').order('name')
-      if (data) {
-        setCountries(data.map((c) => c.name).filter(Boolean) as string[])
+      try {
+        const { data } = await supabase.from('countries').select('name').order('name')
+        if (data) {
+          const uniqueCountries = Array.from(
+            new Set(data.map((c) => c.name).filter(Boolean)),
+          ) as string[]
+          setCountries(uniqueCountries)
+        }
+      } catch (err) {
+        console.error('Error fetching countries', err)
       }
     }
     fetchCountries()
   }, [])
 
-  const handleEventChange = (eventId: string) => {
-    const event = events.find((e) => e.id === eventId)
+  const requester = formData.requesterDetails || {}
+
+  const handleRequesterChange = (field: string, value: string) => {
     onChange({
-      eventId,
-      costCenter: event?.costCenter || formData.costCenter,
+      requesterDetails: { ...requester, [field]: value },
     })
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Requester Info</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label>Requester Name</Label>
-          <Input disabled value={formData.requesterDetails?.name || ''} />
-        </div>
-        <div className="space-y-2">
-          <Label>Country</Label>
-          <Select
-            disabled={readOnly}
-            value={formData.country || formData.requesterDetails?.country || ''}
-            onValueChange={(val) => {
-              onChange({
-                country: val,
-                requesterDetails: { ...formData.requesterDetails, country: val },
-              })
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Country" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Event</Label>
+          <Label className="text-[#4a8ebf] font-bold">
+            Event <span className="text-destructive">*</span>
+          </Label>
           <Select
             disabled={readOnly}
             value={formData.eventId || ''}
-            onValueChange={handleEventChange}
+            onValueChange={(val) => {
+              const event = events.find((e: any) => e.id === val)
+              onChange({ eventId: val, costCenter: event?.costCenter || '' })
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-border/50">
               <SelectValue placeholder="Select Event" />
             </SelectTrigger>
             <SelectContent>
-              {events.map((e) => (
+              {events.map((e: any) => (
                 <SelectItem key={e.id} value={e.id}>
                   {e.name}
                 </SelectItem>
@@ -85,16 +68,164 @@ export function RequestHeader({ formData, onChange, readOnly }: any) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Cost Center</Label>
+          <Label className="text-[#4a8ebf] font-bold">Cost Center</Label>
           <Input
             disabled
-            value={
-              costCenters.find((c) => c.code === formData.costCenter)?.name ||
-              formData.costCenter ||
-              ''
-            }
-            placeholder="Auto-filled from Event"
+            value={formData.costCenter || ''}
+            className="bg-muted/30"
+            placeholder="Auto-filled based on Event"
           />
+        </div>
+      </div>
+
+      <div className="border-t border-border pt-6">
+        <h3 className="font-serif font-bold text-xl text-[#4a8ebf] mb-6">Requester Info</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="space-y-2">
+            <Label>Full Name</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.name || ''}
+              onChange={(e) => handleRequesterChange('name', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.email || ''}
+              onChange={(e) => handleRequesterChange('email', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Organization</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.organization || ''}
+              onChange={(e) => handleRequesterChange('organization', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Country</Label>
+            <Select
+              disabled={readOnly}
+              value={requester.country || ''}
+              onValueChange={(val) => handleRequesterChange('country', val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Country" />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>State / Province</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.state || ''}
+              onChange={(e) => handleRequesterChange('state', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>City</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.city || ''}
+              onChange={(e) => handleRequesterChange('city', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2 lg:col-span-2">
+            <Label>Address</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.address || ''}
+              onChange={(e) => handleRequesterChange('address', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Zip / Postal Code</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.zipCode || ''}
+              onChange={(e) => handleRequesterChange('zipCode', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Phone</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.phone || ''}
+              onChange={(e) => handleRequesterChange('phone', e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-border pt-6">
+        <h3 className="font-serif font-bold text-xl text-[#4a8ebf] mb-6">Bank Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="space-y-2">
+            <Label>Bank Name</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.bankName || ''}
+              onChange={(e) => handleRequesterChange('bankName', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Account Holder Name</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.bankHolder || ''}
+              onChange={(e) => handleRequesterChange('bankHolder', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Bank Account Number</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.bankAccount || ''}
+              onChange={(e) => handleRequesterChange('bankAccount', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>IBAN</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.iban || ''}
+              onChange={(e) => handleRequesterChange('iban', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>SWIFT</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.swift || ''}
+              onChange={(e) => handleRequesterChange('swift', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>BIC</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.bic || ''}
+              onChange={(e) => handleRequesterChange('bic', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Routing / Bank Code</Label>
+            <Input
+              disabled={readOnly}
+              value={requester.bankCode || ''}
+              onChange={(e) => handleRequesterChange('bankCode', e.target.value)}
+            />
+          </div>
         </div>
       </div>
     </div>
