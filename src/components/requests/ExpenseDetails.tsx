@@ -15,6 +15,7 @@ import useAuthStore from '@/stores/useAuthStore'
 
 export function ExpenseDetails({ formData, onChange, readOnly }: any) {
   const [currencies, setCurrencies] = useState<string[]>([])
+  const [eurRate, setEurRate] = useState<number>(1)
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuthStore()
 
@@ -29,6 +30,18 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
             .filter(Boolean)
             .sort((a, b) => a.localeCompare(b))
           setCurrencies(uniqueCurrencies)
+        }
+
+        const { data: eurData } = await supabase
+          .from('exchange_rates')
+          .select('Operational_Rate')
+          .eq('Currency_Code', 'EUR')
+          .order('Effective_Date', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (eurData?.Operational_Rate) {
+          setEurRate(eurData.Operational_Rate)
         }
       } catch (error) {
         console.error('Error fetching dropdown data:', error)
@@ -59,6 +72,13 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
     onChange({ expenses: expenses.filter((e: any) => e.id !== id) })
   }
 
+  const calcEuros = (amount: number, rate: number, currency: string) => {
+    if (currency === 'EUR') return amount
+    if (currency === 'USD') return parseFloat((amount * eurRate).toFixed(2))
+    const amountUsd = amount / (rate || 1)
+    return parseFloat((amountUsd * eurRate).toFixed(2))
+  }
+
   const handleExpenseChange = async (id: string, field: string, value: any) => {
     let newExpenses = [...expenses]
     const index = newExpenses.findIndex((e: any) => e.id === id)
@@ -81,22 +101,19 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
 
         if (data?.Operational_Rate) {
           expense.exchangeRate = data.Operational_Rate
-          expense.amountEuros = parseFloat(
-            ((expense.amount || 0) / data.Operational_Rate).toFixed(2),
-          )
         } else {
           expense.exchangeRate = 1
-          expense.amountEuros = expense.amount || 0
         }
+        expense.amountEuros = calcEuros(expense.amount || 0, expense.exchangeRate, value)
       }
     } else if (field === 'amount') {
       const amount = parseFloat(value) || 0
       expense.amount = amount
-      expense.amountEuros = parseFloat((amount / (expense.exchangeRate || 1)).toFixed(2))
+      expense.amountEuros = calcEuros(amount, expense.exchangeRate || 1, expense.currency)
     } else if (field === 'exchangeRate') {
       const rate = parseFloat(value) || 1
       expense.exchangeRate = rate
-      expense.amountEuros = parseFloat(((expense.amount || 0) / rate).toFixed(2))
+      expense.amountEuros = calcEuros(expense.amount || 0, rate, expense.currency)
     }
 
     newExpenses[index] = expense
