@@ -34,6 +34,7 @@ export default function RequestsList() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
   const [search, setSearch] = useState('')
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('all')
 
   useEffect(() => {
     fetchRequests()
@@ -59,12 +60,25 @@ export default function RequestsList() {
     }
   }
 
+  const paymentMethods = useMemo(() => {
+    const methods = new Set<string>()
+    requests.forEach((req) => {
+      const pm = req.data?.paymentMethod || req.data?.payment_method
+      if (pm && typeof pm === 'string') methods.add(pm)
+    })
+    return Array.from(methods).sort()
+  }, [requests])
+
   const filteredRequests = useMemo(() => {
     return requests.filter((req) => {
       if (statusFilter !== 'all' && req.status !== statusFilter) return false
       if (dateFilter) {
         const reqDate = req.created_at ? req.created_at.substring(0, 10) : ''
         if (reqDate !== dateFilter) return false
+      }
+      if (paymentMethodFilter !== 'all') {
+        const pm = req.data?.paymentMethod || req.data?.payment_method
+        if (pm !== paymentMethodFilter) return false
       }
       if (search) {
         const searchLower = search.toLowerCase()
@@ -74,7 +88,7 @@ export default function RequestsList() {
       }
       return true
     })
-  }, [requests, statusFilter, dateFilter, search])
+  }, [requests, statusFilter, dateFilter, search, paymentMethodFilter])
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -124,7 +138,7 @@ export default function RequestsList() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Search</label>
               <div className="relative">
@@ -162,6 +176,22 @@ export default function RequestsList() {
                 onChange={(e) => setDateFilter(e.target.value)}
                 className="h-9"
               />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Payment Method</label>
+              <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Filter by payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Methods</SelectItem>
+                  {paymentMethods.map((pm) => (
+                    <SelectItem key={pm} value={pm}>
+                      {pm}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
