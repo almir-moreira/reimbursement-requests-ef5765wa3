@@ -42,9 +42,19 @@ export function RequestHeader({ formData, onChange, readOnly }: any) {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
         <div className="space-y-2">
-          <Label className="text-[#4a8ebf] font-bold">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">ID</Label>
+          <Input disabled value={formData.id || ''} className="bg-muted/30 h-10" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Status</Label>
+          <div className="h-10 px-3 py-2 border rounded-md bg-muted/10 flex items-center text-sm font-medium text-muted-foreground">
+            {formData.status || 'Pending'}
+          </div>
+        </div>
+        <div className="space-y-2 lg:col-span-2">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">
             Event <span className="text-destructive">*</span>
           </Label>
           <Select
@@ -52,10 +62,15 @@ export function RequestHeader({ formData, onChange, readOnly }: any) {
             value={formData.eventId || ''}
             onValueChange={(val) => {
               const event = events.find((e: any) => e.id === val)
-              onChange({ eventId: val, costCenter: event?.costCenter || '' })
+              onChange({
+                eventId: val,
+                costCenter: event?.costCenter || '',
+                account: event?.account || '',
+                workorder: event?.workorder || '',
+              })
             }}
           >
-            <SelectTrigger className="border-border/50">
+            <SelectTrigger className="h-10 border-border/50">
               <SelectValue placeholder="Select Event" />
             </SelectTrigger>
             <SelectContent>
@@ -68,13 +83,16 @@ export function RequestHeader({ formData, onChange, readOnly }: any) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label className="text-[#4a8ebf] font-bold">Cost Center</Label>
-          <Input
-            disabled
-            value={formData.costCenter || ''}
-            className="bg-muted/30"
-            placeholder="Auto-filled based on Event"
-          />
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Cost Centre</Label>
+          <Input disabled value={formData.costCenter || ''} className="bg-muted/30 h-10" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Account</Label>
+          <Input disabled value={formData.account || ''} className="bg-muted/30 h-10" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Workorder</Label>
+          <Input disabled value={formData.workorder || ''} className="bg-muted/30 h-10" />
         </div>
       </div>
 
