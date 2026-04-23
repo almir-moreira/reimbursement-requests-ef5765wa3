@@ -5,6 +5,8 @@ import useMasterDataStore from '@/stores/useMasterDataStore'
 import { supabase } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 export default function Dashboard() {
   const { t } = useTranslation()
@@ -42,6 +44,34 @@ export default function Dashboard() {
     }
     return false
   })
+
+  const getAmount = (req: any) => {
+    if (typeof req.data?.totalAmount === 'number') return req.data.totalAmount
+    if (typeof req.data?.total === 'number') return req.data.total
+    if (typeof req.data?.amount === 'number') return req.data.amount
+    if (Array.isArray(req.data?.items)) {
+      return req.data.items.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0)
+    }
+    if (Array.isArray(req.data?.expenses)) {
+      return req.data.expenses.reduce(
+        (sum: number, item: any) => sum + (Number(item.amount) || 0),
+        0,
+      )
+    }
+    return 0
+  }
+
+  const eventStats = events
+    .map((event: any) => {
+      const eventReqs = userRequests.filter((r) => r.data?.eventId === event.id)
+      return {
+        name: event.name || 'Unknown',
+        count: eventReqs.length,
+        value: eventReqs.reduce((sum, r) => sum + getAmount(r), 0),
+      }
+    })
+    .filter((e) => e.count > 0)
+    .sort((a, b) => b.count - a.count)
 
   const total = userRequests.length
   const pendingReview = userRequests.filter((r) => r.status === 'Pending').length
@@ -103,6 +133,50 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {eventStats.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg">Requests per Event</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={{ count: { label: 'Requests', color: 'hsl(var(--chart-1))' } }}
+                className="h-[300px] w-full"
+              >
+                <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg">Total Value per Event</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={{ value: { label: 'Total Value', color: 'hsl(var(--chart-2))' } }}
+                className="h-[300px] w-full"
+              >
+                <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
