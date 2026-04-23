@@ -46,43 +46,64 @@ export default function Dashboard() {
   })
 
   const getAmountEuros = (req: any) => {
+    if (!req || !req.data) return 0
+    const data = req.data
+
     const isEur = (c: any) => {
       if (!c) return false
-      const curr = String(c).toUpperCase()
-      return curr === 'EUR' || curr === 'EURO' || curr === 'EUROS'
+      const curr = String(c).trim().toUpperCase()
+      return curr === 'EUR' || curr === 'EURO' || curr === 'EUROS' || curr === '€'
     }
 
-    if (typeof req.data?.totalAmountEUR === 'number') return req.data.totalAmountEUR
-    if (typeof req.data?.totalEur === 'number') return req.data.totalEur
-    if (typeof req.data?.totalEUR === 'number') return req.data.totalEUR
+    const parseAmt = (val: any) => {
+      if (val === null || val === undefined || val === '') return 0
+      if (typeof val === 'number') return val
+      let strVal = String(val).trim()
+      if (/\d+\.\d{3},\d{2}/.test(strVal) || /,\d{2}$/.test(strVal)) {
+        strVal = strVal.replace(/\./g, '').replace(',', '.')
+      } else {
+        strVal = strVal.replace(/,/g, '')
+      }
+      const parsed = parseFloat(strVal)
+      return isNaN(parsed) ? 0 : parsed
+    }
 
-    const reqCurrency = req.data?.currency || req.data?.RequestersData?.currency
+    if (data.totalAmountEUR !== undefined) return parseAmt(data.totalAmountEUR)
+    if (data.totalEur !== undefined) return parseAmt(data.totalEur)
+    if (data.totalEUR !== undefined) return parseAmt(data.totalEUR)
+
+    const reqCurrency =
+      data.currency || data.RequestersData?.currency || data.BankInformation?.currency
     const hasEurCurrency = isEur(reqCurrency)
 
-    if (Array.isArray(req.data?.items)) {
-      return req.data.items.reduce((sum: number, item: any) => {
+    let total = 0
+    let foundItems = false
+
+    const itemsList = Array.isArray(data.items)
+      ? data.items
+      : Array.isArray(data.expenses)
+        ? data.expenses
+        : []
+
+    if (itemsList.length > 0) {
+      foundItems = true
+      total = itemsList.reduce((sum: number, item: any) => {
         const itemCurrency = item.currency || reqCurrency
         if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
-          return sum + (Number(item.amount) || 0)
+          return sum + parseAmt(item.amount || item.total || item.value || 0)
         }
         return sum
       }, 0)
     }
 
-    if (Array.isArray(req.data?.expenses)) {
-      return req.data.expenses.reduce((sum: number, item: any) => {
-        const itemCurrency = item.currency || reqCurrency
-        if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
-          return sum + (Number(item.amount) || 0)
-        }
-        return sum
-      }, 0)
-    }
+    if (foundItems && total > 0) return total
 
     if (hasEurCurrency) {
-      if (typeof req.data?.totalAmount === 'number') return req.data.totalAmount
-      if (typeof req.data?.total === 'number') return req.data.total
-      if (typeof req.data?.amount === 'number') return req.data.amount
+      if (data.totalAmount !== undefined) return parseAmt(data.totalAmount)
+      if (data.total !== undefined) return parseAmt(data.total)
+      if (data.amount !== undefined) return parseAmt(data.amount)
+      if (data.TotalAmount !== undefined) return parseAmt(data.TotalAmount)
+      if (data.Amount !== undefined) return parseAmt(data.Amount)
     }
 
     return 0
@@ -91,29 +112,29 @@ export default function Dashboard() {
   const eventStats = events
     .map((event: any) => {
       const eventReqs = userRequests.filter((r) => r.data?.eventId === event.id)
+      const rawValue = eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0)
       return {
         name: event.name || 'Unknown',
         count: eventReqs.length,
-        value: eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0),
+        value: Number(rawValue.toFixed(2)),
       }
     })
     .filter((e) => e.count > 0)
     .sort((a, b) => b.count - a.count)
 
   const COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-    '#8884d8',
-    '#82ca9d',
-    '#ffc658',
-    '#ff7300',
-    '#0088FE',
-    '#00C49F',
-    '#FFBB28',
-    '#FF8042',
+    '#3b82f6',
+    '#10b981',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#ec4899',
+    '#06b6d4',
+    '#84cc16',
+    '#f97316',
+    '#6366f1',
+    '#14b8a6',
+    '#d946ef',
   ]
 
   const total = userRequests.length
