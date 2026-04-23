@@ -7,10 +7,19 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
 import { Save } from 'lucide-react'
+import useMasterDataStore from '@/stores/useMasterDataStore'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export default function Profile() {
   const { t } = useTranslation()
   const { user, updateProfile } = useAuthStore()
+  const { countries } = useMasterDataStore()
   const [formData, setFormData] = useState(user || {})
 
   useEffect(() => {
@@ -73,7 +82,27 @@ export default function Profile() {
 
             <div className="space-y-2">
               <Label className="text-muted-foreground text-xs uppercase">Country</Label>
-              <Input name="country" value={formData.country || ''} onChange={handleChange} />
+              <Select
+                value={formData.country || undefined}
+                onValueChange={(value) => setFormData({ ...formData, country: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[...(countries || [])]
+                    .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                    .map((country) => {
+                      const val = country.name || country.id
+                      if (!val) return null
+                      return (
+                        <SelectItem key={country.id} value={val}>
+                          {country.name || country.id}
+                        </SelectItem>
+                      )
+                    })}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground text-xs uppercase">ZIP Code</Label>
@@ -138,11 +167,27 @@ export default function Profile() {
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-muted-foreground text-xs uppercase">Bank Country</Label>
-                <Input
-                  name="bankCountry"
-                  value={formData.bankCountry || ''}
-                  onChange={handleChange}
-                />
+                <Select
+                  value={formData.bankCountry || undefined}
+                  onValueChange={(value) => setFormData({ ...formData, bankCountry: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a bank country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...(countries || [])]
+                      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                      .map((country) => {
+                        const val = country.name || country.id
+                        if (!val) return null
+                        return (
+                          <SelectItem key={country.id} value={val}>
+                            {country.name || country.id}
+                          </SelectItem>
+                        )
+                      })}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2 md:col-span-4">
