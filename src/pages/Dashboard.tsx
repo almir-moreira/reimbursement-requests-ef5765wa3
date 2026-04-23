@@ -59,7 +59,8 @@ export default function Dashboard() {
       if (val === null || val === undefined || val === '') return 0
       if (typeof val === 'number') return val
       let strVal = String(val).trim()
-      if (/\d+\.\d{3},\d{2}/.test(strVal) || /,\d{2}$/.test(strVal)) {
+      strVal = strVal.replace(/[^\d.,-]/g, '')
+      if (/\d+\.\d{3},\d{2}/.test(strVal) || /,\d{2}$/.test(strVal) || /,\d{1}$/.test(strVal)) {
         strVal = strVal.replace(/\./g, '').replace(',', '.')
       } else {
         strVal = strVal.replace(/,/g, '')
@@ -68,12 +69,28 @@ export default function Dashboard() {
       return isNaN(parsed) ? 0 : parsed
     }
 
-    if (data.totalAmountEUR !== undefined) return parseAmt(data.totalAmountEUR)
-    if (data.totalEur !== undefined) return parseAmt(data.totalEur)
-    if (data.totalEUR !== undefined) return parseAmt(data.totalEUR)
+    const eurFields = [
+      'totalAmountEUR',
+      'totalEur',
+      'totalEUR',
+      'total_amount_eur',
+      'totalEuros',
+      'amountEur',
+    ]
+    for (const field of eurFields) {
+      if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+        return parseAmt(data[field])
+      }
+    }
 
     const reqCurrency =
-      data.currency || data.RequestersData?.currency || data.BankInformation?.currency
+      data.currency ||
+      data.RequestersData?.currency ||
+      data.BankInformation?.currency ||
+      data.requestCurrency ||
+      data.currencyCode ||
+      data.currency_code
+
     const hasEurCurrency = isEur(reqCurrency)
 
     let total = 0
@@ -88,9 +105,9 @@ export default function Dashboard() {
     if (itemsList.length > 0) {
       foundItems = true
       total = itemsList.reduce((sum: number, item: any) => {
-        const itemCurrency = item.currency || reqCurrency
+        const itemCurrency = item.currency || item.currencyCode || reqCurrency
         if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
-          return sum + parseAmt(item.amount || item.total || item.value || 0)
+          return sum + parseAmt(item.amount || item.total || item.value || item.cost || 0)
         }
         return sum
       }, 0)
@@ -99,28 +116,27 @@ export default function Dashboard() {
     if (foundItems && total > 0) return total
 
     if (hasEurCurrency) {
-      if (data.totalAmount !== undefined) return parseAmt(data.totalAmount)
-      if (data.total !== undefined) return parseAmt(data.total)
-      if (data.amount !== undefined) return parseAmt(data.amount)
-      if (data.TotalAmount !== undefined) return parseAmt(data.TotalAmount)
-      if (data.Amount !== undefined) return parseAmt(data.Amount)
+      const amountFields = [
+        'totalAmount',
+        'total',
+        'amount',
+        'TotalAmount',
+        'Amount',
+        'total_amount',
+        'value',
+      ]
+      for (const field of amountFields) {
+        if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+          return parseAmt(data[field])
+        }
+      }
+
+      if (data.RequestersData?.amount) return parseAmt(data.RequestersData.amount)
+      if (data.RequestersData?.totalAmount) return parseAmt(data.RequestersData.totalAmount)
     }
 
     return 0
   }
-
-  const eventStats = events
-    .map((event: any) => {
-      const eventReqs = userRequests.filter((r) => r.data?.eventId === event.id)
-      const rawValue = eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0)
-      return {
-        name: event.name || 'Unknown',
-        count: eventReqs.length,
-        value: Number(rawValue.toFixed(2)),
-      }
-    })
-    .filter((e) => e.count > 0)
-    .sort((a, b) => b.count - a.count)
 
   const COLORS = [
     '#3b82f6',
@@ -136,6 +152,20 @@ export default function Dashboard() {
     '#14b8a6',
     '#d946ef',
   ]
+
+  const eventStats = events
+    .map((event: any, index: number) => {
+      const eventReqs = userRequests.filter((r) => r.data?.eventId === event.id)
+      const rawValue = eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0)
+      return {
+        name: event.name || 'Unknown',
+        count: eventReqs.length,
+        value: Number(rawValue.toFixed(2)),
+        fill: COLORS[index % COLORS.length],
+      }
+    })
+    .filter((e) => e.count > 0)
+    .sort((a, b) => b.count - a.count)
 
   const total = userRequests.length
   const pendingReview = userRequests.filter((r) => r.status === 'Pending').length
@@ -205,18 +235,18 @@ export default function Dashboard() {
               <CardTitle className="text-lg">Requests per Event</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{ count: { label: 'Requests' } }}
-                className="h-[300px] w-full"
-              >
+              <ChartContainer config={{}} className="h-[300px] w-full">
                 <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip
+                    cursor={{ fill: 'transparent' }}
+                    content={<ChartTooltipContent />}
+                  />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {eventStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -229,18 +259,18 @@ export default function Dashboard() {
               <CardTitle className="text-lg">Total Value per Event (EUR)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{ value: { label: 'Total Value (EUR)' } }}
-                className="h-[300px] w-full"
-              >
+              <ChartContainer config={{}} className="h-[300px] w-full">
                 <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `€${val}`} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip
+                    cursor={{ fill: 'transparent' }}
+                    content={<ChartTooltipContent />}
+                  />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                     {eventStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
                 </BarChart>
