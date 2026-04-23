@@ -324,13 +324,15 @@ export default function RequestForm() {
   return (
     <>
       <div className="space-y-6 max-w-6xl mx-auto pb-20 animate-fade-in-up print:hidden">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-serif">
-            <span className="font-bold text-[#4a8ebf]">KAICIID</span>
-            <span className="text-muted-foreground ml-3 text-2xl font-sans font-medium">
-              Reimbursement Request {formData.id ? `| ${formData.id}` : ''}
-            </span>
-          </h1>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">Reimbursement Request</h1>
+            {formData.id && (
+              <p className="text-muted-foreground mt-1 text-sm">
+                Request ID: <span className="font-medium text-foreground">{formData.id}</span>
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

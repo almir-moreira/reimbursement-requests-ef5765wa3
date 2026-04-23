@@ -40,11 +40,14 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
               <SelectValue placeholder="Select Event" />
             </SelectTrigger>
             <SelectContent>
-              {events?.map((e) => (
-                <SelectItem key={e.id} value={e.id}>
-                  {e.name}
-                </SelectItem>
-              ))}
+              {events?.map((e) => {
+                if (!e.id) return null
+                return (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.name || e.id}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -59,11 +62,14 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
               <SelectValue placeholder="Select Cost Center" />
             </SelectTrigger>
             <SelectContent>
-              {costCenters?.map((c) => (
-                <SelectItem key={c.code} value={c.code}>
-                  {c.name}
-                </SelectItem>
-              ))}
+              {costCenters?.map((c) => {
+                if (!c.code) return null
+                return (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.name || c.code}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -111,6 +117,65 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
               className="bg-muted/10 h-10"
             />
           </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label className="text-xs uppercase text-muted-foreground">Address</Label>
+            <Input
+              disabled={readOnly}
+              value={user.address || ''}
+              onChange={(e) => handleUserChange('address', e.target.value)}
+              className="bg-muted/10 h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">City</Label>
+            <Input
+              disabled={readOnly}
+              value={user.city || ''}
+              onChange={(e) => handleUserChange('city', e.target.value)}
+              className="bg-muted/10 h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">State/Province</Label>
+            <Input
+              disabled={readOnly}
+              value={user.state || ''}
+              onChange={(e) => handleUserChange('state', e.target.value)}
+              className="bg-muted/10 h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">Zip/Postal Code</Label>
+            <Input
+              disabled={readOnly}
+              value={user.zipCode || ''}
+              onChange={(e) => handleUserChange('zipCode', e.target.value)}
+              className="bg-muted/10 h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">Country</Label>
+            <Select
+              disabled={readOnly}
+              value={user.country || ''}
+              onValueChange={(val) => handleUserChange('country', val)}
+            >
+              <SelectTrigger className="bg-muted/10 h-10">
+                <SelectValue placeholder="Select Country" />
+              </SelectTrigger>
+              <SelectContent>
+                {countries?.map((c) => {
+                  const val = c.name || c.id
+                  if (!val) return null
+                  return (
+                    <SelectItem key={c.id} value={val}>
+                      {c.name || c.id}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -148,11 +213,15 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
                 <SelectValue placeholder="Select Country" />
               </SelectTrigger>
               <SelectContent>
-                {countries?.map((c) => (
-                  <SelectItem key={c.id} value={c.name || c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
+                {countries?.map((c) => {
+                  const val = c.name || c.id
+                  if (!val) return null
+                  return (
+                    <SelectItem key={c.id} value={val}>
+                      {c.name || c.id}
+                    </SelectItem>
+                  )
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -160,8 +229,11 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
             <Label className="text-xs uppercase text-muted-foreground">IBAN / Account Number</Label>
             <Input
               disabled={readOnly}
-              value={user.iban || ''}
-              onChange={(e) => handleUserChange('iban', e.target.value)}
+              value={user.iban || user.bankAccount || ''}
+              onChange={(e) => {
+                handleUserChange('iban', e.target.value)
+                handleUserChange('bankAccount', e.target.value)
+              }}
               className="bg-muted/10 h-10"
             />
           </div>
@@ -169,8 +241,11 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
             <Label className="text-xs uppercase text-muted-foreground">BIC / SWIFT</Label>
             <Input
               disabled={readOnly}
-              value={user.bic || ''}
-              onChange={(e) => handleUserChange('bic', e.target.value)}
+              value={user.bic || user.swift || ''}
+              onChange={(e) => {
+                handleUserChange('bic', e.target.value)
+                handleUserChange('swift', e.target.value)
+              }}
               className="bg-muted/10 h-10"
             />
           </div>
