@@ -5,7 +5,7 @@ import useMasterDataStore from '@/stores/useMasterDataStore'
 import { supabase } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 export default function Dashboard() {
@@ -45,19 +45,46 @@ export default function Dashboard() {
     return false
   })
 
-  const getAmount = (req: any) => {
-    if (typeof req.data?.totalAmount === 'number') return req.data.totalAmount
-    if (typeof req.data?.total === 'number') return req.data.total
-    if (typeof req.data?.amount === 'number') return req.data.amount
+  const getAmountEuros = (req: any) => {
+    const isEur = (c: any) => {
+      if (!c) return false
+      const curr = String(c).toUpperCase()
+      return curr === 'EUR' || curr === 'EURO' || curr === 'EUROS'
+    }
+
+    if (typeof req.data?.totalAmountEUR === 'number') return req.data.totalAmountEUR
+    if (typeof req.data?.totalEur === 'number') return req.data.totalEur
+    if (typeof req.data?.totalEUR === 'number') return req.data.totalEUR
+
+    const reqCurrency = req.data?.currency || req.data?.RequestersData?.currency
+    const hasEurCurrency = isEur(reqCurrency)
+
     if (Array.isArray(req.data?.items)) {
-      return req.data.items.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0)
+      return req.data.items.reduce((sum: number, item: any) => {
+        const itemCurrency = item.currency || reqCurrency
+        if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
+          return sum + (Number(item.amount) || 0)
+        }
+        return sum
+      }, 0)
     }
+
     if (Array.isArray(req.data?.expenses)) {
-      return req.data.expenses.reduce(
-        (sum: number, item: any) => sum + (Number(item.amount) || 0),
-        0,
-      )
+      return req.data.expenses.reduce((sum: number, item: any) => {
+        const itemCurrency = item.currency || reqCurrency
+        if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
+          return sum + (Number(item.amount) || 0)
+        }
+        return sum
+      }, 0)
     }
+
+    if (hasEurCurrency) {
+      if (typeof req.data?.totalAmount === 'number') return req.data.totalAmount
+      if (typeof req.data?.total === 'number') return req.data.total
+      if (typeof req.data?.amount === 'number') return req.data.amount
+    }
+
     return 0
   }
 
@@ -67,11 +94,27 @@ export default function Dashboard() {
       return {
         name: event.name || 'Unknown',
         count: eventReqs.length,
-        value: eventReqs.reduce((sum, r) => sum + getAmount(r), 0),
+        value: eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0),
       }
     })
     .filter((e) => e.count > 0)
     .sort((a, b) => b.count - a.count)
+
+  const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    '#8884d8',
+    '#82ca9d',
+    '#ffc658',
+    '#ff7300',
+    '#0088FE',
+    '#00C49F',
+    '#FFBB28',
+    '#FF8042',
+  ]
 
   const total = userRequests.length
   const pendingReview = userRequests.filter((r) => r.status === 'Pending').length
@@ -142,7 +185,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <ChartContainer
-                config={{ count: { label: 'Requests', color: 'hsl(var(--chart-1))' } }}
+                config={{ count: { label: 'Requests' } }}
                 className="h-[300px] w-full"
               >
                 <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
@@ -150,7 +193,11 @@ export default function Dashboard() {
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {eventStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ChartContainer>
             </CardContent>
@@ -158,19 +205,23 @@ export default function Dashboard() {
 
           <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
-              <CardTitle className="text-lg">Total Value per Event</CardTitle>
+              <CardTitle className="text-lg">Total Value per Event (EUR)</CardTitle>
             </CardHeader>
             <CardContent>
               <ChartContainer
-                config={{ value: { label: 'Total Value', color: 'hsl(var(--chart-2))' } }}
+                config={{ value: { label: 'Total Value (EUR)' } }}
                 className="h-[300px] w-full"
               >
                 <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                  <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `€${val}`} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {eventStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ChartContainer>
             </CardContent>
