@@ -8,6 +8,7 @@ import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
+// trigger update
 export default function Dashboard() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
