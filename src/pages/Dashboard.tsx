@@ -47,76 +47,87 @@ export default function Dashboard() {
 
   const getAmountEuros = (req: any) => {
     if (!req || !req.data) return 0
-    const data = req.data
-
-    const isEur = (c: any) => {
-      if (!c) return false
-      const curr = String(c).trim().toUpperCase()
-      return curr === 'EUR' || curr === 'EURO' || curr === 'EUROS' || curr === '€'
-    }
 
     const parseAmt = (val: any) => {
       if (val === null || val === undefined || val === '') return 0
       if (typeof val === 'number') return val
       let strVal = String(val).trim()
       strVal = strVal.replace(/[^\d.,-]/g, '')
-      if (/\d+\.\d{3},\d{2}/.test(strVal) || /,\d{2}$/.test(strVal) || /,\d{1}$/.test(strVal)) {
-        strVal = strVal.replace(/\./g, '').replace(',', '.')
-      } else {
-        strVal = strVal.replace(/,/g, '')
+
+      if (strVal.includes('.') && strVal.includes(',')) {
+        if (strVal.lastIndexOf(',') > strVal.lastIndexOf('.')) {
+          strVal = strVal.replace(/\./g, '').replace(',', '.')
+        } else {
+          strVal = strVal.replace(/,/g, '')
+        }
+      } else if (strVal.includes(',')) {
+        if (/,\d{1,2}$/.test(strVal)) {
+          strVal = strVal.replace(',', '.')
+        } else {
+          strVal = strVal.replace(/,/g, '')
+        }
       }
+
       const parsed = parseFloat(strVal)
       return isNaN(parsed) ? 0 : parsed
     }
 
-    const eurFields = [
+    const findAmount = (obj: any, keys: string[]): number => {
+      if (!obj || typeof obj !== 'object') return 0
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') {
+          const amt = parseAmt(obj[k])
+          if (amt > 0) return amt
+        }
+      }
+      for (const val of Object.values(obj)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          const amt = findAmount(val, keys)
+          if (amt > 0) return amt
+        }
+      }
+      return 0
+    }
+
+    const findCurrency = (obj: any, keys: string[]): string | null => {
+      if (!obj || typeof obj !== 'object') return null
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return String(obj[k])
+      }
+      for (const val of Object.values(obj)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          const c = findCurrency(val, keys)
+          if (c) return c
+        }
+      }
+      return null
+    }
+
+    const explicitEur = findAmount(req.data, [
       'totalAmountEUR',
       'totalEur',
       'totalEUR',
       'total_amount_eur',
       'totalEuros',
       'amountEur',
-    ]
-    for (const field of eurFields) {
-      if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
-        return parseAmt(data[field])
-      }
-    }
+      'AmountEur',
+    ])
+    if (explicitEur > 0) return explicitEur
 
-    const reqCurrency =
-      data.currency ||
-      data.RequestersData?.currency ||
-      data.BankInformation?.currency ||
-      data.requestCurrency ||
-      data.currencyCode ||
-      data.currency_code
+    const currStr = String(
+      findCurrency(req.data, ['currency', 'currencyCode', 'currency_code', 'Currency']) || '',
+    )
+      .trim()
+      .toUpperCase()
+    const isEur =
+      currStr === 'EUR' ||
+      currStr === 'EURO' ||
+      currStr === 'EUROS' ||
+      currStr === '€' ||
+      currStr === ''
 
-    const hasEurCurrency = isEur(reqCurrency)
-
-    let total = 0
-    let foundItems = false
-
-    const itemsList = Array.isArray(data.items)
-      ? data.items
-      : Array.isArray(data.expenses)
-        ? data.expenses
-        : []
-
-    if (itemsList.length > 0) {
-      foundItems = true
-      total = itemsList.reduce((sum: number, item: any) => {
-        const itemCurrency = item.currency || item.currencyCode || reqCurrency
-        if (isEur(itemCurrency) || (!itemCurrency && hasEurCurrency)) {
-          return sum + parseAmt(item.amount || item.total || item.value || item.cost || 0)
-        }
-        return sum
-      }, 0)
-    }
-
-    if (foundItems && total > 0) return total
-
-    if (hasEurCurrency) {
-      const amountFields = [
+    if (isEur) {
+      const generalAmount = findAmount(req.data, [
         'totalAmount',
         'total',
         'amount',
@@ -124,15 +135,26 @@ export default function Dashboard() {
         'Amount',
         'total_amount',
         'value',
-      ]
-      for (const field of amountFields) {
-        if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
-          return parseAmt(data[field])
-        }
-      }
+      ])
+      if (generalAmount > 0) return generalAmount
+    }
 
-      if (data.RequestersData?.amount) return parseAmt(data.RequestersData.amount)
-      if (data.RequestersData?.totalAmount) return parseAmt(data.RequestersData.totalAmount)
+    const itemsList = Array.isArray(req.data.items)
+      ? req.data.items
+      : Array.isArray(req.data.expenses)
+        ? req.data.expenses
+        : []
+    if (itemsList.length > 0) {
+      let sum = 0
+      itemsList.forEach((item: any) => {
+        const c = String(item.currency || item.currencyCode || currStr)
+          .trim()
+          .toUpperCase()
+        if (c === 'EUR' || c === 'EURO' || c === 'EUROS' || c === '€' || c === '') {
+          sum += parseAmt(item.amount || item.total || item.value || item.cost || 0)
+        }
+      })
+      if (sum > 0) return sum
     }
 
     return 0
