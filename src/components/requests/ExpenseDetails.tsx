@@ -154,8 +154,8 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
               </Button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-2">
-              <div className="space-y-2 lg:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[160px_1fr_100px_140px_160px] gap-4 mt-2">
+              <div className="space-y-2">
                 <Label>Date</Label>
                 <Input
                   type="date"
@@ -165,7 +165,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 />
               </div>
 
-              <div className="space-y-2 lg:col-span-2">
+              <div className="space-y-2">
                 <Label>Description</Label>
                 <Input
                   disabled={readOnly}
@@ -175,7 +175,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 />
               </div>
 
-              <div className="space-y-2 lg:col-span-1">
+              <div className="space-y-2">
                 <Label>Currency</Label>
                 <Select
                   disabled={readOnly || isLoading}
@@ -198,22 +198,39 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 </Select>
               </div>
 
-              <div className="space-y-2 lg:col-span-1">
+              <div className="space-y-2">
                 <Label>Amount</Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
                   disabled={readOnly}
-                  value={expense.amount || ''}
-                  onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
+                  value={
+                    typeof expense.amount === 'number'
+                      ? expense.amount.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : ''
+                  }
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/\D/g, '')
+                    if (!val) val = '0'
+                    const num = parseInt(val, 10) / 100
+                    handleExpenseChange(expense.id, 'amount', num)
+                  }}
+                  className="text-right"
                 />
               </div>
 
-              <div className="space-y-2 lg:col-span-2">
+              <div className="space-y-2">
                 <Label>Amount in EUR</Label>
-                <div className="h-10 px-3 py-2 border rounded-md bg-background flex items-center font-bold text-foreground">
-                  € {Number(expense.amountEuros || 0).toFixed(2)}
+                <div className="h-10 px-3 py-2 border rounded-md bg-background flex items-center justify-between font-bold text-foreground">
+                  <span className="text-muted-foreground mr-1">€</span>
+                  <span>
+                    {Number(expense.amountEuros || 0).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
