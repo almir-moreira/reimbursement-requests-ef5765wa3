@@ -13,6 +13,7 @@ import {
 import useAuthStore from '@/stores/useAuthStore'
 import { useTranslation } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
+import packageJson from '../../package.json'
 import {
   SidebarProvider,
   Sidebar,
@@ -158,7 +159,7 @@ export default function Layout() {
             <footer className="mt-8 pt-4 border-t border-border/50 text-center text-xs text-muted-foreground flex justify-center gap-2">
               <span>KAICIID Reimbursement Portal • {new Date().getFullYear()}</span>
               <span>•</span>
-              <span>v0.0.91</span>
+              <span>v{packageJson.version}</span>
             </footer>
           </main>
         </div>

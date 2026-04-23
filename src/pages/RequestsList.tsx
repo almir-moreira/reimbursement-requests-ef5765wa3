@@ -144,9 +144,6 @@ export default function RequestsList() {
           <h1 className="text-2xl font-bold tracking-tight text-[#4a8ebf] font-serif">
             {t('requests') || 'Reimbursement Requests'}
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Manage and track your reimbursement requests
-          </p>
         </div>
         {(user?.role === 'requester' || user?.role === 'admin') && (
           <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-medium">
