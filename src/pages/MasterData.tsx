@@ -31,6 +31,7 @@ export default function MasterData() {
   const dynamicTabsData = [
     {
       key: 'events',
+      tableName: 'events',
       data: store.events,
       cols: [
         { key: 'name', label: 'Name' },
@@ -44,12 +45,14 @@ export default function MasterData() {
     },
     {
       key: 'countries',
+      tableName: 'countries',
       data: store.countries,
       cols: [{ key: 'name', label: 'Country Name' }],
       tpl: { name: '' },
     },
     {
       key: 'costCenters',
+      tableName: 'cost_centers',
       data: store.costCenters,
       cols: [
         { key: 'code', label: 'Code' },
@@ -61,6 +64,7 @@ export default function MasterData() {
     },
     {
       key: 'accounts',
+      tableName: 'accounts',
       data: store.accounts,
       cols: [
         { key: 'code', label: 'Code' },
@@ -70,6 +74,7 @@ export default function MasterData() {
     },
     {
       key: 'workorders',
+      tableName: 'workorders',
       data: store.workorders,
       cols: [
         { key: 'code', label: 'Code' },
@@ -172,7 +177,7 @@ export default function MasterData() {
                   <CrudTable
                     columns={dynTab.cols as any}
                     data={dynTab.data}
-                    onChange={(newData) => store.updateData(dynTab.key as any, newData)}
+                    tableName={dynTab.tableName}
                     newItemTemplate={dynTab.tpl}
                   />
                 </CardContent>

@@ -32,8 +32,12 @@ export default function Layout() {
   const location = useLocation()
 
   useEffect(() => {
-    if (!loading && !user) navigate('/login')
-  }, [user, loading, navigate])
+    if (!loading && !user) {
+      navigate('/login')
+    } else if (user?.role === 'kiosk' && location.pathname === '/dashboard') {
+      navigate('/requests/new')
+    }
+  }, [user, loading, navigate, location.pathname])
 
   if (loading) {
     return (
