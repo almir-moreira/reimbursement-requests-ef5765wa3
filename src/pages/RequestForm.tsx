@@ -38,32 +38,21 @@ export default function RequestForm() {
       if (!isNew || !user || formData.id) return
 
       const currentYear = new Date().getFullYear().toString()
-      let maxNum = 0
+      let newId = `${currentYear}-0001`
 
       try {
-        const { data: existingIds } = await supabase
-          .from('requests')
-          .select('id')
-          .like('id', `${currentYear}-%`)
-
-        if (existingIds && existingIds.length > 0) {
-          maxNum = existingIds.reduce((max, r) => {
-            const parts = r.id.split('-')
-            if (parts.length === 2) {
-              const num = parseInt(parts[1], 10)
-              return !isNaN(num) && num > max ? num : max
-            }
-            return max
-          }, 0)
+        // @ts-ignore - get_next_request_id is defined in migrations but not yet typed
+        const { data: nextId, error } = await supabase.rpc('get_next_request_id', {
+          req_year: currentYear,
+        })
+        if (!error && nextId) {
+          newId = nextId
         }
       } catch (err) {
-        console.error('Error fetching max ID', err)
+        console.error('Error fetching next ID', err)
       }
 
-      if (!isMounted) return
-
-      const newId = `${currentYear}-${(maxNum + 1).toString().padStart(4, '0')}`
-      const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
+      if (!isMounted) return      const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
 
       setFormData({
         id: newId,
@@ -160,23 +149,12 @@ export default function RequestForm() {
         try {
           // Re-calculate ID at submit time to prevent concurrent conflicts
           const currentYear = new Date().getFullYear().toString()
-          const { data: existingIds } = await supabase
-            .from('requests')
-            .select('id')
-            .like('id', `${currentYear}-%`)
-
-          let finalId = payload.id!
-          if (existingIds && existingIds.length > 0) {
-            const maxNum = existingIds.reduce((max, r) => {
-              const parts = r.id.split('-')
-              if (parts.length === 2) {
-                const num = parseInt(parts[1], 10)
-                return !isNaN(num) && num > max ? num : max
-              }
-              return max
-            }, 0)
-            finalId = `${currentYear}-${(maxNum + 1).toString().padStart(4, '0')}`
-            payload.id = finalId
+          // @ts-ignore - get_next_request_id is defined in migrations but not yet typed
+          const { data: nextId, error } = await supabase.rpc('get_next_request_id', {
+            req_year: currentYear,
+          })
+          if (!error && nextId) {
+            payload.id = nextId
           }
 
           await addRequest(payload)
@@ -502,7 +480,7 @@ export default function RequestForm() {
                     disabled={!isRequesterEditing}
                     value={formData.signature || ''}
                     onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
-                    className="font-script text-4xl h-16 bg-muted/10 py-2"
+                    className="font-script text-6xl h-24 bg-muted/10 py-2"
                     placeholder="Type your full name as signature"
                   />
                 </div>
