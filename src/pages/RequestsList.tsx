@@ -327,7 +327,9 @@ export default function RequestsList() {
                           return found ? found.name : String(evVal)
                         })()}
                       </TableCell>
-                      <TableCell className="text-sm">{req.profiles?.name || 'Unknown'}</TableCell>
+                      <TableCell className="text-sm">
+                        {req.data?.requesterDetails?.name || req.profiles?.name || 'Unknown'}
+                      </TableCell>
                       <TableCell className="text-sm font-medium text-right whitespace-nowrap">
                         {(() => {
                           let currency =

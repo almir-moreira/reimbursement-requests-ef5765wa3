@@ -131,45 +131,71 @@ export default function RequestForm() {
       const payload = { ...formData, totalAmount, totalAmountEuros } as ReimbursementRequest
 
       if (isNew) {
-        await addRequest(payload)
-        if (user?.role === 'requester' && payload.requesterDetails) {
-          await updateProfile(user.id, payload.requesterDetails)
-        }
-
         try {
-          await sendEmail({
-            to: 'qc@kaiciid.org',
-            subject: `New Reimbursement Request Submitted - ${payload.id}`,
-            body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+          await addRequest(payload)
+          if (user?.role === 'requester' && payload.requesterDetails) {
+            await updateProfile(user.id, payload.requesterDetails)
+          }
+
+          try {
+            await sendEmail({
+              to: 'qc@kaiciid.org',
+              subject: `New Reimbursement Request Submitted - ${payload.id}`,
+              body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+            })
+          } catch (err) {
+            console.error('Failed to send email:', err)
+          }
+          toast({ title: 'Request Submitted Successfully' })
+          navigate('/requests')
+        } catch (err: any) {
+          toast({
+            title: 'Error saving request',
+            description: err.message || 'Unknown error',
+            variant: 'destructive',
           })
-        } catch (err) {
-          console.error('Failed to send email:', err)
         }
-        toast({ title: 'Request Submitted Successfully' })
       } else if (isResubmission) {
-        if (user?.role === 'requester' && payload.requesterDetails) {
-          await updateProfile(user.id, payload.requesterDetails)
+        try {
+          if (user?.role === 'requester' && payload.requesterDetails) {
+            await updateProfile(user.id, payload.requesterDetails)
+          }
+          await updateRequest(payload.id!, {
+            ...payload,
+            status: 'Pending',
+            qcSignature: null,
+            history: [
+              ...(payload.history || []),
+              {
+                id: `h-${Date.now()}`,
+                date: new Date().toISOString(),
+                action: 'Resubmitted',
+                userId: user?.name || '',
+              },
+            ],
+          })
+          toast({ title: 'Request Resubmitted for Review' })
+          navigate('/requests')
+        } catch (err: any) {
+          toast({
+            title: 'Error resubmitting request',
+            description: err.message || 'Unknown error',
+            variant: 'destructive',
+          })
         }
-        await updateRequest(payload.id!, {
-          ...payload,
-          status: 'Pending',
-          qcSignature: null,
-          history: [
-            ...(payload.history || []),
-            {
-              id: `h-${Date.now()}`,
-              date: new Date().toISOString(),
-              action: 'Resubmitted',
-              userId: user?.name || '',
-            },
-          ],
-        })
-        toast({ title: 'Request Resubmitted for Review' })
       } else {
-        await updateRequest(payload.id!, payload)
-        toast({ title: 'Request Updated' })
+        try {
+          await updateRequest(payload.id!, payload)
+          toast({ title: 'Request Updated' })
+          navigate('/requests')
+        } catch (err: any) {
+          toast({
+            title: 'Error updating request',
+            description: err.message || 'Unknown error',
+            variant: 'destructive',
+          })
+        }
       }
-      navigate('/requests')
     } finally {
       setIsSaving(false)
     }
@@ -304,22 +330,30 @@ export default function RequestForm() {
         totalAmountEuros,
       }
 
-      await updateRequest(formData.id!, fullPayload)
-      toast({ title: `Request ${newStatus}` })
+      try {
+        await updateRequest(formData.id!, fullPayload)
+        toast({ title: `Request ${newStatus}` })
 
-      if (notifySubject) {
-        try {
-          await sendEmail({
-            to: notifyEmail,
-            subject: notifySubject,
-            body: notifyBody,
-          })
-        } catch (err) {
-          console.error('Failed to send notification email:', err)
+        if (notifySubject) {
+          try {
+            await sendEmail({
+              to: notifyEmail,
+              subject: notifySubject,
+              body: notifyBody,
+            })
+          } catch (err) {
+            console.error('Failed to send notification email:', err)
+          }
         }
-      }
 
-      navigate('/requests')
+        navigate('/requests')
+      } catch (err: any) {
+        toast({
+          title: 'Error processing action',
+          description: err.message || 'Unknown error',
+          variant: 'destructive',
+        })
+      }
     } finally {
       setIsSaving(false)
     }

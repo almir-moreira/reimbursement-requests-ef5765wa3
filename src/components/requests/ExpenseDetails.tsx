@@ -20,7 +20,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
   const [eurRate, setEurRate] = useState<number>(1)
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuthStore()
-  const { accounts } = useMasterDataStore()
+  const { accounts, workorders } = useMasterDataStore()
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -164,7 +164,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   user?.role === 'finance' ||
                   user?.role === 'co' ||
                   user?.role === 'admin'
-                  ? 'lg:grid-cols-[140px_1fr_140px_100px_120px_140px]'
+                  ? 'lg:grid-cols-[130px_1fr_120px_120px_100px_120px_130px]'
                   : 'lg:grid-cols-[160px_1fr_100px_140px_160px]',
               )}
             >
@@ -192,25 +192,47 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 user?.role === 'finance' ||
                 user?.role === 'co' ||
                 user?.role === 'admin') && (
-                <div className="space-y-2">
-                  <Label>Account</Label>
-                  <Select
-                    disabled={readOnly && user?.role !== 'qc'}
-                    value={expense.account || ''}
-                    onValueChange={(val) => handleExpenseChange(expense.id, 'account', val)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts?.map((a) => (
-                        <SelectItem key={a.id} value={a.code || a.id}>
-                          {a.code} - {a.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label>Account</Label>
+                    <Select
+                      disabled={readOnly && user?.role !== 'qc'}
+                      value={expense.account || ''}
+                      onValueChange={(val) => handleExpenseChange(expense.id, 'account', val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts?.map((a) => (
+                          <SelectItem key={a.id} value={a.code || a.id}>
+                            {a.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Workorder</Label>
+                    <Select
+                      disabled={readOnly && user?.role !== 'qc'}
+                      value={expense.workorder || ''}
+                      onValueChange={(val) => handleExpenseChange(expense.id, 'workorder', val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Workorder" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {workorders?.map((w) => (
+                          <SelectItem key={w.id} value={w.code || w.id}>
+                            {w.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
               )}
 
               <div className="space-y-2">

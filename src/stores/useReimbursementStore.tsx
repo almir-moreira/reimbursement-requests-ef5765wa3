@@ -43,10 +43,12 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         status: req.status,
         data: req as any,
       }
-      await supabase.from('requests').insert([dbReq])
+      const { error } = await supabase.from('requests').insert([dbReq])
+      if (error) throw error
       setRequests((prev) => [req, ...prev])
     } catch (error) {
       console.error('Add request error:', error)
+      throw error
     }
   }
 
@@ -55,7 +57,7 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
       const existing = requests.find((r) => r.id === id)
       const updatedReq = { ...existing, ...req } as ReimbursementRequest
 
-      await supabase
+      const { error } = await supabase
         .from('requests')
         .update({
           status: updatedReq.status,
@@ -63,9 +65,12 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         })
         .eq('id', id)
 
+      if (error) throw error
+
       setRequests((prev) => prev.map((r) => (r.id === id ? updatedReq : r)))
     } catch (error) {
       console.error('Update request error:', error)
+      throw error
     }
   }
 

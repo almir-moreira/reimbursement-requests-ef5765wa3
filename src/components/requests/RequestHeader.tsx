@@ -47,7 +47,7 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
           </Label>
           <Input disabled value={formData.status || ''} className="bg-muted/10 h-10" />
         </div>
-        <div className={`space-y-2 ${isRequesterOrKiosk ? 'col-span-2 md:col-span-4' : ''}`}>
+        <div className="space-y-2 col-span-2 md:col-span-4">
           <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
             Event <span className="text-destructive">*</span>
           </Label>
@@ -77,33 +77,6 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
             </SelectContent>
           </Select>
         </div>
-        {!isRequesterOrKiosk && (
-          <>
-            <div className="space-y-2">
-              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Cost Centre
-              </Label>
-              <Input
-                disabled={readOnly}
-                value={formData.costCenter || selectedEvent?.costCenter || ''}
-                onChange={(e) => onChange({ costCenter: e.target.value })}
-                className="bg-white h-10 disabled:bg-muted/10"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Account
-              </Label>
-              <Input disabled value={selectedEvent?.account || ''} className="bg-muted/10 h-10" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Workorder
-              </Label>
-              <Input disabled value={selectedEvent?.workorder || ''} className="bg-muted/10 h-10" />
-            </div>
-          </>
-        )}
       </div>
 
       <hr className="border-border" />
