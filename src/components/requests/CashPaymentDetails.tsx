@@ -46,11 +46,31 @@ export function CashPaymentDetails({
 
       let rate = 1
       if (currency && currency !== 'EUR') {
-        const rateObj = exchangeRates.find((r) => r.Currency_Code === currency)
-        rate = rateObj?.Operational_Rate || 0
+        const currencyRates = exchangeRates
+          .filter((r) => r.Currency_Code === currency)
+          .sort((a, b) => {
+            if (!a.Effective_Date || !b.Effective_Date) return 0
+            return new Date(b.Effective_Date).getTime() - new Date(a.Effective_Date).getTime()
+          })
+        rate = currencyRates[0]?.Operational_Rate || 1
       }
 
-      row.amountEuros = rate && amount ? amount / rate : 0
+      const eurRates = exchangeRates
+        .filter((r) => r.Currency_Code === 'EUR')
+        .sort((a, b) => {
+          if (!a.Effective_Date || !b.Effective_Date) return 0
+          return new Date(b.Effective_Date).getTime() - new Date(a.Effective_Date).getTime()
+        })
+      const eurRate = eurRates[0]?.Operational_Rate || 1
+
+      const calcEuros = (amt: number, rt: number, curr: string) => {
+        if (curr === 'EUR') return amt
+        if (curr === 'USD') return parseFloat((amt * eurRate).toFixed(2))
+        const amountUsd = amt / (rt || 1)
+        return parseFloat((amountUsd * eurRate).toFixed(2))
+      }
+
+      row.amountEuros = calcEuros(amount || 0, rate, currency)
     }
 
     updated[index] = row
