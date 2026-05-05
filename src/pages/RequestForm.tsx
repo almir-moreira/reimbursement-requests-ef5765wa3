@@ -45,11 +45,13 @@ export default function RequestForm() {
       }, 0)
       const newId = `${currentYear}-${(lastNum + 1).toString().padStart(4, '0')}`
 
+      const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
+
       setFormData({
         id: newId,
         status: 'Pending',
         requesterId: user.id,
-        requesterDetails: user,
+        requesterDetails: initialRequesterDetails as any,
         expenses: [],
         attachments: [],
         signature: '',
@@ -77,7 +79,9 @@ export default function RequestForm() {
   }
 
   const isPostCO = formData.status === 'Approved' || formData.status === 'Processed'
-  const isRequesterEditing = user?.role === 'requester' && (isNew || formData.status === 'Rejected')
+  const isRequesterEditing =
+    (user?.role === 'requester' || user?.role === 'kiosk') &&
+    (isNew || formData.status === 'Rejected')
   const isQcEditing = user?.role === 'qc' && !isPostCO
   const readOnly = (!isRequesterEditing && !isQcEditing) || isPostCO
 

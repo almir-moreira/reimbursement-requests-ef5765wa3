@@ -145,7 +145,7 @@ export default function RequestsList() {
             {t('requests') || 'Reimbursement Requests'}
           </h1>
         </div>
-        {(user?.role === 'requester' || user?.role === 'admin') && (
+        {(user?.role === 'requester' || user?.role === 'admin' || user?.role === 'kiosk') && (
           <Button asChild className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white font-medium">
             <Link to="/requests/new">
               <Plus className="w-4 h-4 mr-2" />
@@ -262,7 +262,7 @@ export default function RequestsList() {
                   <TableHead className="font-semibold text-xs uppercase text-muted-foreground text-right">
                     Amt (EUR)
                   </TableHead>
-                  {user?.role !== 'requester' && (
+                  {user?.role !== 'requester' && user?.role !== 'kiosk' && (
                     <TableHead className="font-semibold text-xs uppercase text-muted-foreground">
                       Payment Method
                     </TableHead>
@@ -279,7 +279,7 @@ export default function RequestsList() {
                 {loading ? (
                   <TableRow>
                     <TableCell
-                      colSpan={user?.role !== 'requester' ? 9 : 8}
+                      colSpan={user?.role !== 'requester' && user?.role !== 'kiosk' ? 9 : 8}
                       className="text-center py-12 text-muted-foreground"
                     >
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -291,7 +291,7 @@ export default function RequestsList() {
                 ) : filteredRequests.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={user?.role !== 'requester' ? 9 : 8}
+                      colSpan={user?.role !== 'requester' && user?.role !== 'kiosk' ? 9 : 8}
                       className="text-center py-12 text-muted-foreground"
                     >
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -398,7 +398,7 @@ export default function RequestsList() {
                           return `€ ${formattedEur}`
                         })()}
                       </TableCell>
-                      {user?.role !== 'requester' && (
+                      {user?.role !== 'requester' && user?.role !== 'kiosk' && (
                         <TableCell className="text-sm">
                           {req.data?.paymentMethod || req.data?.payment_method ? (
                             <Badge variant="outline" className="font-normal text-xs bg-muted/50">
