@@ -14,23 +14,45 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Edit, Plus, Trash2 } from 'lucide-react'
 import useAuthStore from '@/stores/useAuthStore'
+import { useToast } from '@/hooks/use-toast'
 
 export function RequesterManager() {
   const { users, updateProfile, adminAddUser, adminDeleteUser } = useAuthStore()
+  const { toast } = useToast()
   const requesters = users.filter((u) => u.role === 'requester')
 
   const [editing, setEditing] = useState<Partial<User> | null>(null)
   const [isNew, setIsNew] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isNew && editing) {
-      adminAddUser({ ...editing, role: 'requester' })
-    } else if (editing && editing.id) {
-      updateProfile(editing.id, editing)
+    setIsSaving(true)
+    try {
+      if (isNew && editing) {
+        await adminAddUser({ ...editing, role: 'requester' })
+        toast({ title: 'Requester added successfully' })
+      } else if (editing && editing.id) {
+        await updateProfile(editing.id, editing)
+        toast({ title: 'Requester updated successfully' })
+      }
+      setEditing(null)
+      setIsNew(false)
+    } catch (err: any) {
+      toast({ title: 'Error saving requester', description: err.message, variant: 'destructive' })
+    } finally {
+      setIsSaving(false)
     }
-    setEditing(null)
-    setIsNew(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this requester?')) return
+    try {
+      await adminDeleteUser(id)
+      toast({ title: 'Requester deleted successfully' })
+    } catch (err: any) {
+      toast({ title: 'Error deleting requester', description: err.message, variant: 'destructive' })
+    }
   }
 
   return (
@@ -69,7 +91,7 @@ export function RequesterManager() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => adminDeleteUser(req.id!)}
+                      onClick={() => handleDelete(req.id!)}
                       className="h-8 w-8 text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -215,8 +237,12 @@ export function RequesterManager() {
                 <Button type="button" variant="outline" onClick={() => setEditing(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white">
-                  Save Changes
+                <Button
+                  type="submit"
+                  disabled={isSaving}
+                  className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white"
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </form>

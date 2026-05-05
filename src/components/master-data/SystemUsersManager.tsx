@@ -22,14 +22,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge'
 import { Edit, Plus, Trash2 } from 'lucide-react'
 import useAuthStore from '@/stores/useAuthStore'
+import { useToast } from '@/hooks/use-toast'
 
 export function SystemUsersManager() {
   const { users, updateProfile, adminAddUser, adminDeleteUser } = useAuthStore()
+  const { toast } = useToast()
   const systemUsers = users.filter((u) => u.role !== 'requester')
 
   const [editing, setEditing] = useState<Partial<User> | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const openEdit = (u: User) => {
     setEditing({ ...u })
@@ -37,16 +40,35 @@ export function SystemUsersManager() {
     setIsOpen(true)
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isNew && editing) {
-      adminAddUser({ ...editing, role: editing.role || 'qc' })
-    } else if (editing && editing.id) {
-      updateProfile(editing.id, editing)
+    setIsSaving(true)
+    try {
+      if (isNew && editing) {
+        await adminAddUser({ ...editing, role: editing.role || 'qc' })
+        toast({ title: 'User added successfully' })
+      } else if (editing && editing.id) {
+        await updateProfile(editing.id, editing)
+        toast({ title: 'User updated successfully' })
+      }
+      setIsOpen(false)
+      setTimeout(() => setEditing(null), 200)
+      setIsNew(false)
+    } catch (err: any) {
+      toast({ title: 'Error saving user', description: err.message, variant: 'destructive' })
+    } finally {
+      setIsSaving(false)
     }
-    setIsOpen(false)
-    setTimeout(() => setEditing(null), 200)
-    setIsNew(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    try {
+      await adminDeleteUser(id)
+      toast({ title: 'User deleted successfully' })
+    } catch (err: any) {
+      toast({ title: 'Error deleting user', description: err.message, variant: 'destructive' })
+    }
   }
 
   return (
@@ -85,7 +107,7 @@ export function SystemUsersManager() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => adminDeleteUser(u.id!)}
+                      onClick={() => handleDelete(u.id!)}
                       className="h-8 w-8 text-destructive"
                       disabled={u.role === 'admin'}
                     >
@@ -157,6 +179,7 @@ export function SystemUsersManager() {
                     <SelectItem value="co">Certifying Officer (CO)</SelectItem>
                     <SelectItem value="finance">Finance</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="kiosk">Kiosk</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -165,8 +188,12 @@ export function SystemUsersManager() {
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white">
-                  Save Changes
+                <Button
+                  type="submit"
+                  disabled={isSaving}
+                  className="bg-[#4a8ebf] hover:bg-[#4a8ebf]/90 text-white"
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </form>

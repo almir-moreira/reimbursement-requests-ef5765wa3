@@ -13,8 +13,8 @@ interface AuthContextData {
   register: (email: string, name: string, password?: string) => Promise<void>
   logout: () => Promise<void>
   updateProfile: (id: string, data: Partial<User>) => Promise<void>
-  adminAddUser: (data: Partial<User>) => void
-  adminDeleteUser: (id: string) => void
+  adminAddUser: (data: Partial<User>) => Promise<void>
+  adminDeleteUser: (id: string) => Promise<void>
   updatePassword: (email: string, newPassword: string) => boolean
   loading: boolean
 }
@@ -162,21 +162,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       await supabase.from('profiles').update(updateData).eq('id', id)
+
+      // If there's a password update or email update and caller is admin, update auth user
+      if (user?.role === 'admin' && (data.password || data.email || data.name)) {
+        await supabase.functions.invoke('manage-users', {
+          body: {
+            action: 'update',
+            payload: { id, password: data.password, email: data.email, name: data.name },
+          },
+        })
+      }
+
       if (user?.id === id) {
         setUser({ ...user, ...data } as User)
       }
       setUsers((prev) => prev.map((u) => (u.id === id ? ({ ...u, ...data } as User) : u)))
     } catch (error) {
       console.error('Supabase updateProfile error:', error)
+      throw error
     }
   }
 
   const adminAddUser = async (data: Partial<User>) => {
-    setUsers((prev) => [...prev, { ...data, id: `usr-${Date.now()}` } as User])
+    try {
+      const { data: response, error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'create', payload: data },
+      })
+      if (error) throw error
+      if (response?.error) throw new Error(response.error)
+
+      const { data: profiles } = await supabase.from('profiles').select('*')
+      if (profiles) setUsers(profiles as User[])
+    } catch (error) {
+      console.error('Supabase adminAddUser error:', error)
+      throw error
+    }
   }
 
   const adminDeleteUser = async (id: string) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id))
+    try {
+      const { data: response, error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'delete', payload: { id } },
+      })
+      if (error) throw error
+      if (response?.error) throw new Error(response.error)
+
+      setUsers((prev) => prev.filter((u) => u.id !== id))
+    } catch (error) {
+      console.error('Supabase adminDeleteUser error:', error)
+      throw error
+    }
   }
 
   const updatePassword = (email: string, newPassword: string) => {

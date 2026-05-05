@@ -1,5 +1,6 @@
 {
   "_versions": {
-    "import-exchange-rates": 2
+    "import-exchange-rates": 2,
+    "manage-users": 1
   }
 }
