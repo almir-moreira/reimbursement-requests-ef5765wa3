@@ -12,12 +12,15 @@ import {
 } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase/client'
 import useAuthStore from '@/stores/useAuthStore'
+import useMasterDataStore from '@/stores/useMasterDataStore'
+import { cn } from '@/lib/utils'
 
 export function ExpenseDetails({ formData, onChange, readOnly }: any) {
   const [currencies, setCurrencies] = useState<string[]>([])
   const [eurRate, setEurRate] = useState<number>(1)
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuthStore()
+  const { accounts } = useMasterDataStore()
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -154,7 +157,17 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
               </Button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[160px_1fr_100px_140px_160px] gap-4 mt-2">
+            <div
+              className={cn(
+                'grid grid-cols-1 md:grid-cols-2 gap-4 mt-2',
+                user?.role === 'qc' ||
+                  user?.role === 'finance' ||
+                  user?.role === 'co' ||
+                  user?.role === 'admin'
+                  ? 'lg:grid-cols-[140px_1fr_140px_100px_120px_140px]'
+                  : 'lg:grid-cols-[160px_1fr_100px_140px_160px]',
+              )}
+            >
               <div className="space-y-2">
                 <Label>Date</Label>
                 <Input
@@ -174,6 +187,31 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   onChange={(e) => handleExpenseChange(expense.id, 'description', e.target.value)}
                 />
               </div>
+
+              {(user?.role === 'qc' ||
+                user?.role === 'finance' ||
+                user?.role === 'co' ||
+                user?.role === 'admin') && (
+                <div className="space-y-2">
+                  <Label>Account</Label>
+                  <Select
+                    disabled={readOnly && user?.role !== 'qc'}
+                    value={expense.account || ''}
+                    onValueChange={(val) => handleExpenseChange(expense.id, 'account', val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Account" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {accounts?.map((a) => (
+                        <SelectItem key={a.id} value={a.code || a.id}>
+                          {a.code} - {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Currency</Label>

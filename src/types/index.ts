@@ -1,4 +1,4 @@
-export type Role = 'requester' | 'qc' | 'co' | 'finance' | 'admin'
+export type Role = 'requester' | 'qc' | 'co' | 'finance' | 'admin' | 'kiosk'
 export type RequestStatus = 'Pending' | 'Checked' | 'Approved' | 'Processed' | 'Rejected'
 
 export interface User {

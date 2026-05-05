@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import useMasterDataStore from '@/stores/useMasterDataStore'
+import useAuthStore from '@/stores/useAuthStore'
 
 interface RequestHeaderProps {
   formData: Partial<ReimbursementRequest>
@@ -18,7 +19,11 @@ interface RequestHeaderProps {
 
 export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderProps) {
   const { events, countries } = useMasterDataStore()
+  const { user: currentUser } = useAuthStore()
   const user = formData.requesterDetails || {}
+
+  const isRequesterOrKiosk = currentUser?.role === 'requester' || currentUser?.role === 'kiosk'
+  const isKiosk = currentUser?.role === 'kiosk'
 
   const handleUserChange = (field: string, value: string) => {
     onChange({ requesterDetails: { ...user, [field]: value } as any })
@@ -72,29 +77,33 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            Cost Centre
-          </Label>
-          <Input
-            disabled={readOnly}
-            value={formData.costCenter || selectedEvent?.costCenter || ''}
-            onChange={(e) => onChange({ costCenter: e.target.value })}
-            className="bg-white h-10 disabled:bg-muted/10"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            Account
-          </Label>
-          <Input disabled value={selectedEvent?.account || ''} className="bg-muted/10 h-10" />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            Workorder
-          </Label>
-          <Input disabled value={selectedEvent?.workorder || ''} className="bg-muted/10 h-10" />
-        </div>
+        {!isRequesterOrKiosk && (
+          <>
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Cost Centre
+              </Label>
+              <Input
+                disabled={readOnly}
+                value={formData.costCenter || selectedEvent?.costCenter || ''}
+                onChange={(e) => onChange({ costCenter: e.target.value })}
+                className="bg-white h-10 disabled:bg-muted/10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Account
+              </Label>
+              <Input disabled value={selectedEvent?.account || ''} className="bg-muted/10 h-10" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Workorder
+              </Label>
+              <Input disabled value={selectedEvent?.workorder || ''} className="bg-muted/10 h-10" />
+            </div>
+          </>
+        )}
       </div>
 
       <hr className="border-border" />
@@ -202,88 +211,92 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
         </div>
       </div>
 
-      <hr className="border-border" />
+      {!isKiosk && (
+        <>
+          <hr className="border-border" />
 
-      {/* Bank Details */}
-      <div className="space-y-4">
-        <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Bank Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">Bank Name</Label>
-            <Input
-              disabled={readOnly}
-              value={user.bankName || ''}
-              onChange={(e) => handleUserChange('bankName', e.target.value)}
-              className="bg-white h-10 disabled:bg-muted/10"
-            />
+          {/* Bank Details */}
+          <div className="space-y-4">
+            <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Bank Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Bank Name</Label>
+                <Input
+                  disabled={readOnly}
+                  value={user.bankName || ''}
+                  onChange={(e) => handleUserChange('bankName', e.target.value)}
+                  className="bg-white h-10 disabled:bg-muted/10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Account Holder</Label>
+                <Input
+                  disabled={readOnly}
+                  value={user.bankHolder || ''}
+                  onChange={(e) => handleUserChange('bankHolder', e.target.value)}
+                  className="bg-white h-10 disabled:bg-muted/10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Bank Country</Label>
+                <Select
+                  disabled={readOnly}
+                  value={user.bankCountry || ''}
+                  onValueChange={(val) => handleUserChange('bankCountry', val)}
+                >
+                  <SelectTrigger className="bg-white h-10 disabled:bg-muted/10">
+                    <SelectValue placeholder="Select Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries?.map((c) => {
+                      const val = c.name || c.id
+                      if (!val) return null
+                      return (
+                        <SelectItem key={c.id} value={val}>
+                          {c.name || c.id}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">IBAN / Account Number</Label>
+                <Input
+                  disabled={readOnly}
+                  value={user.iban || user.bankAccount || ''}
+                  onChange={(e) => {
+                    handleUserChange('iban', e.target.value)
+                    handleUserChange('bankAccount', e.target.value)
+                  }}
+                  className="bg-white h-10 disabled:bg-muted/10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">BIC / SWIFT</Label>
+                <Input
+                  disabled={readOnly}
+                  value={user.bic || user.swift || ''}
+                  onChange={(e) => {
+                    handleUserChange('bic', e.target.value)
+                    handleUserChange('swift', e.target.value)
+                  }}
+                  className="bg-white h-10 disabled:bg-muted/10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Bank Code</Label>
+                <Input
+                  disabled={readOnly}
+                  value={user.bankCode || ''}
+                  onChange={(e) => handleUserChange('bankCode', e.target.value)}
+                  className="bg-white h-10 disabled:bg-muted/10"
+                />
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">Account Holder</Label>
-            <Input
-              disabled={readOnly}
-              value={user.bankHolder || ''}
-              onChange={(e) => handleUserChange('bankHolder', e.target.value)}
-              className="bg-white h-10 disabled:bg-muted/10"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">Bank Country</Label>
-            <Select
-              disabled={readOnly}
-              value={user.bankCountry || ''}
-              onValueChange={(val) => handleUserChange('bankCountry', val)}
-            >
-              <SelectTrigger className="bg-white h-10 disabled:bg-muted/10">
-                <SelectValue placeholder="Select Country" />
-              </SelectTrigger>
-              <SelectContent>
-                {countries?.map((c) => {
-                  const val = c.name || c.id
-                  if (!val) return null
-                  return (
-                    <SelectItem key={c.id} value={val}>
-                      {c.name || c.id}
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">IBAN / Account Number</Label>
-            <Input
-              disabled={readOnly}
-              value={user.iban || user.bankAccount || ''}
-              onChange={(e) => {
-                handleUserChange('iban', e.target.value)
-                handleUserChange('bankAccount', e.target.value)
-              }}
-              className="bg-white h-10 disabled:bg-muted/10"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">BIC / SWIFT</Label>
-            <Input
-              disabled={readOnly}
-              value={user.bic || user.swift || ''}
-              onChange={(e) => {
-                handleUserChange('bic', e.target.value)
-                handleUserChange('swift', e.target.value)
-              }}
-              className="bg-white h-10 disabled:bg-muted/10"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">Bank Code</Label>
-            <Input
-              disabled={readOnly}
-              value={user.bankCode || ''}
-              onChange={(e) => handleUserChange('bankCode', e.target.value)}
-              className="bg-white h-10 disabled:bg-muted/10"
-            />
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   )
 }

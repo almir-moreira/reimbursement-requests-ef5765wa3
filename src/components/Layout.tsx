@@ -50,10 +50,13 @@ export default function Layout() {
     navigate('/login')
   }
 
-  const navItems = [
-    { name: t('dashboard'), path: '/dashboard', icon: LayoutDashboard },
-    { name: t('requests'), path: '/requests', icon: FileText },
-  ]
+  const navItems = []
+
+  if (user.role !== 'kiosk') {
+    navItems.push({ name: t('dashboard'), path: '/dashboard', icon: LayoutDashboard })
+  }
+
+  navItems.push({ name: t('requests'), path: '/requests', icon: FileText })
 
   if (user.role === 'requester') {
     navItems.push({ name: t('profile'), path: '/profile', icon: UserIcon })
