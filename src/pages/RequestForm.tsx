@@ -12,6 +12,7 @@ import { RequestHeader } from '@/components/requests/RequestHeader'
 import { ExpenseDetails } from '@/components/requests/ExpenseDetails'
 import { Attachments } from '@/components/requests/Attachments'
 import { ApprovalSection } from '@/components/requests/ApprovalSection'
+import { CashPaymentDetails } from '@/components/requests/CashPaymentDetails'
 import { PrintTemplate } from '@/components/requests/PrintTemplate'
 import { toast } from '@/hooks/use-toast'
 import { sendEmail } from '@/lib/smtp'
@@ -440,6 +441,12 @@ export default function RequestForm() {
               readOnly={readOnly}
             />
 
+            <Attachments
+              formData={formData}
+              onChange={(data) => setFormData({ ...formData, ...data })}
+              readOnly={readOnly}
+            />
+
             <div className="space-y-6 pt-6 border-t border-border">
               <h3 className="font-serif font-bold text-xl text-[#4a8ebf]">Requester Signature</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -449,7 +456,7 @@ export default function RequestForm() {
                     disabled={!isRequesterEditing}
                     value={formData.signature || ''}
                     onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
-                    className="font-serif italic text-lg h-12 bg-muted/10"
+                    className="font-script text-4xl h-16 bg-muted/10 py-2"
                     placeholder="Type your full name as signature"
                   />
                 </div>
@@ -459,17 +466,19 @@ export default function RequestForm() {
                     disabled
                     type="date"
                     value={formData.date || ''}
-                    className="h-12 bg-muted/30"
+                    className="h-16 bg-muted/30"
                   />
                 </div>
               </div>
             </div>
 
-            <Attachments
-              formData={formData}
-              onChange={(data) => setFormData({ ...formData, ...data })}
-              readOnly={readOnly}
-            />
+            {formData.paymentMethod === 'Cash' && (
+              <CashPaymentDetails
+                formData={formData}
+                onChange={(data) => setFormData({ ...formData, ...data })}
+                readOnly={!(user?.role === 'qc' && formData.status !== 'Processed')}
+              />
+            )}
 
             <ApprovalSection formData={formData} onAction={handleAction} />
           </CardContent>

@@ -61,6 +61,14 @@ export interface Signature {
   role: string
 }
 
+export interface CashPaymentRow {
+  id: string
+  currency: string
+  amount: number
+  amountEuros: number
+  isRound?: boolean
+}
+
 export interface ReimbursementRequest {
   id: string
   status: RequestStatus
@@ -80,4 +88,5 @@ export interface ReimbursementRequest {
   financeSignature?: Signature | null
   paymentReceipt?: string
   paymentMethod?: 'Cash' | 'Bank Transfer'
+  cashPaymentDetails?: CashPaymentRow[]
 }
