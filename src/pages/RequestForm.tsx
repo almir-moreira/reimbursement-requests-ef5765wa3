@@ -41,7 +41,7 @@ export default function RequestForm() {
       let newId = `${currentYear}-0001`
 
       try {
-        // @ts-ignore - get_next_request_id is defined in migrations but not yet typed
+        // @ts-expect-error - get_next_request_id is defined in migrations but not yet typed
         const { data: nextId, error } = await supabase.rpc('get_next_request_id', {
           req_year: currentYear,
         })
@@ -52,7 +52,8 @@ export default function RequestForm() {
         console.error('Error fetching next ID', err)
       }
 
-      if (!isMounted) return      const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
+      if (!isMounted) return
+      const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
 
       setFormData({
         id: newId,
@@ -149,7 +150,7 @@ export default function RequestForm() {
         try {
           // Re-calculate ID at submit time to prevent concurrent conflicts
           const currentYear = new Date().getFullYear().toString()
-          // @ts-ignore - get_next_request_id is defined in migrations but not yet typed
+          // @ts-expect-error - get_next_request_id is defined in migrations but not yet typed
           const { data: nextId, error } = await supabase.rpc('get_next_request_id', {
             req_year: currentYear,
           })
