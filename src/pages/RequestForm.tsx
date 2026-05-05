@@ -16,6 +16,7 @@ import { CashPaymentDetails } from '@/components/requests/CashPaymentDetails'
 import { PrintTemplate } from '@/components/requests/PrintTemplate'
 import { toast } from '@/hooks/use-toast'
 import { sendEmail } from '@/lib/smtp'
+import { supabase } from '@/lib/supabase/client'
 import { Save, Printer, ArrowLeft, Send, RotateCcw } from 'lucide-react'
 
 export default function RequestForm() {
@@ -32,20 +33,36 @@ export default function RequestForm() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (isNew && user) {
-      // Generate standardized YYYY-NNNN Request ID
-      const currentYear = new Date().getFullYear().toString()
-      const yearRequests = requests.filter((r) => r.id.startsWith(`${currentYear}-`))
-      const lastNum = yearRequests.reduce((max, r) => {
-        const parts = r.id.split('-')
-        if (parts.length === 2) {
-          const num = parseInt(parts[1], 10)
-          return !isNaN(num) && num > max ? num : max
-        }
-        return max
-      }, 0)
-      const newId = `${currentYear}-${(lastNum + 1).toString().padStart(4, '0')}`
+    let isMounted = true
+    const initNew = async () => {
+      if (!isNew || !user || formData.id) return
 
+      const currentYear = new Date().getFullYear().toString()
+      let maxNum = 0
+
+      try {
+        const { data: existingIds } = await supabase
+          .from('requests')
+          .select('id')
+          .like('id', `${currentYear}-%`)
+
+        if (existingIds && existingIds.length > 0) {
+          maxNum = existingIds.reduce((max, r) => {
+            const parts = r.id.split('-')
+            if (parts.length === 2) {
+              const num = parseInt(parts[1], 10)
+              return !isNaN(num) && num > max ? num : max
+            }
+            return max
+          }, 0)
+        }
+      } catch (err) {
+        console.error('Error fetching max ID', err)
+      }
+
+      if (!isMounted) return
+
+      const newId = `${currentYear}-${(maxNum + 1).toString().padStart(4, '0')}`
       const initialRequesterDetails = user.role === 'kiosk' ? { role: 'kiosk' } : user
 
       setFormData({
@@ -66,10 +83,18 @@ export default function RequestForm() {
           },
         ],
       })
-    } else if (existing) {
+    }
+
+    if (isNew) {
+      initNew()
+    } else if (existing && !formData.id) {
       setFormData(existing)
     }
-  }, [isNew, existing, user, requests])
+
+    return () => {
+      isMounted = false
+    }
+  }, [isNew, existing, user, formData.id])
 
   if (!formData.id) {
     return (
@@ -133,6 +158,27 @@ export default function RequestForm() {
 
       if (isNew) {
         try {
+          // Re-calculate ID at submit time to prevent concurrent conflicts
+          const currentYear = new Date().getFullYear().toString()
+          const { data: existingIds } = await supabase
+            .from('requests')
+            .select('id')
+            .like('id', `${currentYear}-%`)
+
+          let finalId = payload.id!
+          if (existingIds && existingIds.length > 0) {
+            const maxNum = existingIds.reduce((max, r) => {
+              const parts = r.id.split('-')
+              if (parts.length === 2) {
+                const num = parseInt(parts[1], 10)
+                return !isNaN(num) && num > max ? num : max
+              }
+              return max
+            }, 0)
+            finalId = `${currentYear}-${(maxNum + 1).toString().padStart(4, '0')}`
+            payload.id = finalId
+          }
+
           await addRequest(payload)
           if (user?.role === 'requester' && payload.requesterDetails) {
             await updateProfile(user.id, payload.requesterDetails)
