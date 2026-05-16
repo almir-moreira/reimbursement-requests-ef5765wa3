@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS public.v_request_workflow_context CASCADE;
+
 CREATE OR REPLACE VIEW public.v_request_workflow_context AS
 SELECT 
     r.id AS request_id,
