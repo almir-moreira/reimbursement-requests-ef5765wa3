@@ -56,7 +56,7 @@ export default function RequestForm() {
 
       setFormData({
         id: newId,
-        status: 'Pending',
+        status: 'PENDING_QC',
         requesterId: user.id,
         requesterDetails: initialRequesterDetails as any,
         expenses: [],
@@ -175,11 +175,19 @@ export default function RequestForm() {
           }
 
           try {
-            await supabase.from('workflow_events').insert({
-              request_id: payload.id,
-              event_type: 'REQUEST_CREATED',
-              rejection_reason: null,
-            })
+            const { data: existingEvents } = await supabase
+              .from('workflow_events')
+              .select('id')
+              .eq('request_id', payload.id)
+              .eq('event_type', 'REQUEST_CREATED')
+
+            if (!existingEvents || existingEvents.length === 0) {
+              await supabase.from('workflow_events').insert({
+                request_id: payload.id,
+                event_type: 'REQUEST_CREATED',
+                rejection_reason: null,
+              })
+            }
           } catch (err) {
             console.error('Failed to log workflow event:', err)
           }
@@ -199,7 +207,7 @@ export default function RequestForm() {
           }
           await updateRequest(payload.id!, {
             ...payload,
-            status: 'Pending',
+            status: 'PENDING_QC',
             qcSignature: null,
             history: [
               ...(payload.history || []),
@@ -212,11 +220,19 @@ export default function RequestForm() {
             ],
           })
           try {
-            await supabase.from('workflow_events').insert({
-              request_id: payload.id,
-              event_type: 'REQUEST_CREATED',
-              rejection_reason: null,
-            })
+            const { data: existingEvents } = await supabase
+              .from('workflow_events')
+              .select('id')
+              .eq('request_id', payload.id)
+              .eq('event_type', 'REQUEST_CREATED')
+
+            if (!existingEvents || existingEvents.length === 0) {
+              await supabase.from('workflow_events').insert({
+                request_id: payload.id,
+                event_type: 'REQUEST_CREATED',
+                rejection_reason: null,
+              })
+            }
           } catch (err) {
             console.error('Failed to log workflow event:', err)
           }
