@@ -79,7 +79,7 @@ export default function RequestsList() {
   const paymentMethods = useMemo(() => {
     const methods = new Set<string>()
     requests.forEach((req) => {
-      const pm = req.data?.paymentMethod || req.data?.payment_method
+      const pm = req.payment_method || req.data?.paymentMethod || req.data?.payment_method
       if (pm && typeof pm === 'string') methods.add(pm)
     })
     return Array.from(methods).sort()
@@ -93,7 +93,7 @@ export default function RequestsList() {
         if (reqDate !== dateFilter) return false
       }
       if (paymentMethodFilter !== 'all') {
-        const pm = req.data?.paymentMethod || req.data?.payment_method
+        const pm = req.payment_method || req.data?.paymentMethod || req.data?.payment_method
         if (pm !== paymentMethodFilter) return false
       }
       if (eventFilter !== 'all') {
@@ -408,9 +408,13 @@ export default function RequestsList() {
                       </TableCell>
                       {user?.role !== 'requester' && user?.role !== 'kiosk' && (
                         <TableCell className="text-sm">
-                          {req.data?.paymentMethod || req.data?.payment_method ? (
+                          {req.payment_method ||
+                          req.data?.paymentMethod ||
+                          req.data?.payment_method ? (
                             <Badge variant="outline" className="font-normal text-xs bg-muted/50">
-                              {req.data?.paymentMethod || req.data?.payment_method}
+                              {req.payment_method ||
+                                req.data?.paymentMethod ||
+                                req.data?.payment_method}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground">-</span>

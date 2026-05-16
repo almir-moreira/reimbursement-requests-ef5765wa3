@@ -35,13 +35,13 @@ export default function MasterData() {
       data: store.events,
       cols: [
         { key: 'name', label: 'Name' },
-        { key: 'costCenter', label: 'Cost Centre' },
+        { key: 'cost_center', label: 'Cost Centre' },
         { key: 'account', label: 'Account' },
         { key: 'workorder', label: 'Workorder' },
-        { key: 'qcName', label: 'QC Name' },
-        { key: 'qcEmail', label: 'QC Email' },
+        { key: 'qc_name', label: 'QC Name' },
+        { key: 'qc_email', label: 'QC Email' },
       ],
-      tpl: { name: '', costCenter: '', account: '', workorder: '', qcName: '', qcEmail: '' },
+      tpl: { name: '', cost_center: '', account: '', workorder: '', qc_name: '', qc_email: '' },
     },
     {
       key: 'countries',
@@ -57,10 +57,10 @@ export default function MasterData() {
       cols: [
         { key: 'code', label: 'Code' },
         { key: 'name', label: 'Name' },
-        { key: 'coName', label: 'CO Name' },
-        { key: 'coEmail', label: 'CO Email' },
+        { key: 'co_name', label: 'CO Name' },
+        { key: 'co_email', label: 'CO Email' },
       ],
-      tpl: { code: '', name: '', coName: '', coEmail: '' },
+      tpl: { code: '', name: '', co_name: '', co_email: '' },
     },
     {
       key: 'accounts',

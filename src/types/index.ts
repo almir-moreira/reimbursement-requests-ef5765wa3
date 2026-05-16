@@ -90,4 +90,8 @@ export interface ReimbursementRequest {
   paymentReceipt?: string
   paymentMethod?: 'Cash' | 'Bank Transfer'
   cashPaymentDetails?: CashPaymentRow[]
+  qcRejectionReason?: string
+  coRejectionReason?: string
+  createdAt?: string
+  updatedAt?: string
 }

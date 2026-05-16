@@ -58,7 +58,7 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
               const ev = events?.find((e) => e.id === val)
               onChange({
                 eventId: val,
-                costCenter: ev?.costCenter || '',
+                costCenter: ev?.cost_center || '',
               })
             }}
           >

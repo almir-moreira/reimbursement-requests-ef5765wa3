@@ -34,6 +34,11 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
                 eventId: d.event_id || d.data?.eventId,
                 costCenterId: d.cost_center_id || d.data?.costCenterId,
                 requesterId: d.requester_id || d.data?.requesterId,
+                paymentMethod: d.payment_method || d.data?.paymentMethod,
+                qcRejectionReason: d.qc_rejection_reason || d.data?.qcRejectionReason,
+                coRejectionReason: d.co_rejection_reason || d.data?.coRejectionReason,
+                createdAt: d.created_at || d.data?.createdAt,
+                updatedAt: d.updated_at || d.data?.updatedAt,
               }) as ReimbursementRequest,
           ),
         )
@@ -56,6 +61,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         status: req.status,
         event_id: req.eventId || null,
         cost_center_id: req.costCenterId || null,
+        payment_method: req.paymentMethod || null,
+        qc_rejection_reason: req.qcRejectionReason || null,
+        co_rejection_reason: req.coRejectionReason || null,
         data: req as any,
       }
       const { error } = await supabase.from('requests').insert([dbReq])
@@ -79,6 +87,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
           requester_id: updatedReq.requesterId || undefined,
           event_id: updatedReq.eventId || null,
           cost_center_id: updatedReq.costCenterId || null,
+          payment_method: updatedReq.paymentMethod || null,
+          qc_rejection_reason: updatedReq.qcRejectionReason || null,
+          co_rejection_reason: updatedReq.coRejectionReason || null,
           data: updatedReq as any,
         })
         .eq('id', id)

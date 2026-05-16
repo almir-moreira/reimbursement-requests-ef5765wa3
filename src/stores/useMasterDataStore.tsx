@@ -5,11 +5,11 @@ import useAuthStore from './useAuthStore'
 export interface EventDetail {
   id: string
   name: string
-  costCenter: string
+  cost_center: string
   account: string
   workorder: string
-  qcName: string
-  qcEmail: string
+  qc_name: string
+  qc_email: string
 }
 
 export interface ExchangeRate {
@@ -29,8 +29,8 @@ export interface CostCenter {
   id: string
   code: string
   name: string
-  coName: string
-  coEmail: string
+  co_name: string
+  co_email: string
 }
 
 export interface Account {

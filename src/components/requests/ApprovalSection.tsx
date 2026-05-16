@@ -65,6 +65,16 @@ export function ApprovalSection({ formData, onAction }: Props) {
                 {new Date(formData.qcSignature.date).toLocaleString()}
               </p>
             </>
+          ) : formData.qcRejectionReason ? (
+            <>
+              <p className="text-xs font-bold text-destructive">Rejected</p>
+              <p
+                className="text-xs text-muted-foreground mt-1 line-clamp-2"
+                title={formData.qcRejectionReason}
+              >
+                {formData.qcRejectionReason}
+              </p>
+            </>
           ) : (
             <p className="text-xs text-muted-foreground italic">Pending Review</p>
           )}
@@ -81,6 +91,16 @@ export function ApprovalSection({ formData, onAction }: Props) {
               <p className="font-medium text-sm">{formData.coSignature.name}</p>
               <p className="text-xs text-muted-foreground">
                 {new Date(formData.coSignature.date).toLocaleString()}
+              </p>
+            </>
+          ) : formData.coRejectionReason ? (
+            <>
+              <p className="text-xs font-bold text-destructive">Rejected</p>
+              <p
+                className="text-xs text-muted-foreground mt-1 line-clamp-2"
+                title={formData.coRejectionReason}
+              >
+                {formData.coRejectionReason}
               </p>
             </>
           ) : (

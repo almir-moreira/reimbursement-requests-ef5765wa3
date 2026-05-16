@@ -144,7 +144,8 @@ export default function RequestForm() {
       const totalAmountEuros =
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
 
-      const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+      const reqCc =
+        formData.costCenter || events.find((e) => e.id === formData.eventId)?.cost_center
       const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
       const costCenterId = ccData?.id || null
 
@@ -153,6 +154,7 @@ export default function RequestForm() {
         totalAmount,
         totalAmountEuros,
         costCenterId,
+        paymentMethod: formData.paymentMethod || 'Bank Transfer',
       } as ReimbursementRequest
 
       if (isNew) {
@@ -315,6 +317,7 @@ export default function RequestForm() {
         } else {
           newStatus = 'Rejected'
           updates.qcSignature = null
+          updates.qcRejectionReason = comments
         }
       } else if (user?.role === 'co') {
         if (action === 'approve') {
@@ -325,6 +328,7 @@ export default function RequestForm() {
           newStatus = 'Rejected'
           updates.qcSignature = null
           updates.coSignature = null
+          updates.coRejectionReason = comments
         }
       } else if (user?.role === 'finance' || isQcProcessingCash) {
         if (action === 'approve') {
@@ -355,7 +359,8 @@ export default function RequestForm() {
       const totalAmountEuros =
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
 
-      const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+      const reqCc =
+        formData.costCenter || events.find((e) => e.id === formData.eventId)?.cost_center
       const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
       const costCenterId = ccData?.id || null
 
