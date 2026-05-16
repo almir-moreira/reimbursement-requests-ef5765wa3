@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { FileText, Plus, Search, Filter, Trash2 } from 'lucide-react'
+import { getDisplayStatus } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -108,7 +109,7 @@ export default function RequestsList() {
 
   const filteredRequests = useMemo(() => {
     return requests.filter((req) => {
-      if (statusFilter !== 'all' && req.status !== statusFilter) return false
+      if (statusFilter !== 'all' && getDisplayStatus(req.status) !== statusFilter) return false
       if (dateFilter) {
         const reqDate = req.created_at ? req.created_at.substring(0, 10) : ''
         if (reqDate !== dateFilter) return false
@@ -143,18 +144,14 @@ export default function RequestsList() {
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'draft':
-        return 'bg-gray-100 text-gray-800'
       case 'pending':
         return 'bg-yellow-100 text-yellow-800'
       case 'approved':
-        return 'bg-green-100 text-green-800'
+        return 'bg-blue-100 text-blue-800'
       case 'rejected':
         return 'bg-red-100 text-red-800'
-      case 'processed':
-        return 'bg-blue-100 text-blue-800'
-      case 'paid':
-        return 'bg-purple-100 text-purple-800'
+      case 'completed':
+        return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -223,12 +220,10 @@ export default function RequestsList() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Draft">Draft</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Approved">Approved</SelectItem>
                   <SelectItem value="Rejected">Rejected</SelectItem>
-                  <SelectItem value="Processed">Processed</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -445,9 +440,9 @@ export default function RequestsList() {
                       <TableCell>
                         <Badge
                           variant="secondary"
-                          className={`${getStatusColor(req.status)} border-transparent font-medium`}
+                          className={`${getStatusColor(getDisplayStatus(req.status))} border-transparent font-medium`}
                         >
-                          {req.status || 'Draft'}
+                          {getDisplayStatus(req.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
