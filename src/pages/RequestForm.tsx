@@ -15,7 +15,6 @@ import { ApprovalSection } from '@/components/requests/ApprovalSection'
 import { CashPaymentDetails } from '@/components/requests/CashPaymentDetails'
 import { PrintTemplate } from '@/components/requests/PrintTemplate'
 import { toast } from '@/hooks/use-toast'
-import { sendEmail } from '@/lib/smtp'
 import { supabase } from '@/lib/supabase/client'
 import { Save, Printer, ArrowLeft, Send, RotateCcw } from 'lucide-react'
 
@@ -144,7 +143,17 @@ export default function RequestForm() {
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0
       const totalAmountEuros =
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
-      const payload = { ...formData, totalAmount, totalAmountEuros } as ReimbursementRequest
+
+      const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+      const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
+      const costCenterId = ccData?.id
+
+      const payload = {
+        ...formData,
+        totalAmount,
+        totalAmountEuros,
+        costCenterId,
+      } as ReimbursementRequest
 
       if (isNew) {
         try {
@@ -164,13 +173,16 @@ export default function RequestForm() {
           }
 
           try {
-            await sendEmail({
-              to: 'qc@kaiciid.org',
-              subject: `New Reimbursement Request Submitted - ${payload.id}`,
-              body: `A new reimbursement request has been submitted by ${user?.name}. Please log in to review it.`,
+            await supabase.from('workflow_events').insert({
+              request_id: payload.id,
+              action: 'submit',
+              status_from: null,
+              status_to: 'Pending',
+              created_by: user?.id,
+              comments: 'New request submitted',
             })
           } catch (err) {
-            console.error('Failed to send email:', err)
+            console.error('Failed to log workflow event:', err)
           }
           toast({ title: 'Request Submitted Successfully' })
           navigate('/requests')
@@ -200,6 +212,18 @@ export default function RequestForm() {
               },
             ],
           })
+          try {
+            await supabase.from('workflow_events').insert({
+              request_id: payload.id,
+              action: 'resubmit',
+              status_from: 'Rejected',
+              status_to: 'Pending',
+              created_by: user?.id,
+              comments: 'Request resubmitted for review',
+            })
+          } catch (err) {
+            console.error('Failed to log workflow event:', err)
+          }
           toast({ title: 'Request Resubmitted for Review' })
           navigate('/requests')
         } catch (err: any) {
@@ -279,9 +303,6 @@ export default function RequestForm() {
       }
 
       let newStatus = formData.status
-      let notifyEmail = formData.requesterDetails?.email || 'requester@example.com'
-      let notifySubject = ''
-      let notifyBody = ''
       let historyAction = action === 'approve' ? 'Approved' : 'Rejected'
       const updates: Partial<ReimbursementRequest> = {}
 
@@ -294,8 +315,6 @@ export default function RequestForm() {
         } else {
           newStatus = 'Rejected'
           updates.qcSignature = null
-          notifySubject = `Reimbursement Request Rejected: ${formData.id}`
-          notifyBody = `Your reimbursement request ${formData.id} was returned for adjustments. Reason: ${comments}`
         }
       } else if (user?.role === 'co') {
         if (action === 'approve') {
@@ -306,9 +325,6 @@ export default function RequestForm() {
           newStatus = 'Rejected'
           updates.qcSignature = null
           updates.coSignature = null
-          notifyEmail = 'qc@kaiciid.org'
-          notifySubject = `Request rejected by Certifying Officer: ${formData.id}`
-          notifyBody = `Request ${formData.id} was returned by Certifying Officer to QC. Reason: ${comments}`
         }
       } else if (user?.role === 'finance' || isQcProcessingCash) {
         if (action === 'approve') {
@@ -316,18 +332,10 @@ export default function RequestForm() {
           historyAction = 'Processed'
           updates.financeSignature = signature
           if (receipt) updates.paymentReceipt = receipt
-          notifySubject = `Reimbursement Request Processed: ${formData.id}`
-          notifyBody = `Your reimbursement request ${formData.id} has been processed. Payment Reference: ${receipt || 'N/A'}`
         } else {
           newStatus = 'Rejected'
           updates.coSignature = null
           updates.financeSignature = null
-          const reqCc =
-            formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
-          const ccData = costCenters.find((c) => c.code === reqCc)
-          notifyEmail = ccData?.coEmail || 'co@kaiciid.org'
-          notifySubject = `Request rejected by ${isQcProcessingCash ? 'QC' : 'Finance'}: ${formData.id}`
-          notifyBody = `Request ${formData.id} was rejected by ${isQcProcessingCash ? 'QC' : 'Finance'}. Reason: ${comments}`
         }
       }
 
@@ -347,8 +355,13 @@ export default function RequestForm() {
       const totalAmountEuros =
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amountEuros) || 0), 0) || 0
 
+      const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
+      const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
+      const costCenterId = ccData?.id
+
       const fullPayload = {
         ...formData,
+        costCenterId,
         ...updates,
         status: newStatus as any,
         history: newHistory,
@@ -360,16 +373,22 @@ export default function RequestForm() {
         await updateRequest(formData.id!, fullPayload)
         toast({ title: `Request ${newStatus}` })
 
-        if (notifySubject) {
-          try {
-            await sendEmail({
-              to: notifyEmail,
-              subject: notifySubject,
-              body: notifyBody,
-            })
-          } catch (err) {
-            console.error('Failed to send notification email:', err)
-          }
+        try {
+          await supabase.from('workflow_events').insert({
+            request_id: formData.id,
+            action:
+              action === 'upload_receipt'
+                ? 'upload_receipt'
+                : action === 'approve'
+                  ? 'approve'
+                  : 'reject',
+            status_from: formData.status,
+            status_to: newStatus,
+            created_by: user?.id,
+            comments: comments || (action === 'upload_receipt' ? 'Payment receipt uploaded' : ''),
+          })
+        } catch (err) {
+          console.error('Failed to log workflow event:', err)
         }
 
         navigate('/requests')

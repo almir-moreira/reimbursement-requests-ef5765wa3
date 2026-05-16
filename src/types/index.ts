@@ -73,6 +73,7 @@ export interface ReimbursementRequest {
   id: string
   status: RequestStatus
   eventId: string
+  costCenterId?: string
   costCenter?: string
   account?: string
   workorder?: string

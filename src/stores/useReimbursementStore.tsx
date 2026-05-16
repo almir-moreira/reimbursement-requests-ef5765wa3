@@ -40,7 +40,10 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
       const dbReq = {
         id: req.id,
         user_id: user?.id,
+        requester_id: user?.id,
         status: req.status,
+        event_id: req.eventId,
+        cost_center_id: req.costCenterId || null,
         data: req as any,
       }
       const { error } = await supabase.from('requests').insert([dbReq])
@@ -61,6 +64,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         .from('requests')
         .update({
           status: updatedReq.status,
+          requester_id: updatedReq.requesterId || undefined,
+          event_id: updatedReq.eventId,
+          cost_center_id: updatedReq.costCenterId || null,
           data: updatedReq as any,
         })
         .eq('id', id)
