@@ -60,7 +60,9 @@ export default function RequestsList() {
     try {
       let query = supabase
         .from('requests')
-        .select('*, profiles(name, email)')
+        .select(
+          '*, requester:profiles!requests_requester_id_fkey(name, email), user:profiles!requests_user_id_fkey(name, email)',
+        )
         .order('created_at', { ascending: false })
 
       const { data, error } = await query
@@ -328,7 +330,11 @@ export default function RequestsList() {
                         })()}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {req.data?.requesterDetails?.name || req.profiles?.name || 'Unknown'}
+                        {req.data?.requesterDetails?.name ||
+                          req.requester?.name ||
+                          req.user?.name ||
+                          req.profiles?.name ||
+                          'Unknown'}
                       </TableCell>
                       <TableCell className="text-sm font-medium text-right whitespace-nowrap">
                         {(() => {

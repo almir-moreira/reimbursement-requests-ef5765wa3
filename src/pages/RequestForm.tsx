@@ -146,7 +146,7 @@ export default function RequestForm() {
 
       const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
       const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
-      const costCenterId = ccData?.id
+      const costCenterId = ccData?.id || null
 
       const payload = {
         ...formData,
@@ -357,7 +357,7 @@ export default function RequestForm() {
 
       const reqCc = formData.costCenter || events.find((e) => e.id === formData.eventId)?.costCenter
       const ccData = costCenters.find((c) => c.code === reqCc || c.id === reqCc)
-      const costCenterId = ccData?.id
+      const costCenterId = ccData?.id || null
 
       const fullPayload = {
         ...formData,

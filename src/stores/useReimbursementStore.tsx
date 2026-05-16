@@ -24,7 +24,19 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         .select('*')
         .order('created_at', { ascending: false })
       if (!error && data) {
-        setRequests(data.map((d) => d.data as ReimbursementRequest))
+        setRequests(
+          data.map(
+            (d) =>
+              ({
+                ...d.data,
+                id: d.id,
+                status: d.status,
+                eventId: d.event_id || d.data?.eventId,
+                costCenterId: d.cost_center_id || d.data?.costCenterId,
+                requesterId: d.requester_id || d.data?.requesterId,
+              }) as ReimbursementRequest,
+          ),
+        )
       }
     } catch (error) {
       console.error('Fetch requests error:', error)
@@ -40,9 +52,9 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
       const dbReq = {
         id: req.id,
         user_id: user?.id,
-        requester_id: user?.id,
+        requester_id: req.requesterId || user?.id,
         status: req.status,
-        event_id: req.eventId,
+        event_id: req.eventId || null,
         cost_center_id: req.costCenterId || null,
         data: req as any,
       }
@@ -65,7 +77,7 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         .update({
           status: updatedReq.status,
           requester_id: updatedReq.requesterId || undefined,
-          event_id: updatedReq.eventId,
+          event_id: updatedReq.eventId || null,
           cost_center_id: updatedReq.costCenterId || null,
           data: updatedReq as any,
         })
