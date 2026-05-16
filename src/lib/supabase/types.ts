@@ -1,11 +1,17 @@
 // AVOID UPDATING THIS FILE DIRECTLY. It is automatically generated.
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '14.4'
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -57,40 +63,40 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'audit_history_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "audit_history_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['id']
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'audit_history_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "audit_history_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_id']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_id"]
           },
         ]
       }
       cost_centers: {
         Row: {
+          co_email: string | null
+          co_name: string | null
           code: string | null
-          coEmail: string | null
-          coName: string | null
           id: string
           name: string | null
         }
         Insert: {
+          co_email?: string | null
+          co_name?: string | null
           code?: string | null
-          coEmail?: string | null
-          coName?: string | null
           id: string
           name?: string | null
         }
         Update: {
+          co_email?: string | null
+          co_name?: string | null
           code?: string | null
-          coEmail?: string | null
-          coName?: string | null
           id?: string
           name?: string | null
         }
@@ -114,29 +120,29 @@ export type Database = {
       events: {
         Row: {
           account: string | null
-          costCenter: string | null
+          cost_center: string | null
           id: string
           name: string | null
-          qcEmail: string | null
-          qcName: string | null
+          qc_email: string | null
+          qc_name: string | null
           workorder: string | null
         }
         Insert: {
           account?: string | null
-          costCenter?: string | null
+          cost_center?: string | null
           id: string
           name?: string | null
-          qcEmail?: string | null
-          qcName?: string | null
+          qc_email?: string | null
+          qc_name?: string | null
           workorder?: string | null
         }
         Update: {
           account?: string | null
-          costCenter?: string | null
+          cost_center?: string | null
           id?: string
           name?: string | null
-          qcEmail?: string | null
-          qcName?: string | null
+          qc_email?: string | null
+          qc_name?: string | null
           workorder?: string | null
         }
         Relationships: []
@@ -186,11 +192,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'exchange_rates_log_imported_by_fkey'
-            columns: ['imported_by']
+            foreignKeyName: "exchange_rates_log_imported_by_fkey"
+            columns: ["imported_by"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -265,63 +271,75 @@ export type Database = {
       }
       requests: {
         Row: {
+          co_rejection_reason: string | null
           cost_center_id: string | null
           created_at: string | null
           data: Json
           event_id: string | null
           id: string
+          payment_method: string | null
+          qc_rejection_reason: string | null
           requester_id: string | null
           status: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          co_rejection_reason?: string | null
           cost_center_id?: string | null
           created_at?: string | null
           data: Json
           event_id?: string | null
           id: string
+          payment_method?: string | null
+          qc_rejection_reason?: string | null
           requester_id?: string | null
           status?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          co_rejection_reason?: string | null
           cost_center_id?: string | null
           created_at?: string | null
           data?: Json
           event_id?: string | null
           id?: string
+          payment_method?: string | null
+          qc_rejection_reason?: string | null
           requester_id?: string | null
           status?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'requests_cost_center_id_fkey'
-            columns: ['cost_center_id']
+            foreignKeyName: "requests_cost_center_id_fkey"
+            columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: 'cost_centers'
-            referencedColumns: ['id']
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_event_id_fkey'
-            columns: ['event_id']
+            foreignKeyName: "requests_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: 'events'
-            referencedColumns: ['id']
+            referencedRelation: "events"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_requester_id_fkey'
-            columns: ['requester_id']
+            foreignKeyName: "requests_requester_id_fkey"
+            columns: ["requester_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_user_id_fkey'
-            columns: ['user_id']
+            foreignKeyName: "requests_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -391,18 +409,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'workflow_events_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "workflow_events_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['id']
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'workflow_events_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "workflow_events_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_id']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_id"]
           },
         ]
       }
@@ -445,32 +463,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'requests_cost_center_id_fkey'
-            columns: ['cost_center_id']
+            foreignKeyName: "requests_cost_center_id_fkey"
+            columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: 'cost_centers'
-            referencedColumns: ['id']
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_event_id_fkey'
-            columns: ['event_id']
+            foreignKeyName: "requests_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: 'events'
-            referencedColumns: ['id']
+            referencedRelation: "events"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_requester_id_fkey'
-            columns: ['requester_id']
+            foreignKeyName: "requests_requester_id_fkey"
+            columns: ["requester_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_user_id_fkey'
-            columns: ['legacy_user_id']
+            foreignKeyName: "requests_user_id_fkey"
+            columns: ["legacy_user_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -487,31 +505,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
-    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -520,23 +540,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -545,23 +565,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -570,36 +590,36 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema['Enums']
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
-    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema['CompositeTypes']
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
-    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
@@ -607,6 +627,7 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
 
 // ====== DATABASE EXTENDED CONTEXT (auto-generated) ======
 // This section contains actual PostgreSQL column types, constraints, RLS policies,
@@ -634,19 +655,19 @@ export const Constants = {
 //   id: text (not null)
 //   code: text (nullable)
 //   name: text (nullable)
-//   coName: text (nullable)
-//   coEmail: text (nullable)
+//   co_name: text (nullable)
+//   co_email: text (nullable)
 // Table: countries
 //   id: text (not null)
 //   name: text (nullable)
 // Table: events
 //   id: text (not null)
 //   name: text (nullable)
-//   costCenter: text (nullable)
+//   cost_center: text (nullable)
 //   account: text (nullable)
 //   workorder: text (nullable)
-//   qcName: text (nullable)
-//   qcEmail: text (nullable)
+//   qc_name: text (nullable)
+//   qc_email: text (nullable)
 // Table: exchange_rates
 //   Currency_Code: character varying (not null)
 //   Country: character varying (not null)
@@ -688,6 +709,10 @@ export const Constants = {
 //   requester_id: uuid (nullable)
 //   event_id: text (nullable)
 //   cost_center_id: text (nullable)
+//   payment_method: text (nullable)
+//   qc_rejection_reason: text (nullable)
+//   co_rejection_reason: text (nullable)
+//   updated_at: timestamp with time zone (nullable, default: now())
 // Table: smtp_settings
 //   id: text (not null)
 //   host: text (nullable)
@@ -750,6 +775,7 @@ export const Constants = {
 // Table: requests
 //   FOREIGN KEY requests_cost_center_id_fkey: FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id)
 //   FOREIGN KEY requests_event_id_fkey: FOREIGN KEY (event_id) REFERENCES events(id)
+//   CHECK requests_payment_method_check: CHECK ((payment_method = ANY (ARRAY['Cash'::text, 'Bank Transfer'::text])))
 //   PRIMARY KEY requests_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY requests_requester_id_fkey: FOREIGN KEY (requester_id) REFERENCES profiles(id)
 //   FOREIGN KEY requests_user_id_fkey: FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
@@ -813,9 +839,9 @@ export const Constants = {
 //   Policy "Users can insert own requests" (INSERT, PERMISSIVE) roles={authenticated}
 //     WITH CHECK: ((user_id = auth.uid()) OR (EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'qc'::text, 'co'::text, 'finance'::text, 'kiosk'::text]))))))
 //   Policy "Users can read requests" (SELECT, PERMISSIVE) roles={authenticated}
-//     USING: ((user_id = auth.uid()) OR (requester_id = auth.uid()) OR (EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'qc'::text, 'finance'::text, 'kiosk'::text]))))) OR (EXISTS ( SELECT 1    FROM profiles p   WHERE ((p.id = auth.uid()) AND (p.role = 'co'::text) AND (p.email IN ( SELECT cost_centers."coEmail"            FROM cost_centers           WHERE ((cost_centers.id = requests.cost_center_id) OR (cost_centers.code = (requests.data ->> 'costCenter'::text)) OR (cost_centers.name = (requests.data ->> 'costCenter'::text)))))))))
+//     USING: ((user_id = auth.uid()) OR (requester_id = auth.uid()) OR (EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'qc'::text, 'finance'::text, 'kiosk'::text]))))) OR (EXISTS ( SELECT 1    FROM profiles p   WHERE ((p.id = auth.uid()) AND (p.role = 'co'::text) AND (p.email IN ( SELECT cost_centers.co_email            FROM cost_centers           WHERE ((cost_centers.id = requests.cost_center_id) OR (cost_centers.code = (requests.data ->> 'costCenter'::text)) OR (cost_centers.name = (requests.data ->> 'costCenter'::text)))))))))
 //   Policy "Users can update requests" (UPDATE, PERMISSIVE) roles={authenticated}
-//     USING: ((user_id = auth.uid()) OR (requester_id = auth.uid()) OR (EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'qc'::text, 'finance'::text, 'kiosk'::text]))))) OR (EXISTS ( SELECT 1    FROM profiles p   WHERE ((p.id = auth.uid()) AND (p.role = 'co'::text) AND (p.email IN ( SELECT cost_centers."coEmail"            FROM cost_centers           WHERE ((cost_centers.id = requests.cost_center_id) OR (cost_centers.code = (requests.data ->> 'costCenter'::text)) OR (cost_centers.name = (requests.data ->> 'costCenter'::text)))))))))
+//     USING: ((user_id = auth.uid()) OR (requester_id = auth.uid()) OR (EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'qc'::text, 'finance'::text, 'kiosk'::text]))))) OR (EXISTS ( SELECT 1    FROM profiles p   WHERE ((p.id = auth.uid()) AND (p.role = 'co'::text) AND (p.email IN ( SELECT cost_centers.co_email            FROM cost_centers           WHERE ((cost_centers.id = requests.cost_center_id) OR (cost_centers.code = (requests.data ->> 'costCenter'::text)) OR (cost_centers.name = (requests.data ->> 'costCenter'::text)))))))))
 // Table: smtp_settings
 //   Policy "Enable read access for all authenticated users" (SELECT, PERMISSIVE) roles={authenticated}
 //     USING: true
@@ -846,15 +872,28 @@ export const Constants = {
 //   BEGIN
 //     -- We query all requests, ignoring RLS policies due to SECURITY DEFINER,
 //     -- so we can guarantee the correct max sequence ID is retrieved.
-//     SELECT COALESCE(MAX(SUBSTRING(id FROM '-([0-9]+)'))::int), 0) + 1
+//     SELECT COALESCE(MAX(SUBSTRING(id FROM '-([0-9]+)
+)::int), 0) + 1
 //     INTO next_num
 //     FROM public.requests
-//     WHERE id LIKE req_year || '-%' AND id ~ '-[0-9]+';
-//
+//     WHERE id LIKE req_year || '-%' AND id ~ '-[0-9]+
+;
+//   
 //     RETURN req_year || '-' || LPAD(next_num::text, 4, '0');
 //   END;
 //   $function$
-//
+//   
+// FUNCTION set_current_timestamp_updated_at()
+//   CREATE OR REPLACE FUNCTION public.set_current_timestamp_updated_at()
+//    RETURNS trigger
+//    LANGUAGE plpgsql
+//   AS $function$
+//   BEGIN
+//     NEW.updated_at = NOW();
+//     RETURN NEW;
+//   END;
+//   $function$
+//   
 // FUNCTION track_request_status_change()
 //   CREATE OR REPLACE FUNCTION public.track_request_status_change()
 //    RETURNS trigger
@@ -874,9 +913,11 @@ export const Constants = {
 //     RETURN NEW;
 //   END;
 //   $function$
-//
+//   
 
 // --- TRIGGERS ---
 // Table: requests
 //   request_status_audit_trigger: CREATE TRIGGER request_status_audit_trigger AFTER INSERT OR UPDATE ON public.requests FOR EACH ROW EXECUTE FUNCTION track_request_status_change()
 //   requests_status_to_n8n: CREATE TRIGGER requests_status_to_n8n AFTER INSERT OR UPDATE ON public.requests FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://almir-moreira.app.n8n.cloud/webhook-test/supabase-requests-status', 'POST', '{"Content-type":"application/json","Authorization":"Bearer bi$coffk@ic11d"}', '{}', '5000')
+//   set_requests_updated_at: CREATE TRIGGER set_requests_updated_at BEFORE UPDATE ON public.requests FOR EACH ROW EXECUTE FUNCTION set_current_timestamp_updated_at()
+
