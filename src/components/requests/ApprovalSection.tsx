@@ -34,14 +34,19 @@ export function ApprovalSection({ formData, onAction }: Props) {
   if (!user || user.role === 'requester' || user.role === 'admin') return null
 
   const isCash = formData.paymentMethod === 'Cash'
-  const isQcProcessingCash = user.role === 'qc' && formData.status === 'Approved' && isCash
+  const isQcProcessingCash =
+    user.role === 'qc' &&
+    (formData.status === 'Approved' || formData.status === 'APPROVED_BY_CO') &&
+    isCash
   const canEditPaymentMethod =
     user.role === 'qc' && (formData.status === 'Pending' || formData.status === 'PENDING_QC')
 
   const canApprove =
     (user.role === 'qc' && (formData.status === 'Pending' || formData.status === 'PENDING_QC')) ||
     (user.role === 'co' && (formData.status === 'Checked' || formData.status === 'PENDING_CO')) ||
-    (user.role === 'finance' && formData.status === 'Approved' && !isCash) ||
+    (user.role === 'finance' &&
+      (formData.status === 'Approved' || formData.status === 'APPROVED_BY_CO') &&
+      !isCash) ||
     isQcProcessingCash
 
   const canUploadReceipt =
@@ -94,14 +99,14 @@ export function ApprovalSection({ formData, onAction }: Props) {
                 {new Date(formData.coSignature.date).toLocaleString()}
               </p>
             </>
-          ) : formData.coRejectionReason ? (
+          ) : formData.status === 'REJECTED_BY_CO' || formData.coRejectionReason ? (
             <>
               <p className="text-xs font-bold text-destructive">Rejected</p>
               <p
                 className="text-xs text-muted-foreground mt-1 line-clamp-2"
-                title={formData.coRejectionReason}
+                title={formData.coRejectionReason || 'No reason provided'}
               >
-                {formData.coRejectionReason}
+                {formData.coRejectionReason || 'No reason provided'}
               </p>
             </>
           ) : (
@@ -194,7 +199,7 @@ export function ApprovalSection({ formData, onAction }: Props) {
               onClick={() => onAction('reject', comments, undefined, paymentMethod)}
               variant="destructive"
               className="h-12 px-8 text-md font-bold shadow-sm"
-              disabled={user.role === 'qc' && !comments.trim()}
+              disabled={(user.role === 'qc' || user.role === 'co') && !comments.trim()}
             >
               {user.role === 'co' || user.role === 'finance' || isQcProcessingCash ? (
                 <RotateCcw className="w-5 h-5 mr-2" />

@@ -99,6 +99,24 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
           eventType = 'QC_REJECTED'
           rejectionReason = req.qcRejectionReason
         }
+      } else if (
+        user?.role === 'co' &&
+        (existing.status === 'PENDING_CO' || existing.status === 'Checked')
+      ) {
+        if (req.status === 'Approved' || req.status === 'APPROVED_BY_CO') {
+          newStatus = 'APPROVED_BY_CO'
+          eventType = 'CO_APPROVED'
+        } else if (req.status === 'Rejected' || req.status === 'REJECTED_BY_CO') {
+          const reason = req.coRejectionReason || req.qcRejectionReason
+          if (!reason) {
+            throw new Error('Rejection reason is required')
+          }
+          newStatus = 'REJECTED_BY_CO'
+          eventType = 'CO_REJECTED'
+          rejectionReason = reason
+          req.coRejectionReason = reason
+          delete req.qcRejectionReason
+        }
       }
 
       const updatedReq = { ...existing, ...req, status: newStatus } as ReimbursementRequest
