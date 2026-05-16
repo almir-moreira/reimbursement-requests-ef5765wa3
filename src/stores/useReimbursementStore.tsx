@@ -78,7 +78,30 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
   const updateRequest = async (id: string, req: Partial<ReimbursementRequest>) => {
     try {
       const existing = requests.find((r) => r.id === id)
-      const updatedReq = { ...existing, ...req } as ReimbursementRequest
+      if (!existing) throw new Error('Request not found')
+
+      let newStatus = req.status || existing.status
+      let eventType = null
+      let rejectionReason = null
+
+      if (
+        user?.role === 'qc' &&
+        (existing.status === 'PENDING_QC' || existing.status === 'Pending')
+      ) {
+        if (req.status === 'Checked' || req.status === 'PENDING_CO') {
+          newStatus = 'PENDING_CO'
+          eventType = 'QC_APPROVED'
+        } else if (req.status === 'Rejected' || req.status === 'REJECTED_BY_QC') {
+          if (!req.qcRejectionReason) {
+            throw new Error('Rejection reason is required')
+          }
+          newStatus = 'REJECTED_BY_QC'
+          eventType = 'QC_REJECTED'
+          rejectionReason = req.qcRejectionReason
+        }
+      }
+
+      const updatedReq = { ...existing, ...req, status: newStatus } as ReimbursementRequest
 
       const { error } = await supabase
         .from('requests')
@@ -95,6 +118,16 @@ export function ReimbursementProvider({ children }: { children: ReactNode }) {
         .eq('id', id)
 
       if (error) throw error
+
+      if (eventType) {
+        await supabase.from('workflow_events').insert([
+          {
+            request_id: id,
+            event_type: eventType,
+            rejection_reason: rejectionReason,
+          },
+        ])
+      }
 
       setRequests((prev) => prev.map((r) => (r.id === id ? updatedReq : r)))
     } catch (error) {
