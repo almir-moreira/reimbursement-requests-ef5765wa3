@@ -23,7 +23,18 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
-import { FileText, Plus, Search, Filter } from 'lucide-react'
+import { FileText, Plus, Search, Filter, Trash2 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 export default function RequestsList() {
   const { t } = useTranslation()
@@ -51,6 +62,16 @@ export default function RequestsList() {
       }
     } catch (error) {
       console.error('Error fetching events:', error)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase.from('requests').delete().eq('id', id)
+      if (error) throw error
+      setRequests((prev) => prev.filter((r) => r.id !== id))
+    } catch (error) {
+      console.error('Error deleting request:', error)
     }
   }
 
@@ -429,7 +450,7 @@ export default function RequestsList() {
                           {req.status || 'Draft'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right whitespace-nowrap">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -441,6 +462,38 @@ export default function RequestsList() {
                             View
                           </Link>
                         </Button>
+                        {user?.role === 'qc' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-1 px-2"
+                                title="Delete Request"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Request</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this request? This action cannot
+                                  be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                  onClick={() => handleDelete(req.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
