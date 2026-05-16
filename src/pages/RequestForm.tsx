@@ -177,11 +177,8 @@ export default function RequestForm() {
           try {
             await supabase.from('workflow_events').insert({
               request_id: payload.id,
-              action: 'submit',
-              status_from: null,
-              status_to: 'Pending',
-              created_by: user?.id,
-              comments: 'New request submitted',
+              event_type: 'REQUEST_CREATED',
+              rejection_reason: null,
             })
           } catch (err) {
             console.error('Failed to log workflow event:', err)
@@ -217,11 +214,8 @@ export default function RequestForm() {
           try {
             await supabase.from('workflow_events').insert({
               request_id: payload.id,
-              action: 'resubmit',
-              status_from: 'Rejected',
-              status_to: 'Pending',
-              created_by: user?.id,
-              comments: 'Request resubmitted for review',
+              event_type: 'REQUEST_CREATED',
+              rejection_reason: null,
             })
           } catch (err) {
             console.error('Failed to log workflow event:', err)
@@ -378,22 +372,25 @@ export default function RequestForm() {
         await updateRequest(formData.id!, fullPayload)
         toast({ title: `Request ${newStatus}` })
 
-        try {
-          await supabase.from('workflow_events').insert({
-            request_id: formData.id,
-            action:
-              action === 'upload_receipt'
-                ? 'upload_receipt'
-                : action === 'approve'
-                  ? 'approve'
-                  : 'reject',
-            status_from: formData.status,
-            status_to: newStatus,
-            created_by: user?.id,
-            comments: comments || (action === 'upload_receipt' ? 'Payment receipt uploaded' : ''),
-          })
-        } catch (err) {
-          console.error('Failed to log workflow event:', err)
+        let eventType = ''
+        if (action === 'approve') {
+          if (user?.role === 'qc') eventType = 'QC_APPROVED'
+          else if (user?.role === 'co') eventType = 'CO_APPROVED'
+        } else if (action === 'reject') {
+          if (user?.role === 'qc') eventType = 'QC_REJECTED'
+          else if (user?.role === 'co') eventType = 'CO_REJECTED'
+        }
+
+        if (eventType) {
+          try {
+            await supabase.from('workflow_events').insert({
+              request_id: formData.id,
+              event_type: eventType,
+              rejection_reason: action === 'reject' ? comments : null,
+            })
+          } catch (err) {
+            console.error('Failed to log workflow event:', err)
+          }
         }
 
         navigate('/requests')

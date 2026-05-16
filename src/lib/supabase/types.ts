@@ -382,37 +382,28 @@ export type Database = {
       }
       workflow_events: {
         Row: {
-          action: string
-          comments: string | null
+          event_type: string
+          rejection_reason: string | null
           created_at: string
-          created_by: string | null
           id: string
-          processed: boolean
+          processed_at: string | null
           request_id: string
-          status_from: string | null
-          status_to: string | null
         }
         Insert: {
-          action: string
-          comments?: string | null
+          event_type: string
+          rejection_reason?: string | null
           created_at?: string
-          created_by?: string | null
           id?: string
-          processed?: boolean
+          processed_at?: string | null
           request_id: string
-          status_from?: string | null
-          status_to?: string | null
         }
         Update: {
-          action?: string
-          comments?: string | null
+          event_type?: string
+          rejection_reason?: string | null
           created_at?: string
-          created_by?: string | null
           id?: string
-          processed?: boolean
+          processed_at?: string | null
           request_id?: string
-          status_from?: string | null
-          status_to?: string | null
         }
         Relationships: [
           {
