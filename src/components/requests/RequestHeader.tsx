@@ -46,7 +46,15 @@ export function RequestHeader({ formData, onChange, readOnly }: RequestHeaderPro
           <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
             Status
           </Label>
-          <Input disabled value={getDisplayStatus(formData.status)} className="bg-muted/10 h-10" />
+          <Input
+            disabled
+            value={
+              getDisplayStatus(formData.status) === 'Pending'
+                ? 'Pending Approval'
+                : getDisplayStatus(formData.status)
+            }
+            className="bg-muted/10 h-10"
+          />
         </div>
         <div className="space-y-2 col-span-2 md:col-span-4">
           <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
