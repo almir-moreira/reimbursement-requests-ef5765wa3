@@ -50,8 +50,12 @@ export function ApprovalSection({ formData, onAction }: Props) {
     isQcProcessingCash
 
   const canUploadReceipt =
-    (user.role === 'finance' && formData.status === 'Processed' && !isCash) ||
-    (user.role === 'qc' && formData.status === 'Processed' && isCash)
+    (user.role === 'finance' &&
+      (formData.status === 'Processed' || formData.status === 'Completed') &&
+      !isCash) ||
+    (user.role === 'qc' &&
+      (formData.status === 'Processed' || formData.status === 'Completed') &&
+      isCash)
 
   return (
     <div className="space-y-6 pt-6 border-t border-border mt-10 bg-[#4a8ebf]/5 p-6 rounded-xl border border-[#4a8ebf]/20">
@@ -71,7 +75,9 @@ export function ApprovalSection({ formData, onAction }: Props) {
                 {new Date(formData.qcSignature.date).toLocaleString()}
               </p>
             </>
-          ) : formData.status === 'REJECTED_BY_QC' || formData.qcRejectionReason ? (
+          ) : formData.status === 'REJECTED_BY_QC' ||
+            formData.status === 'Rejected' ||
+            formData.qcRejectionReason ? (
             <>
               <p className="text-xs font-bold text-destructive">Rejected</p>
               <p
@@ -99,7 +105,9 @@ export function ApprovalSection({ formData, onAction }: Props) {
                 {new Date(formData.coSignature.date).toLocaleString()}
               </p>
             </>
-          ) : formData.status === 'REJECTED_BY_CO' || formData.coRejectionReason ? (
+          ) : formData.status === 'REJECTED_BY_CO' ||
+            formData.status === 'Rejected' ||
+            formData.coRejectionReason ? (
             <>
               <p className="text-xs font-bold text-destructive">Rejected</p>
               <p

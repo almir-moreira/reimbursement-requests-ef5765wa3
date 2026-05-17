@@ -141,14 +141,7 @@ export default function Layout() {
                 </span>
                 <span className="hidden sm:inline-block">{user.name}</span>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-                title="Toggle Language"
-              >
-                <Globe className="w-4 h-4" />
-              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"

@@ -93,10 +93,17 @@ export default function RequestForm() {
     )
   }
 
-  const isPostCO = formData.status === 'Approved' || formData.status === 'Processed'
+  const isPostCO =
+    formData.status === 'Approved' ||
+    formData.status === 'APPROVED_BY_CO' ||
+    formData.status === 'Processed' ||
+    formData.status === 'Completed'
   const isRequesterEditing =
     (user?.role === 'requester' || user?.role === 'kiosk') &&
-    (isNew || formData.status === 'Rejected')
+    (isNew ||
+      formData.status === 'Rejected' ||
+      formData.status === 'REJECTED_BY_QC' ||
+      formData.status === 'REJECTED_BY_CO')
   const isQcEditing = user?.role === 'qc' && !isPostCO
   const readOnly = (!isRequesterEditing && !isQcEditing) || isPostCO
 
@@ -137,7 +144,11 @@ export default function RequestForm() {
 
     setIsSaving(true)
     try {
-      const isResubmission = !isNew && formData.status === 'Rejected'
+      const isResubmission =
+        !isNew &&
+        (formData.status === 'Rejected' ||
+          formData.status === 'REJECTED_BY_QC' ||
+          formData.status === 'REJECTED_BY_CO')
 
       const totalAmount =
         formData.expenses?.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 0
@@ -320,29 +331,29 @@ export default function RequestForm() {
 
       if (user?.role === 'qc' && !isQcProcessingCash) {
         if (action === 'approve') {
-          newStatus = 'Checked'
+          newStatus = 'PENDING_CO'
           historyAction = 'Reviewed'
           updates.qcSignature = signature
           if (paymentMethod) updates.paymentMethod = paymentMethod as any
         } else {
-          newStatus = 'Rejected'
+          newStatus = 'REJECTED_BY_QC'
           updates.qcSignature = null
           updates.qcRejectionReason = comments
         }
       } else if (user?.role === 'co') {
         if (action === 'approve') {
-          newStatus = 'Approved'
+          newStatus = 'APPROVED_BY_CO'
           historyAction = 'Approved'
           updates.coSignature = signature
         } else {
-          newStatus = 'Rejected'
+          newStatus = 'REJECTED_BY_CO'
           updates.qcSignature = null
           updates.coSignature = null
           updates.coRejectionReason = comments
         }
       } else if (user?.role === 'finance' || isQcProcessingCash) {
         if (action === 'approve') {
-          newStatus = 'Processed'
+          newStatus = 'Completed'
           historyAction = 'Processed'
           updates.financeSignature = signature
           if (receipt) updates.paymentReceipt = receipt
@@ -465,7 +476,9 @@ export default function RequestForm() {
                   <>
                     <Send className="w-4 h-4 mr-2" /> Submit Request
                   </>
-                ) : formData.status === 'Rejected' ? (
+                ) : formData.status === 'Rejected' ||
+                  formData.status === 'REJECTED_BY_QC' ||
+                  formData.status === 'REJECTED_BY_CO' ? (
                   <>
                     <RotateCcw className="w-4 h-4 mr-2" /> Resubmit Request
                   </>
@@ -481,11 +494,13 @@ export default function RequestForm() {
 
         <Card className="border-border shadow-sm overflow-hidden">
           <CardHeader
-            className={`text-white py-4 ${formData.status === 'Rejected' ? 'bg-destructive' : 'bg-[#4a8ebf]'}`}
+            className={`text-white py-4 ${formData.status === 'Rejected' || formData.status === 'REJECTED_BY_QC' || formData.status === 'REJECTED_BY_CO' ? 'bg-destructive' : 'bg-[#4a8ebf]'}`}
           >
             <CardTitle className="text-xl tracking-wide flex items-center gap-3">
               Request Details
-              {formData.status === 'Rejected' && (
+              {(formData.status === 'Rejected' ||
+                formData.status === 'REJECTED_BY_QC' ||
+                formData.status === 'REJECTED_BY_CO') && (
                 <span className="text-sm bg-white/20 px-2 py-0.5 rounded ml-auto">REJECTED</span>
               )}
             </CardTitle>

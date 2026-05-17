@@ -35,13 +35,28 @@ export default function Dashboard() {
     if (user.role === 'requester') return req.user_id === user.id
     if (user.role === 'qc') return true
     if (user.role === 'co') {
-      if (req.status === 'Pending') return false
-      const allowedCostCenters = costCenters
-        .filter((c: any) => c.coEmail === user.email)
-        .map((c: any) => c.code)
-      const reqCostCenter =
-        req.data?.costCenter || events.find((e: any) => e.id === req.data?.eventId)?.costCenter
-      return allowedCostCenters.includes(reqCostCenter)
+      if (req.status === 'Pending' || req.status === 'PENDING_QC') return false
+      const userEmail = user.email?.toLowerCase()
+      const myCostCenters = costCenters.filter(
+        (c: any) =>
+          c.coEmail?.toLowerCase() === userEmail || c.co_email?.toLowerCase() === userEmail,
+      )
+      if (myCostCenters.length === 0) return false
+
+      const allowedIds = myCostCenters.map((c: any) => c.id)
+      const allowedCodes = myCostCenters.map((c: any) => c.code)
+
+      const reqEventId = req.event_id || req.data?.eventId
+      const reqEvent = events.find((e: any) => e.id === reqEventId)
+
+      const reqCostCenterId = req.cost_center_id || req.data?.costCenterId || reqEvent?.cost_center
+      const reqCostCenterCode = req.data?.costCenter
+
+      return (
+        allowedIds.includes(reqCostCenterId) ||
+        allowedCodes.includes(reqCostCenterId) ||
+        (reqCostCenterCode && allowedCodes.includes(reqCostCenterCode))
+      )
     }
     return false
   })
@@ -191,11 +206,22 @@ export default function Dashboard() {
     .sort((a, b) => b.count - a.count)
 
   const total = userRequests.length
-  const pendingReview = userRequests.filter((r) => r.status === 'Pending').length
-  const pendingApproval = userRequests.filter((r) => r.status === 'Checked').length
-  const pendingProcessing = userRequests.filter((r) => r.status === 'Approved').length
-  const processed = userRequests.filter((r) => r.status === 'Processed').length
-  const rejected = userRequests.filter((r) => r.status === 'Rejected').length
+  const pendingReview = userRequests.filter(
+    (r) => r.status === 'Pending' || r.status === 'PENDING_QC',
+  ).length
+  const pendingApproval = userRequests.filter(
+    (r) => r.status === 'Checked' || r.status === 'PENDING_CO',
+  ).length
+  const pendingProcessing = userRequests.filter(
+    (r) => r.status === 'Approved' || r.status === 'APPROVED_BY_CO',
+  ).length
+  const processed = userRequests.filter(
+    (r) => r.status === 'Processed' || r.status === 'Completed',
+  ).length
+  const rejected = userRequests.filter(
+    (r) =>
+      r.status === 'Rejected' || r.status === 'REJECTED_BY_QC' || r.status === 'REJECTED_BY_CO',
+  ).length
 
   const stats = [
     { title: 'Total Requests', value: total, icon: FileText, color: 'text-[#4a8ebf]' },

@@ -71,8 +71,8 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
     onChange({ expenses: [...expenses, newExpense] })
   }
 
-  const handleRemoveExpense = (id: string) => {
-    onChange({ expenses: expenses.filter((e: any) => e.id !== id) })
+  const handleRemoveExpense = (indexToRemove: number) => {
+    onChange({ expenses: expenses.filter((_: any, i: number) => i !== indexToRemove) })
   }
 
   const calcEuros = (amount: number, rate: number, currency: string) => {
@@ -82,11 +82,15 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
     return parseFloat((amountUsd * eurRate).toFixed(2))
   }
 
-  const handleExpenseChange = async (id: string, field: string, value: any) => {
-    let newExpenses = [...expenses]
-    const index = newExpenses.findIndex((e: any) => e.id === id)
-    if (index === -1) return
+  const getCalculatedRate = (rate: number, currency: string) => {
+    if (currency === 'EUR') return 1
+    if (currency === 'USD') return eurRate
+    return (1 / (rate || 1)) * eurRate
+  }
 
+  const handleExpenseChange = async (index: number, field: string, value: any) => {
+    let newExpenses = [...expenses]
+    if (!newExpenses[index]) return
     const expense = { ...newExpenses[index], [field]: value }
 
     if (field === 'currency') {
@@ -102,20 +106,23 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
           .limit(1)
           .single()
 
-        if (data?.Operational_Rate) {
-          expense.exchangeRate = data.Operational_Rate
-        } else {
-          expense.exchangeRate = 1
-        }
-        expense.amountEuros = calcEuros(expense.amount || 0, expense.exchangeRate, value)
+        const rate = data?.Operational_Rate || 1
+        expense.exchangeRate = rate
+        expense.amountEuros = calcEuros(expense.amount || 0, rate, value)
       }
+      expense.usdToEurRate = eurRate
+      expense.calculatedRate = getCalculatedRate(expense.exchangeRate, value)
     } else if (field === 'amount') {
       const amount = parseFloat(value) || 0
       expense.amount = amount
+      expense.usdToEurRate = eurRate
+      expense.calculatedRate = getCalculatedRate(expense.exchangeRate || 1, expense.currency)
       expense.amountEuros = calcEuros(amount, expense.exchangeRate || 1, expense.currency)
     } else if (field === 'exchangeRate') {
       const rate = parseFloat(value) || 1
       expense.exchangeRate = rate
+      expense.usdToEurRate = eurRate
+      expense.calculatedRate = getCalculatedRate(rate, expense.currency)
       expense.amountEuros = calcEuros(expense.amount || 0, rate, expense.currency)
     }
 
@@ -151,7 +158,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 variant="ghost"
                 size="icon"
                 className="absolute top-2 right-2 text-destructive hover:text-destructive hover:bg-destructive/10 z-10"
-                onClick={() => handleRemoveExpense(expense.id)}
+                onClick={() => handleRemoveExpense(index)}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -174,7 +181,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   type="date"
                   disabled={readOnly}
                   value={expense.date || ''}
-                  onChange={(e) => handleExpenseChange(expense.id, 'date', e.target.value)}
+                  onChange={(e) => handleExpenseChange(index, 'date', e.target.value)}
                 />
               </div>
 
@@ -184,7 +191,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                   disabled={readOnly}
                   value={expense.description || ''}
                   placeholder="Expense description"
-                  onChange={(e) => handleExpenseChange(expense.id, 'description', e.target.value)}
+                  onChange={(e) => handleExpenseChange(index, 'description', e.target.value)}
                 />
               </div>
 
@@ -198,7 +205,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                     <Select
                       disabled={readOnly && user?.role !== 'qc'}
                       value={expense.account || ''}
-                      onValueChange={(val) => handleExpenseChange(expense.id, 'account', val)}
+                      onValueChange={(val) => handleExpenseChange(index, 'account', val)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Account" />
@@ -218,7 +225,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                     <Select
                       disabled={readOnly && user?.role !== 'qc'}
                       value={expense.workorder || ''}
-                      onValueChange={(val) => handleExpenseChange(expense.id, 'workorder', val)}
+                      onValueChange={(val) => handleExpenseChange(index, 'workorder', val)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Workorder" />
@@ -240,7 +247,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                 <Select
                   disabled={readOnly || isLoading}
                   value={expense.currency || ''}
-                  onValueChange={(val) => handleExpenseChange(expense.id, 'currency', val)}
+                  onValueChange={(val) => handleExpenseChange(index, 'currency', val)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Currency" />
@@ -275,7 +282,7 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
                     let val = e.target.value.replace(/\D/g, '')
                     if (!val) val = '0'
                     const num = parseInt(val, 10) / 100
-                    handleExpenseChange(expense.id, 'amount', num)
+                    handleExpenseChange(index, 'amount', num)
                   }}
                   className="text-right"
                 />
@@ -297,9 +304,32 @@ export function ExpenseDetails({ formData, onChange, readOnly }: any) {
 
             {user?.role !== 'requester' && (
               <div className="mt-4 pt-3 border-t border-border/50">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>Exchange Rate Applied:</span>
-                  <span className="font-mono font-medium">{expense.exchangeRate || 1}</span>
+                <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <span>Exchange Rate Applied (to USD):</span>
+                    <span className="font-mono font-medium">{expense.exchangeRate || 1}</span>
+                  </div>
+                  {expense.currency !== 'EUR' && (
+                    <div className="flex items-center gap-4">
+                      <span>USD to EUR Rate:</span>
+                      <span className="font-mono font-medium">
+                        {expense.usdToEurRate || eurRate}
+                      </span>
+                    </div>
+                  )}
+                  {expense.currency !== 'EUR' && (
+                    <div className="flex items-center gap-4">
+                      <span>Final Rate (Local to EUR):</span>
+                      <span className="font-mono font-medium text-[#4a8ebf]">
+                        {expense.calculatedRate
+                          ? expense.calculatedRate.toFixed(6)
+                          : (
+                              (1 / (expense.exchangeRate || 1)) *
+                              (expense.usdToEurRate || eurRate)
+                            ).toFixed(6)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
