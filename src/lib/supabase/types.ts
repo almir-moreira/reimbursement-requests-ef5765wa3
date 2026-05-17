@@ -1,11 +1,17 @@
 // AVOID UPDATING THIS FILE DIRECTLY. It is automatically generated.
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '14.4'
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -57,25 +63,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'audit_history_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "audit_history_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['id']
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'audit_history_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "audit_history_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_id']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_id"]
           },
           {
-            foreignKeyName: 'audit_history_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "audit_history_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_number']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_number"]
           },
         ]
       }
@@ -193,11 +199,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'exchange_rates_log_imported_by_fkey'
-            columns: ['imported_by']
+            foreignKeyName: "exchange_rates_log_imported_by_fkey"
+            columns: ["imported_by"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -315,32 +321,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'requests_cost_center_id_fkey'
-            columns: ['cost_center_id']
+            foreignKeyName: "requests_cost_center_id_fkey"
+            columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: 'cost_centers'
-            referencedColumns: ['id']
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_event_id_fkey'
-            columns: ['event_id']
+            foreignKeyName: "requests_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: 'events'
-            referencedColumns: ['id']
+            referencedRelation: "events"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_requester_id_fkey'
-            columns: ['requester_id']
+            foreignKeyName: "requests_requester_id_fkey"
+            columns: ["requester_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'requests_user_id_fkey'
-            columns: ['user_id']
+            foreignKeyName: "requests_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -401,25 +407,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'workflow_events_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "workflow_events_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['id']
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'workflow_events_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "workflow_events_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_id']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_id"]
           },
           {
-            foreignKeyName: 'workflow_events_request_id_fkey'
-            columns: ['request_id']
+            foreignKeyName: "workflow_events_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
-            referencedRelation: 'v_request_workflow_context'
-            referencedColumns: ['request_number']
+            referencedRelation: "v_request_workflow_context"
+            referencedColumns: ["request_number"]
           },
         ]
       }
@@ -476,31 +482,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
-    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -509,23 +517,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -534,23 +542,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -559,36 +567,36 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema['Enums']
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
-    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema['CompositeTypes']
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
-    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
@@ -596,6 +604,7 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
 
 // ====== DATABASE EXTENDED CONTEXT (auto-generated) ======
 // This section contains actual PostgreSQL column types, constraints, RLS policies,
@@ -832,22 +841,21 @@ export const Constants = {
 //    RETURNS text
 //    LANGUAGE plpgsql
 //    SECURITY DEFINER
-//   AS $function$
-//   DECLARE
+//   AS $function$DECLARE
 //     next_num int;
 //   BEGIN
 //     -- We query all requests, ignoring RLS policies due to SECURITY DEFINER,
-//     -- so we can guarantee the correct max sequence ID is retrieved.
-//     SELECT COALESCE(MAX(SUBSTRING(id FROM '-([0-9]+)')
-//     ::int), 0) + 1
+//    
+//     SELECT COALESCE(MAX(SUBSTRING(id FROM '-([0-9]+)
+)::int), 0) + 1
 //     INTO next_num
 //     FROM public.requests
-//     WHERE id LIKE req_year || '-%' AND id ~ '-[0-9]+';
-//
+//     WHERE id LIKE req_year || '-%' AND id ~ '-[0-9]+
+;
+//   
 //     RETURN req_year || '-' || LPAD(next_num::text, 4, '0');
-//   END;
-//   $function$
-//
+//   END;$function$
+//   
 // FUNCTION notify_n8n_workflow_event()
 //   CREATE OR REPLACE FUNCTION public.notify_n8n_workflow_event()
 //    RETURNS trigger
@@ -867,7 +875,7 @@ export const Constants = {
 //       'rejection_reason', NEW.rejection_reason,
 //       'created_at', NEW.created_at
 //     );
-//
+//   
 //     -- Send the webhook using pg_net (asynchronous, non-blocking)
 //     PERFORM net.http_post(
 //       url := webhook_url,
@@ -877,14 +885,14 @@ export const Constants = {
 //       ),
 //       body := payload
 //     );
-//
+//     
 //     RETURN NEW;
 //   EXCEPTION WHEN OTHERS THEN
 //     -- Ignore network/extension errors so the main transaction doesn't fail
 //     RETURN NEW;
 //   END;
 //   $function$
-//
+//   
 // FUNCTION set_current_timestamp_updated_at()
 //   CREATE OR REPLACE FUNCTION public.set_current_timestamp_updated_at()
 //    RETURNS trigger
@@ -895,7 +903,7 @@ export const Constants = {
 //     RETURN NEW;
 //   END;
 //   $function$
-//
+//   
 // FUNCTION track_request_status_change()
 //   CREATE OR REPLACE FUNCTION public.track_request_status_change()
 //    RETURNS trigger
@@ -915,7 +923,7 @@ export const Constants = {
 //     RETURN NEW;
 //   END;
 //   $function$
-//
+//   
 
 // --- TRIGGERS ---
 // Table: requests
@@ -924,3 +932,4 @@ export const Constants = {
 //   set_requests_updated_at: CREATE TRIGGER set_requests_updated_at BEFORE UPDATE ON public.requests FOR EACH ROW EXECUTE FUNCTION set_current_timestamp_updated_at()
 // Table: workflow_events
 //   workflow_events_to_n8n_trigger: CREATE TRIGGER workflow_events_to_n8n_trigger AFTER INSERT ON public.workflow_events FOR EACH ROW EXECUTE FUNCTION notify_n8n_workflow_event()
+
