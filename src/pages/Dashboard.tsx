@@ -1,333 +1,104 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import useAuthStore from '@/stores/useAuthStore'
-import useMasterDataStore from '@/stores/useMasterDataStore'
-import { supabase } from '@/lib/supabase/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, CheckCircle, Clock, DollarSign, XCircle } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from 'recharts'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { Button } from '@/components/ui/button'
+import { RefreshCw } from 'lucide-react'
+import { format } from 'date-fns'
+import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
+import { DashboardKPIs } from '@/components/dashboard/DashboardKPIs'
+import { WorkflowPipeline } from '@/components/dashboard/WorkflowPipeline'
+import { DelayAlerts } from '@/components/dashboard/DelayAlerts'
+import { AgingCharts } from '@/components/dashboard/AgingCharts'
+import { FinancialCharts } from '@/components/dashboard/FinancialCharts'
+import { RejectionOverview } from '@/components/dashboard/RejectionOverview'
+import { RequestDetailsTable } from '@/components/dashboard/RequestDetailsTable'
+import { FilterState, defaultFilters, DashboardRow } from '@/services/dashboard'
 
-// trigger update
 export default function Dashboard() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
-  const { costCenters, events } = useMasterDataStore()
-  const [requests, setRequests] = useState<any[]>([])
+  const { data, loading, lastUpdated, refetch, filterOptions } = useDashboardData()
+  const [filters, setFilters] = useState<FilterState>(defaultFilters)
 
-  useEffect(() => {
-    const fetchRequests = async () => {
-      if (!user) return
-      try {
-        const { data, error } = await supabase.from('requests').select('*')
-        if (error) throw error
-        setRequests(data || [])
-      } catch (err) {
-        console.error('Error fetching requests:', err)
+  const filteredData = useMemo<DashboardRow[]>(() => {
+    return data.filter((row) => {
+      if (filters.search) {
+        const s = filters.search.toLowerCase()
+        if (
+          !row.request_id?.toLowerCase().includes(s) &&
+          !row.requester_name?.toLowerCase().includes(s)
+        )
+          return false
       }
-    }
-    fetchRequests()
-  }, [user])
-
-  const userRequests = requests.filter((req) => {
-    if (!user) return false
-    if (user.role === 'admin' || user.role === 'finance') return true
-    if (user.role === 'requester') return req.user_id === user.id
-    if (user.role === 'qc') return true
-    if (user.role === 'co') {
-      if (req.status === 'Pending' || req.status === 'PENDING_QC') return false
-      const userEmail = user.email?.toLowerCase()
-      const myCostCenters = costCenters.filter(
-        (c: any) =>
-          c.coEmail?.toLowerCase() === userEmail || c.co_email?.toLowerCase() === userEmail,
+      if (filters.status !== 'all' && row.status !== filters.status) return false
+      if (filters.eventId !== 'all' && row.event_id !== filters.eventId) return false
+      if (filters.costCenterId !== 'all' && row.cost_center_id !== filters.costCenterId)
+        return false
+      if (filters.paymentMethod !== 'all' && row.payment_method !== filters.paymentMethod)
+        return false
+      if (filters.requester !== 'all' && row.requester_id !== filters.requester) return false
+      if (
+        filters.responsibleRole !== 'all' &&
+        row.current_responsible_role !== filters.responsibleRole
       )
-      if (myCostCenters.length === 0) return false
+        return false
+      return true
+    })
+  }, [data, filters])
 
-      const allowedIds = myCostCenters.map((c: any) => c.id)
-      const allowedCodes = myCostCenters.map((c: any) => c.code)
+  const delayedData = useMemo(
+    () => filteredData.filter((r) => r.is_delayed_48h === true),
+    [filteredData],
+  )
+  const rejectedData = useMemo(
+    () => filteredData.filter((r) => r.is_rejected === true),
+    [filteredData],
+  )
 
-      const reqEventId = req.event_id || req.data?.eventId
-      const reqEvent = events.find((e: any) => e.id === reqEventId)
-
-      const reqCostCenterId = req.cost_center_id || req.data?.costCenterId || reqEvent?.cost_center
-      const reqCostCenterCode = req.data?.costCenter
-
-      return (
-        allowedIds.includes(reqCostCenterId) ||
-        allowedCodes.includes(reqCostCenterId) ||
-        (reqCostCenterCode && allowedCodes.includes(reqCostCenterCode))
-      )
-    }
-    return false
-  })
-
-  const getAmountEuros = (req: any) => {
-    if (!req || !req.data) return 0
-
-    const parseAmt = (val: any) => {
-      if (val === null || val === undefined || val === '') return 0
-      if (typeof val === 'number') return val
-      let strVal = String(val).trim()
-      strVal = strVal.replace(/[^\d.,-]/g, '')
-
-      if (strVal.includes('.') && strVal.includes(',')) {
-        if (strVal.lastIndexOf(',') > strVal.lastIndexOf('.')) {
-          strVal = strVal.replace(/\./g, '').replace(',', '.')
-        } else {
-          strVal = strVal.replace(/,/g, '')
-        }
-      } else if (strVal.includes(',')) {
-        if (/,\d{1,2}$/.test(strVal)) {
-          strVal = strVal.replace(',', '.')
-        } else {
-          strVal = strVal.replace(/,/g, '')
-        }
-      }
-
-      const parsed = parseFloat(strVal)
-      return isNaN(parsed) ? 0 : parsed
-    }
-
-    const findAmount = (obj: any, keys: string[]): number => {
-      if (!obj || typeof obj !== 'object') return 0
-      for (const k of keys) {
-        if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') {
-          const amt = parseAmt(obj[k])
-          if (amt > 0) return amt
-        }
-      }
-      for (const val of Object.values(obj)) {
-        if (val && typeof val === 'object' && !Array.isArray(val)) {
-          const amt = findAmount(val, keys)
-          if (amt > 0) return amt
-        }
-      }
-      return 0
-    }
-
-    const findCurrency = (obj: any, keys: string[]): string | null => {
-      if (!obj || typeof obj !== 'object') return null
-      for (const k of keys) {
-        if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return String(obj[k])
-      }
-      for (const val of Object.values(obj)) {
-        if (val && typeof val === 'object' && !Array.isArray(val)) {
-          const c = findCurrency(val, keys)
-          if (c) return c
-        }
-      }
-      return null
-    }
-
-    const explicitEur = findAmount(req.data, [
-      'totalAmountEUR',
-      'totalEur',
-      'totalEUR',
-      'total_amount_eur',
-      'totalEuros',
-      'amountEur',
-      'AmountEur',
-    ])
-    if (explicitEur > 0) return explicitEur
-
-    const currStr = String(
-      findCurrency(req.data, ['currency', 'currencyCode', 'currency_code', 'Currency']) || '',
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-8 h-8 border-2 border-[#4a8ebf] border-t-transparent rounded-full animate-spin" />
+      </div>
     )
-      .trim()
-      .toUpperCase()
-    const isEur =
-      currStr === 'EUR' ||
-      currStr === 'EURO' ||
-      currStr === 'EUROS' ||
-      currStr === '€' ||
-      currStr === ''
-
-    if (isEur) {
-      const generalAmount = findAmount(req.data, [
-        'totalAmount',
-        'total',
-        'amount',
-        'TotalAmount',
-        'Amount',
-        'total_amount',
-        'value',
-      ])
-      if (generalAmount > 0) return generalAmount
-    }
-
-    const itemsList = Array.isArray(req.data.items)
-      ? req.data.items
-      : Array.isArray(req.data.expenses)
-        ? req.data.expenses
-        : []
-    if (itemsList.length > 0) {
-      let sum = 0
-      itemsList.forEach((item: any) => {
-        const c = String(item.currency || item.currencyCode || currStr)
-          .trim()
-          .toUpperCase()
-        if (c === 'EUR' || c === 'EURO' || c === 'EUROS' || c === '€' || c === '') {
-          sum += parseAmt(item.amount || item.total || item.value || item.cost || 0)
-        }
-      })
-      if (sum > 0) return sum
-    }
-
-    return 0
   }
 
-  const COLORS = [
-    '#3b82f6',
-    '#10b981',
-    '#f59e0b',
-    '#ef4444',
-    '#8b5cf6',
-    '#ec4899',
-    '#06b6d4',
-    '#84cc16',
-    '#f97316',
-    '#6366f1',
-    '#14b8a6',
-    '#d946ef',
-  ]
-
-  const eventStats = events
-    .map((event: any, index: number) => {
-      const eventReqs = userRequests.filter((r) => r.data?.eventId === event.id)
-      const rawValue = eventReqs.reduce((sum, r) => sum + getAmountEuros(r), 0)
-      return {
-        name: event.name || 'Unknown',
-        count: eventReqs.length,
-        value: Number(rawValue.toFixed(2)),
-        fill: COLORS[index % COLORS.length],
-      }
-    })
-    .filter((e) => e.count > 0)
-    .sort((a, b) => b.count - a.count)
-
-  const total = userRequests.length
-  const pendingReview = userRequests.filter(
-    (r) => r.status === 'Pending' || r.status === 'PENDING_QC',
-  ).length
-  const pendingApproval = userRequests.filter(
-    (r) => r.status === 'Checked' || r.status === 'PENDING_CO',
-  ).length
-  const pendingProcessing = userRequests.filter(
-    (r) => r.status === 'Approved' || r.status === 'APPROVED_BY_CO',
-  ).length
-  const processed = userRequests.filter(
-    (r) => r.status === 'Processed' || r.status === 'Completed',
-  ).length
-  const rejected = userRequests.filter(
-    (r) =>
-      r.status === 'Rejected' || r.status === 'REJECTED_BY_QC' || r.status === 'REJECTED_BY_CO',
-  ).length
-
-  const stats = [
-    { title: 'Total Requests', value: total, icon: FileText, color: 'text-[#4a8ebf]' },
-    { title: 'Pending Review', value: pendingReview, icon: Clock, color: 'text-orange-500' },
-    {
-      title: 'Pending Approval',
-      value: pendingApproval,
-      icon: CheckCircle,
-      color: 'text-blue-500',
-    },
-    {
-      title: 'Pending Processing',
-      value: pendingProcessing,
-      icon: DollarSign,
-      color: 'text-purple-500',
-    },
-    { title: 'Processed & Closed', value: processed, icon: CheckCircle, color: 'text-success' },
-    { title: 'Rejected', value: rejected, icon: XCircle, color: 'text-destructive' },
-  ]
-
   return (
-    <div className="space-y-6 max-w-6xl mx-auto animate-fade-in-up">
-      <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('dashboard')}</h1>
-
-      {user?.role === 'requester' ? (
-        <p className="text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100">
-          Welcome back, {user.name}. You can view the real-time status of all your reimbursement
-          requests below. Check the "Requests" page to view detailed histories and manage
-          rejections.
-        </p>
-      ) : (
-        <p className="text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100">
-          Welcome back, {user?.name}. Here is an overview of the platform's current reimbursement
-          workflow.
-        </p>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-8">
-        {stats.map((stat, i) => (
-          <Card key={i} className="border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                {stat.title}
-              </CardTitle>
-              <div className={`p-2 rounded-full bg-muted ${stat.color} bg-opacity-20`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-foreground">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in-up">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-3xl font-serif font-bold text-[#4a8ebf]">{t('dashboard')}</h1>
+        {lastUpdated && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              Last updated: {format(lastUpdated, 'MMM dd, yyyy HH:mm')}
+            </span>
+            <Button variant="ghost" size="sm" onClick={refetch} className="h-7 px-2">
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {eventStats.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg">Requests per Event</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{}} className="h-[300px] w-full">
-                <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
-                  <ChartTooltip
-                    cursor={{ fill: 'transparent' }}
-                    content={<ChartTooltipContent />}
-                  />
-                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                    {eventStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+      <p className="text-muted-foreground bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm">
+        {user?.role === 'requester'
+          ? `Welcome back, ${user.name}. Here is a real-time overview of your reimbursement requests.`
+          : `Welcome back, ${user?.name}. Here is an overview of the platform's reimbursement workflow.`}
+      </p>
 
-          <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg">Total Value per Event (EUR)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{}} className="h-[300px] w-full">
-                <BarChart data={eventStats} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.5} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `€${val}`} />
-                  <ChartTooltip
-                    cursor={{ fill: 'transparent' }}
-                    content={<ChartTooltipContent />}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {eventStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <DashboardFilters
+        filters={filters}
+        onChange={setFilters}
+        onReset={() => setFilters(defaultFilters)}
+        options={filterOptions}
+      />
+      <DashboardKPIs data={filteredData} />
+      <WorkflowPipeline data={filteredData} />
+      <DelayAlerts data={delayedData} />
+      <AgingCharts data={filteredData} />
+      <FinancialCharts data={filteredData} />
+      <RejectionOverview data={rejectedData} />
+      <RequestDetailsTable data={filteredData} />
     </div>
   )
 }
