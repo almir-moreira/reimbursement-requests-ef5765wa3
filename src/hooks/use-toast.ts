@@ -1,4 +1,4 @@
--- Custom toast hook - used to display toasts - from shadcn/ui (exposes useToast, toast) 
+// Custom toast hook - used to display toasts - from shadcn/ui (exposes useToast, toast)
 
 // Inspired by react-hot-toast library
 import * as React from 'react'
